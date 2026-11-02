@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucide 标本目录</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --wy_paper: #F7F5EF;
+            --wy_ink: #18181B;
+            --wy_copper: #9A3412;
+            --wy_muted: #71717A;
+            --wy_rule: #D4D0C4;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            background: var(--wy_paper);
+            color: var(--wy_ink);
+            font-family: Georgia, "Times New Roman", serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .wy_sheet {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .wy_masthead {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid var(--wy_rule);
+            padding-bottom: 0.75rem;
+            margin-bottom: 2rem;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.78rem;
+            color: var(--wy_muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .wy_masthead .wy_brand {
+            color: var(--wy_ink);
+            font-weight: 600;
+        }
+
+        .wy_masthead a {
+            color: var(--wy_muted);
+            text-decoration: none;
+            margin-left: 1.2rem;
+        }
+
+        .wy_masthead a:hover {
+            color: var(--wy_copper);
+        }
+
+        .wy_hero {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 2rem;
+            align-items: end;
+            border-bottom: 1px solid var(--wy_rule);
+            padding-bottom: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .wy_title-block h1 {
+            font-size: clamp(2.5rem, 6vw, 4.2rem);
+            font-weight: 400;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .wy_title-block .wy_lede {
+            font-family: system-ui, sans-serif;
+            font-size: 1rem;
+            color: var(--wy_muted);
+            max-width: 42ch;
+            line-height: 1.5;
+        }
+
+        .wy_specimen {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .wy_specimen svg {
+            width: 4.5rem;
+            height: 4.5rem;
+            stroke: var(--wy_ink);
+            stroke-width: 1.5;
+        }
+
+        .wy_specimen svg.wy_copper {
+            stroke: var(--wy_copper);
+        }
+
+        .wy_section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--wy_rule);
+        }
+
+        .wy_section-head h2 {
+            font-size: 1.15rem;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .wy_section-head .wy_count {
+            font-family: system-ui, sans-serif;
+            font-size: 0.75rem;
+            color: var(--wy_muted);
+        }
+
+        .wy_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 0;
+            border-left: 1px solid var(--wy_rule);
+            border-top: 1px solid var(--wy_rule);
+            margin-bottom: 3rem;
+        }
+
+        .wy_cell {
+            border-right: 1px solid var(--wy_rule);
+            border-bottom: 1px solid var(--wy_rule);
+            padding: 1.25rem 0.5rem 1rem;
+            text-align: center;
+            transition: background 0.2s;
+            cursor: default;
+        }
+
+        .wy_cell:hover {
+            background: rgba(154, 52, 18, 0.04);
+        }
+
+        .wy_cell svg {
+            width: 1.75rem;
+            height: 1.75rem;
+            stroke: var(--wy_ink);
+            stroke-width: 1.75;
+            display: block;
+            margin: 0 auto 0.6rem;
+        }
+
+        .wy_cell .wy_name {
+            font-family: system-ui, sans-serif;
+            font-size: 0.7rem;
+            color: var(--wy_muted);
+            word-break: break-all;
+            line-height: 1.3;
+        }
+
+        .wy_foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-top: 1px solid var(--wy_rule);
+            padding-top: 1rem;
+            font-family: system-ui, sans-serif;
+            font-size: 0.75rem;
+            color: var(--wy_muted);
+        }
+
+        .wy_foot .wy_method {
+            color: var(--wy_copper);
+        }
+
+        @media (max-width: 640px) {
+            .wy_hero {
+                grid-template-columns: 1fr;
+            }
+            .wy_specimen svg {
+                width: 3rem;
+                height: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wy_sheet">
+        <header class="wy_masthead">
+            <span class="wy_brand">图标标本目录</span>
+            <nav>
+                <a href="index.html">目录</a>
+                <a href="iconfont-1.html">← 上一卷</a>
+            </nav>
+        </header>
+
+        <section class="wy_hero">
+            <div class="wy_title-block">
+                <h1>Lucide</h1>
+                <p class="wy_lede">以矢量路径绘制图标的方案。每个图标由一段 SVG 代码构成，通过脚本替换为内联 SVG，可精确控制描边、尺寸与填充。</p>
+            </div>
+            <div class="wy_specimen" aria-hidden="true">
+                <i data-lucide="star"></i>
+                <i data-lucide="heart" class="wy_copper"></i>
+                <i data-lucide="zap"></i>
+                <i data-lucide="crown" class="wy_copper"></i>
+            </div>
+        </section>
+
+        <section>
+            <div class="wy_section-head">
+                <h2>基础物件</h2>
+                <span class="wy_count">12 件标本</span>
+            </div>
+            <div class="wy_grid">
+                <div class="wy_cell"><i data-lucide="home"></i><span class="wy_name">home</span></div>
+                <div class="wy_cell"><i data-lucide="user"></i><span class="wy_name">user</span></div>
+                <div class="wy_cell"><i data-lucide="heart"></i><span class="wy_name">heart</span></div>
+                <div class="wy_cell"><i data-lucide="star"></i><span class="wy_name">star</span></div>
+                <div class="wy_cell"><i data-lucide="bell"></i><span class="wy_name">bell</span></div>
+                <div class="wy_cell"><i data-lucide="mail"></i><span class="wy_name">mail</span></div>
+                <div class="wy_cell"><i data-lucide="settings"></i><span class="wy_name">settings</span></div>
+                <div class="wy_cell"><i data-lucide="search"></i><span class="wy_name">search</span></div>
+                <div class="wy_cell"><i data-lucide="shopping-cart"></i><span class="wy_name">shopping-cart</span></div>
+                <div class="wy_cell"><i data-lucide="camera"></i><span class="wy_name">camera</span></div>
+                <div class="wy_cell"><i data-lucide="music"></i><span class="wy_name">music</span></div>
+                <div class="wy_cell"><i data-lucide="film"></i><span class="wy_name">film</span></div>
+            </div>
+        </section>
+
+        <section>
+            <div class="wy_section-head">
+                <h2>导航与操作</h2>
+                <span class="wy_count">12 件标本</span>
+            </div>
+            <div class="wy_grid">
+                <div class="wy_cell"><i data-lucide="menu"></i><span class="wy_name">menu</span></div>
+                <div class="wy_cell"><i data-lucide="chevron-right"></i><span class="wy_name">chevron-right</span></div>
+                <div class="wy_cell"><i data-lucide="chevron-left"></i><span class="wy_name">chevron-left</span></div>
+                <div class="wy_cell"><i data-lucide="arrow-up"></i><span class="wy_name">arrow-up</span></div>
+                <div class="wy_cell"><i data-lucide="arrow-down"></i><span class="wy_name">arrow-down</span></div>
+                <div class="wy_cell"><i data-lucide="check"></i><span class="wy_name">check</span></div>
+                <div class="wy_cell"><i data-lucide="x"></i><span class="wy_name">x</span></div>
+                <div class="wy_cell"><i data-lucide="plus"></i><span class="wy_name">plus</span></div>
+                <div class="wy_cell"><i data-lucide="minus"></i><span class="wy_name">minus</span></div>
+                <div class="wy_cell"><i data-lucide="pencil"></i><span class="wy_name">pencil</span></div>
+                <div class="wy_cell"><i data-lucide="trash-2"></i><span class="wy_name">trash-2</span></div>
+                <div class="wy_cell"><i data-lucide="download"></i><span class="wy_name">download</span></div>
+            </div>
+        </section>
+
+        <section>
+            <div class="wy_section-head">
+                <h2>社交与媒介</h2>
+                <span class="wy_count">12 件标本</span>
+            </div>
+            <div class="wy_grid">
+                <div class="wy_cell"><i data-lucide="github"></i><span class="wy_name">github</span></div>
+                <div class="wy_cell"><i data-lucide="twitter"></i><span class="wy_name">twitter</span></div>
+                <div class="wy_cell"><i data-lucide="facebook"></i><span class="wy_name">facebook</span></div>
+                <div class="wy_cell"><i data-lucide="instagram"></i><span class="wy_name">instagram</span></div>
+                <div class="wy_cell"><i data-lucide="youtube"></i><span class="wy_name">youtube</span></div>
+                <div class="wy_cell"><i data-lucide="linkedin"></i><span class="wy_name">linkedin</span></div>
+                <div class="wy_cell"><i data-lucide="send"></i><span class="wy_name">send</span></div>
+                <div class="wy_cell"><i data-lucide="message-circle"></i><span class="wy_name">message-circle</span></div>
+                <div class="wy_cell"><i data-lucide="share-2"></i><span class="wy_name">share-2</span></div>
+                <div class="wy_cell"><i data-lucide="thumbs-up"></i><span class="wy_name">thumbs-up</span></div>
+                <div class="wy_cell"><i data-lucide="eye"></i><span class="wy_name">eye</span></div>
+                <div class="wy_cell"><i data-lucide="bookmark"></i><span class="wy_name">bookmark</span></div>
+            </div>
+        </section>
+
+        <footer class="wy_foot">
+            <span>Lucide · 本地资源</span>
+            <span class="wy_method">SVG 方式</span>
+        </footer>
+    </div>
+
+    <script src="cdn/lucide/lucide.min.js"></script>
+    <script>
+        var wy_root = document.querySelector('.wy_sheet');
+        lucide.createIcons();
+    </script>
+</body>
+</html>

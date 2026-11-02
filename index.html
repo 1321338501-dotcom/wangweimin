@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图标标本目录</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --wy_paper: #F7F5EF;
+            --wy_ink: #18181B;
+            --wy_copper: #9A3412;
+            --wy_muted: #71717A;
+            --wy_rule: #D4D0C4;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            background: var(--wy_paper);
+            color: var(--wy_ink);
+            font-family: Georgia, "Times New Roman", serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+        }
+
+        .wy_cover {
+            max-width: 860px;
+            width: 100%;
+        }
+
+        .wy_masthead {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid var(--wy_rule);
+            padding-bottom: 0.75rem;
+            margin-bottom: 4rem;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.78rem;
+            color: var(--wy_muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .wy_masthead .wy_brand {
+            color: var(--wy_ink);
+            font-weight: 600;
+        }
+
+        .wy_title-block {
+            margin-bottom: 4rem;
+        }
+
+        .wy_title-block h1 {
+            font-size: clamp(3rem, 8vw, 5.5rem);
+            font-weight: 400;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.25rem;
+        }
+
+        .wy_title-block .wy_lede {
+            font-family: system-ui, sans-serif;
+            font-size: 1.05rem;
+            color: var(--wy_muted);
+            max-width: 46ch;
+            line-height: 1.55;
+        }
+
+        .wy_contents {
+            border-top: 1px solid var(--wy_rule);
+        }
+
+        .wy_entry {
+            display: grid;
+            grid-template-columns: 5rem 1fr auto;
+            align-items: baseline;
+            gap: 1.5rem;
+            padding: 1.75rem 0;
+            border-bottom: 1px solid var(--wy_rule);
+            text-decoration: none;
+            color: var(--wy_ink);
+            transition: padding 0.25s;
+        }
+
+        .wy_entry:hover {
+            padding-left: 0.75rem;
+        }
+
+        .wy_entry:hover .wy_entry-title {
+            color: var(--wy_copper);
+        }
+
+        .wy_entry-num {
+            font-family: system-ui, sans-serif;
+            font-size: 0.8rem;
+            color: var(--wy_muted);
+            letter-spacing: 0.05em;
+        }
+
+        .wy_entry-title {
+            font-size: 1.5rem;
+            font-weight: 400;
+            transition: color 0.25s;
+        }
+
+        .wy_entry-sub {
+            display: block;
+            font-family: system-ui, sans-serif;
+            font-size: 0.82rem;
+            color: var(--wy_muted);
+            margin-top: 0.2rem;
+        }
+
+        .wy_entry-arrow {
+            font-family: system-ui, sans-serif;
+            font-size: 0.8rem;
+            color: var(--wy_muted);
+        }
+
+        .wy_colophon {
+            margin-top: 3rem;
+            display: flex;
+            justify-content: space-between;
+            font-family: system-ui, sans-serif;
+            font-size: 0.75rem;
+            color: var(--wy_muted);
+            border-top: 1px solid var(--wy_rule);
+            padding-top: 1rem;
+        }
+
+        @media (max-width: 560px) {
+            .wy_entry {
+                grid-template-columns: 3rem 1fr;
+            }
+            .wy_entry-arrow {
+                grid-column: 2;
+                margin-top: 0.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="wy_cover">
+        <header class="wy_masthead">
+            <span class="wy_brand">图标标本目录</span>
+            <span>两卷 · 本地资源</span>
+        </header>
+
+        <section class="wy_title-block">
+            <h1>两套图标系统<br>的标本目录</h1>
+            <p class="wy_lede">Font Awesome 以字体承载字形，Lucide 以矢量路径绘制。本目录收录两套方案的常用图标，均以本地 CDN 资源加载。</p>
+        </section>
+
+        <nav class="wy_contents">
+            <a href="iconfont-1.html" class="wy_entry">
+                <span class="wy_entry-num">卷一</span>
+                <span>
+                    <span class="wy_entry-title">Font Awesome</span>
+                    <span class="wy_entry-sub">字体图标方式 · Solid / Regular / Brands</span>
+                </span>
+                <span class="wy_entry-arrow">翻开 →</span>
+            </a>
+            <a href="iconfont-2.html" class="wy_entry">
+                <span class="wy_entry-num">卷二</span>
+                <span>
+                    <span class="wy_entry-title">Lucide</span>
+                    <span class="wy_entry-sub">SVG 方式 · 基础 / 操作 / 社交</span>
+                </span>
+                <span class="wy_entry-arrow">翻开 →</span>
+            </a>
+            <a href="news-tabs.html" class="wy_entry">
+                <span class="wy_entry-num">卷三</span>
+                <span>
+                    <span class="wy_entry-title">新闻选项卡</span>
+                    <span class="wy_entry-sub">可复用 Tab 组件 · 国内 / 省内 / 国际 / 最热</span>
+                </span>
+                <span class="wy_entry-arrow">翻开 →</span>
+            </a>
+        </nav>
+
+        <footer class="wy_colophon">
+            <span>资源存放于 cdn/ 目录</span>
+            <span>标本目录 · 王垚</span>
+        </footer>
+    </main>
+</body>
+</html>
