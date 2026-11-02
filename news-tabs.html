@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -18,35 +18,35 @@
     padding: 32px 16px;
   }
 
-  .wy_page {
+  .wwm_page {
     max-width: 860px;
     margin: 0 auto;
   }
 
-  .wy_topbar {
+  .wwm_topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 18px;
   }
 
-  .wy_topbar h1 {
+  .wwm_topbar h1 {
     font-size: 22px;
     color: #1f2733;
   }
 
-  .wy_topbar a {
+  .wwm_topbar a {
     color: #5b7cfa;
     text-decoration: none;
     font-size: 14px;
   }
 
-  .wy_topbar a:hover {
+  .wwm_topbar a:hover {
     text-decoration: underline;
   }
 
   /* 选项卡容器 */
-  .wy_tabs {
+  .wwm_tabs {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 6px 20px rgba(20, 28, 48, 0.08);
@@ -54,13 +54,13 @@
   }
 
   /* 选项卡按钮栏 */
-  .wy_tab-nav {
+  .wwm_tab-nav {
     display: flex;
     border-bottom: 2px solid #e7eaf0;
     background: #fafbfc;
   }
 
-  .wy_tab-btn {
+  .wwm_tab-btn {
     flex: 1;
     padding: 14px 16px;
     border: none;
@@ -73,16 +73,16 @@
     position: relative;
   }
 
-  .wy_tab-btn:hover {
+  .wwm_tab-btn:hover {
     color: #3f5fd9;
   }
 
-  .wy_tab-btn.wy_active {
+  .wwm_tab-btn.wwm_active {
     color: #3f5fd9;
     background: #fff;
   }
 
-  .wy_tab-btn.wy_active::after {
+  .wwm_tab-btn.wwm_active::after {
     content: "";
     position: absolute;
     left: 20%;
@@ -94,26 +94,26 @@
   }
 
   /* 内容面板 */
-  .wy_tab-panel {
+  .wwm_tab-panel {
     display: none;
     padding: 24px;
   }
 
-  .wy_tab-panel.wy_active {
+  .wwm_tab-panel.wwm_active {
     display: block;
   }
 
-  .wy_panel-title {
+  .wwm_panel-title {
     font-size: 18px;
     color: #1f2733;
     margin-bottom: 14px;
   }
 
-  .wy_news-list {
+  .wwm_news-list {
     list-style: none;
   }
 
-  .wy_news-list li {
+  .wwm_news-list li {
     padding: 12px 0;
     border-bottom: 1px dashed #e7eaf0;
     color: #3a4250;
@@ -121,11 +121,11 @@
     line-height: 1.6;
   }
 
-  .wy_news-list li:last-child {
+  .wwm_news-list li:last-child {
     border-bottom: none;
   }
 
-  .wy_news-list li .wy_date {
+  .wwm_news-list li .wwm_date {
     color: #9aa3b2;
     font-size: 12px;
     margin-left: 8px;
@@ -133,70 +133,70 @@
 </style>
 </head>
 <body>
-  <div class="wy_page">
-    <div class="wy_topbar">
+  <div class="wwm_page">
+    <div class="wwm_topbar">
       <h1>新闻中心</h1>
       <a href="index.html">← 返回首页</a>
     </div>
 
     <!-- Tab 选项卡容器 -->
-    <div class="wy_tabs" id="wy_newsTabs">
+    <div class="wwm_tabs" id="wwm_newsTabs">
       <!-- 按钮栏 -->
-      <nav class="wy_tab-nav">
-        <button type="button" class="wy_tab-btn" data-wy-tab="domestic" data-wy-active="true">国内新闻</button>
-        <button type="button" class="wy_tab-btn" data-wy-tab="province">省内新闻</button>
-        <button type="button" class="wy_tab-btn" data-wy-tab="international">国际新闻</button>
-        <button type="button" class="wy_tab-btn" data-wy-tab="hot">最热新闻</button>
+      <nav class="wwm_tab-nav">
+        <button type="button" class="wwm_tab-btn" data-wwm-tab="domestic" data-wwm-active="true">国内新闻</button>
+        <button type="button" class="wwm_tab-btn" data-wwm-tab="province">省内新闻</button>
+        <button type="button" class="wwm_tab-btn" data-wwm-tab="international">国际新闻</button>
+        <button type="button" class="wwm_tab-btn" data-wwm-tab="hot">最热新闻</button>
       </nav>
 
       <!-- 内容面板 -->
-      <section class="wy_tab-panel" data-wy-panel="domestic">
-        <h2 class="wy_panel-title">国内新闻</h2>
-        <ul class="wy_news-list">
-          <li>全国多地推进智慧城市建设，数字化治理成效显著<span class="wy_date">11-01</span></li>
-          <li>新一批重大交通项目集中开工，总投资超三千亿元<span class="wy_date">10-31</span></li>
-          <li>秋粮收购有序展开，今年粮食产量有望再创新高<span class="wy_date">10-30</span></li>
-          <li>新能源汽车销量持续攀升，出口量同比增长超两成<span class="wy_date">10-29</span></li>
+      <section class="wwm_tab-panel" data-wwm-panel="domestic">
+        <h2 class="wwm_panel-title">国内新闻</h2>
+        <ul class="wwm_news-list">
+          <li>全国多地推进智慧城市建设，数字化治理成效显著<span class="wwm_date">11-01</span></li>
+          <li>新一批重大交通项目集中开工，总投资超三千亿元<span class="wwm_date">10-31</span></li>
+          <li>秋粮收购有序展开，今年粮食产量有望再创新高<span class="wwm_date">10-30</span></li>
+          <li>新能源汽车销量持续攀升，出口量同比增长超两成<span class="wwm_date">10-29</span></li>
         </ul>
       </section>
 
-      <section class="wy_tab-panel" data-wy-panel="province">
-        <h2 class="wy_panel-title">省内新闻</h2>
-        <ul class="wy_news-list">
-          <li>本省推出人才新政，安家补贴最高可达五十万元<span class="wy_date">11-01</span></li>
-          <li>省会至邻市高铁正式开通，两地通勤缩短至一小时<span class="wy_date">10-31</span></li>
-          <li>省内秋季文旅活动启幕，推出百条精品旅游线路<span class="wy_date">10-30</span></li>
-          <li>省级科技创新大赛落幕，三十个项目获重点扶持<span class="wy_date">10-29</span></li>
+      <section class="wwm_tab-panel" data-wwm-panel="province">
+        <h2 class="wwm_panel-title">省内新闻</h2>
+        <ul class="wwm_news-list">
+          <li>本省推出人才新政，安家补贴最高可达五十万元<span class="wwm_date">11-01</span></li>
+          <li>省会至邻市高铁正式开通，两地通勤缩短至一小时<span class="wwm_date">10-31</span></li>
+          <li>省内秋季文旅活动启幕，推出百条精品旅游线路<span class="wwm_date">10-30</span></li>
+          <li>省级科技创新大赛落幕，三十个项目获重点扶持<span class="wwm_date">10-29</span></li>
         </ul>
       </section>
 
-      <section class="wy_tab-panel" data-wy-panel="international">
-        <h2 class="wy_panel-title">国际新闻</h2>
-        <ul class="wy_news-list">
-          <li>多国央行维持利率不变，全球货币政策趋向谨慎<span class="wy_date">11-01</span></li>
-          <li>国际气候大会达成新共识，减排目标进一步明确<span class="wy_date">10-31</span></li>
-          <li>全球半导体供应链持续调整，区域合作日益深化<span class="wy_date">10-30</span></li>
-          <li>联合国报告指出全球粮食安全仍面临多重挑战<span class="wy_date">10-29</span></li>
+      <section class="wwm_tab-panel" data-wwm-panel="international">
+        <h2 class="wwm_panel-title">国际新闻</h2>
+        <ul class="wwm_news-list">
+          <li>多国央行维持利率不变，全球货币政策趋向谨慎<span class="wwm_date">11-01</span></li>
+          <li>国际气候大会达成新共识，减排目标进一步明确<span class="wwm_date">10-31</span></li>
+          <li>全球半导体供应链持续调整，区域合作日益深化<span class="wwm_date">10-30</span></li>
+          <li>联合国报告指出全球粮食安全仍面临多重挑战<span class="wwm_date">10-29</span></li>
         </ul>
       </section>
 
-      <section class="wy_tab-panel" data-wy-panel="hot">
-        <h2 class="wy_panel-title">最热新闻</h2>
-        <ul class="wy_news-list">
-          <li>国产大飞机再获百架订单，航空制造产业链加速升级<span class="wy_date">11-01</span></li>
-          <li>人工智能大模型开源生态蓬勃发展，应用场景不断拓展<span class="wy_date">10-31</span></li>
-          <li>全国多地开展夜间经济活动，消费活力持续释放<span class="wy_date">10-30</span></li>
-          <li>体育赛事精彩纷呈，多项世界纪录在本赛季被打破<span class="wy_date">10-29</span></li>
+      <section class="wwm_tab-panel" data-wwm-panel="hot">
+        <h2 class="wwm_panel-title">最热新闻</h2>
+        <ul class="wwm_news-list">
+          <li>国产大飞机再获百架订单，航空制造产业链加速升级<span class="wwm_date">11-01</span></li>
+          <li>人工智能大模型开源生态蓬勃发展，应用场景不断拓展<span class="wwm_date">10-31</span></li>
+          <li>全国多地开展夜间经济活动，消费活力持续释放<span class="wwm_date">10-30</span></li>
+          <li>体育赛事精彩纷呈，多项世界纪录在本赛季被打破<span class="wwm_date">10-29</span></li>
         </ul>
       </section>
     </div>
   </div>
 
   <!-- 外部引入可复用 Tab 组件 -->
-  <script src="js/wy_tabs.js"></script>
+  <script src="js/wwm_tabs.js"></script>
   <script>
     // 初始化新闻选项卡
-    wy_initTabs("#wy_newsTabs");
+    wwm_initTabs("#wwm_newsTabs");
   </script>
 </body>
 </html>
