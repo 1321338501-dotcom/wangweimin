@@ -18,10 +18,10 @@ AGENTS.md 所有说明、检查条目统一简体中文；文件路径、HTML、
 用户提示词：
 把所有wy都改成wwm
 
-## 2026-11-02 | 模型: Seed-2.1-Turbo
+## 2026-11-05 | 模型: Seed-2.1-Turbo
 用户提示词：
-c:/Users/lenovo/Documents/Trae-CN/default/click-ranking.html 把里面所有wy都改成wwm
+上传 5 张大国重器原图（天宫、复兴号、C919、奋斗者号、天眼），替换 swiper-imgs 中的 nature 图片，并修复 swiper-task.html 中任务2导航按钮 prev/next 写反的 bug
 
-## 2026-11-02 | 模型: Seed-2.1-Turbo
+## 2026-11-05 | 模型: Seed-2.1-Turbo
 用户提示词：
-帮我上传到GitHub上
+发布到GitHub上
