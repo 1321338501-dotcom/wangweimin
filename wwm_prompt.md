@@ -25,3 +25,7 @@ AGENTS.md 所有说明、检查条目统一简体中文；文件路径、HTML、
 ## 2026-11-05 | 模型: Seed-2.1-Turbo
 用户提示词：
 发布到GitHub上
+
+## 2026-11-05 | 模型: Seed-2.1-Turbo
+用户提示词：
+课程进阶任务：任务二添加 creative 第七种效果（参考 swiper/demo/257-effect-creative.html 的 creativeEffect.transform）；任务三添加第6个展品"爱达魔都号"图片，并任选一个课堂未讲的 Swiper 能力（keyboard 键盘控制 + mousewheel 滚轮）
