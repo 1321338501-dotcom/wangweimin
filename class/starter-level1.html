@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学生成绩分析面板 · 等级一（起始模板）</title>
+<style>
+  /* 样式与 target.html 保持一致，方便一比一对照还原 */
+  :root{
+    --bg-1:#1a1c2c; --bg-2:#243b55;
+    --card:#ffffff; --card-soft:rgba(255,255,255,.92);
+    --ink:#1f2733; --ink-soft:#5b6472; --line:#e7eaf0;
+    --primary:#5b7cfa; --primary-d:#3f5fd9;
+    --accent:#21d4b4; --warn:#ff7a59; --gold:#f5b945; --rose:#ff5d8f;
+    --radius:14px; --shadow:0 10px 30px rgba(20,28,48,.18);
+    --shadow-sm:0 4px 14px rgba(20,28,48,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+    background:linear-gradient(135deg,var(--bg-1),var(--bg-2));min-height:100vh;color:var(--ink);line-height:1.6;padding:24px}
+  .wwm-wrap{max-width:1180px;margin:0 auto}
+  header.wwm-head{background:var(--card-soft);border-radius:var(--radius);padding:22px 26px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+  .wwm-head h1{font-size:22px;display:flex;align-items:center;gap:10px}
+  .wwm-head h1 .wwm-logo{width:38px;height:38px;border-radius:11px;flex:none;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;color:#fff;font-weight:700}
+  .wwm-head .wwm-sub{color:var(--ink-soft);font-size:13px}
+  .wwm-tag-level{font-size:12px;font-weight:700;color:#fff;background:var(--primary);padding:4px 10px;border-radius:20px}
+  section.wwm-block{background:var(--card);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow-sm);margin-bottom:18px}
+  .wwm-block-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:16px;color:var(--ink)}
+  .wwm-block-title::before{content:"";width:4px;height:16px;border-radius:3px;background:var(--primary)}
+  .wwm-block-title .wwm-hint{font-weight:400;color:var(--ink-soft);font-size:12px}
+  .wwm-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .wwm-stat-card{background:linear-gradient(135deg,#f6f8ff,#fff);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
+  .wwm-stat-card .wwm-stat-value{font-size:30px;font-weight:800;color:var(--primary);line-height:1.2}
+  .wwm-stat-card .wwm-stat-label{font-size:13px;color:var(--ink-soft);margin-top:4px}
+  .wwm-stat-card .wwm-stat-unit{font-size:14px;color:var(--ink-soft);font-weight:600;margin-left:3px}
+  .wwm-stat-card.wwm-accent .wwm-stat-value{color:var(--accent)}
+  .wwm-stat-card.wwm-warn .wwm-stat-value{color:var(--warn)}
+  .wwm-stat-card.wwm-gold .wwm-stat-value{color:var(--gold)}
+  .wwm-controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  .wwm-search-box{position:relative;flex:1;min-width:220px}
+  .wwm-search-box input{width:100%;padding:11px 14px 11px 38px;border:1px solid var(--line);border-radius:10px;font-size:14px;outline:none;transition:border-color .2s}
+  .wwm-search-box input:focus{border-color:var(--primary)}
+  .wwm-search-box .wwm-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-soft)}
+  .wwm-btn-group{display:flex;gap:6px;background:#eef1f7;padding:4px;border-radius:10px}
+  .wwm-btn-group button{border:none;background:transparent;padding:8px 14px;border-radius:7px;font-size:13px;color:var(--ink-soft);cursor:pointer;transition:all .18s}
+  .wwm-btn-group button.wwm-active{background:#fff;color:var(--primary);font-weight:700;box-shadow:var(--shadow-sm)}
+  .wwm-rank-grid{display:grid;grid-template-columns:1fr;gap:14px}
+  .wwm-rank-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff}
+  .wwm-rank-card h4{font-size:13px;color:var(--ink-soft);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .wwm-rank-card h4 .wwm-dot{width:8px;height:8px;border-radius:50%;background:var(--primary)}
+  .wwm-rank-card.wwm-fail h4 .wwm-dot{background:var(--warn)}
+  .wwm-rank-list{display:flex;flex-direction:column;gap:8px}
+  .wwm-rank-row{display:flex;align-items:center;justify-content:space-between;font-size:13px}
+  .wwm-rank-row .wwm-rk{width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;font-size:12px}
+  .wwm-rank-row .wwm-rk{background:#fde9dd;color:#c0602a}
+  .wwm-rank-row .wwm-nm{flex:1;margin:0 8px;font-weight:600}
+  .wwm-rank-row .wwm-vl{font-weight:700;color:var(--warn)}
+  .wwm-empty{color:var(--ink-soft);font-size:13px;font-style:italic;text-align:center;padding:10px 0}
+  .wwm-student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+  .wwm-student-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;transition:transform .18s,box-shadow .18s;cursor:pointer}
+  .wwm-student-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+  .wwm-student-card .wwm-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .wwm-avatar{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;color:#fff;font-size:15px}
+  .wwm-avatar.wwm-boy{background:linear-gradient(135deg,#5b7cfa,#7a5bfa)}
+  .wwm-avatar.wwm-girl{background:linear-gradient(135deg,#ff5d8f,#ff8fb1)}
+  .wwm-student-card .wwm-name{font-weight:700;font-size:15px}
+  .wwm-student-card .wwm-meta{font-size:12px;color:var(--ink-soft)}
+  .wwm-student-card .wwm-rank-badge{margin-left:auto;font-size:12px;font-weight:700;color:#fff;background:var(--primary);padding:3px 9px;border-radius:20px}
+  .wwm-student-card .wwm-rank-badge.wwm-gold{background:var(--gold)}
+  .wwm-score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+  .wwm-score-item{text-align:center;background:#f6f8ff;border-radius:8px;padding:6px 2px}
+  .wwm-score-item .wwm-sbj{font-size:11px;color:var(--ink-soft)}
+  .wwm-score-item .wwm-val{font-size:14px;font-weight:700}
+  .wwm-score-item .wwm-val.wwm-fail{color:var(--warn)}
+  .wwm-score-item .wwm-val.wwm-full{color:var(--accent)}
+  .wwm-student-card .wwm-ft{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:8px;font-size:13px}
+  .wwm-student-card .wwm-ft .wwm-total{font-weight:800;color:var(--primary)}
+  .wwm-student-card .wwm-ft .wwm-avg{color:var(--ink-soft)}
+  footer.wwm-foot{text-align:center;color:rgba(255,255,255,.7);font-size:12px;padding:14px 0}
+  /* 等级一提示框 */
+  .wwm-task-note{background:#fff8e6;border:1px solid #f3e0a8;color:#7a5d10;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:18px}
+  .wwm-task-note b{color:#5a4700}
+</style>
+</head>
+<body>
+<div class="wwm-wrap">
+
+  <header class="wwm-head">
+    <h1><span class="wwm-logo">分</span>学生成绩分析面板</h1>
+    <div>
+      <span class="wwm-tag-level">等级一 · 基础</span>
+      <div class="wwm-sub">DOM 查找 × 数组方法 × 函数 综合实战</div>
+    </div>
+  </header>
+
+  <!-- 区域1：统计卡片 -->
+  <section class="wwm-block">
+    <div class="wwm-block-title">班级概览 <span class="wwm-hint">getElementById / reduce / filter</span></div>
+    <div class="wwm-stat-grid">
+      <div class="wwm-stat-card"><div class="wwm-stat-value" id="wwmStatCount">0</div><div class="wwm-stat-label">班级人数（人）</div></div>
+      <div class="wwm-stat-card wwm-accent"><div class="wwm-stat-value" id="wwmStatTotalScore">0</div><div class="wwm-stat-label">班级总分</div></div>
+      <div class="wwm-stat-card wwm-gold"><div class="wwm-stat-value" id="wwmStatAvgScore">0</div><div class="wwm-stat-label">班级平均分</div></div>
+      <div class="wwm-stat-card wwm-warn"><div class="wwm-stat-value" id="wwmStatPassRate">0<span class="wwm-stat-unit">%</span></div><div class="wwm-stat-label">及格率（无不及格科目）</div></div>
+    </div>
+  </section>
+
+  <!-- 区域2：控制区（搜索 + 排序）-->
+  <section class="wwm-block">
+    <div class="wwm-block-title">数据操作 <span class="wwm-hint">filter / sort / querySelectorAll / classList / 事件委托</span></div>
+    <div class="wwm-controls">
+      <div class="wwm-search-box">
+        <span class="wwm-ico">🔍</span>
+        <input type="text" id="wwmSearchInput" placeholder="按姓名或学号搜索…">
+      </div>
+      <div class="wwm-btn-group" id="wwmSortBtns">
+        <button class="wwm-active" data-wwm-sort="total">按总分↓</button>
+        <button data-wwm-sort="id">按学号↑</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 区域3：不及格预警（榜单区简化）-->
+  <section class="wwm-block">
+    <div class="wwm-block-title">不及格预警 <span class="wwm-hint">filter / sort / forEach</span></div>
+    <div class="wwm-rank-grid">
+      <div class="wwm-rank-card wwm-fail">
+        <h4><span class="wwm-dot"></span>不及格学生名单</h4>
+        <div class="wwm-rank-list" id="wwmFailWarningList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 区域4：学生卡片列表 -->
+  <section class="wwm-block">
+    <div class="wwm-block-title">学生成绩卡片 <span class="wwm-hint">forEach / createElement / classList</span></div>
+    <div class="wwm-student-grid" id="wwmStudentList"></div>
+  </section>
+
+  <footer class="wwm-foot">高级网页设计课堂实践任务 · 等级一（基础）· 起始模板</footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+/* ============================================================
+ * 等级一（基础）· 起始模板
+ * 在下方补全函数实现，运行后与 target.html 一比一还原
+ * 数据来源：window.wwmStudents / window.wwmSubjects（见 data.js）
+ * ============================================================ */
+(function () {
+  "use strict";
+  const wwmStudents = window.wwmStudents;
+  const wwmSubjects = window.wwmSubjects;
+
+  const WWM_PASS_LINE = 60;          // 及格线
+  const WWM_EXCELLENT_AVG = 85;      // 优秀线（等级一暂不使用）
+
+  /* ---------- 工具函数（纯计算层） ---------- */
+  // 计算单科分数的样式类：不及格返回 "fail"，满分返回 "full"
+  function wwmScoreClass(v) {
+    if (v < WWM_PASS_LINE) return "fail";
+    if (v >= 100) return "full";
+    return "";
+  }
+
+  // 计算一个学生的总分：用 reduce 把 wwmSubjects 对应的分数累加
+  function wwmGetTotal(s) {
+    return wwmSubjects.reduce(function (wwm_sum, wwm_sub) {
+      return wwm_sum + s[wwm_sub.key];
+    }, 0);
+  }
+
+  // 计算一个学生的平均分：总分 / 科目数，保留一位小数
+  function wwmGetAvg(s) {
+    return Math.round(wwmGetTotal(s) / wwmSubjects.length * 10) / 10;
+  }
+
+  // 取一个学生不及格的科目数组：用 filter 筛选分数 < WWM_PASS_LINE
+  function wwmGetFails(s) {
+    return wwmSubjects.filter(function (wwm_sub) {
+      return s[wwm_sub.key] < WWM_PASS_LINE;
+    });
+  }
+
+  // 姓名首字（头像用）
+  function wwmFirstName(s) {
+    // TODO: s.wwm-name.charAt(0)
+    return s.wwm-name.charAt(0);
+  }
+
+
+  /* ============ 以下 5 个为本等级必做函数 ============ */
+
+  /* ① 渲染统计卡片 —— 考察 getElementById + reduce + filter
+   * 把 list 的人数/总分/平均分/及格率写入 4 个统计卡片
+   * 及格率 = 没有不及格科目的学生人数 ÷ 总人数 × 100（取整）
+   */
+  function wwmRenderStats(list) {
+    var wwm_count = list.length;
+    // 总分：把每个学生的五科总分累加
+    var wwm_totalScore = list.reduce(function (wwm_sum, wwm_s) {
+      return wwm_sum + wwmGetTotal(wwm_s);
+    }, 0);
+    // 平均分 = 总分 ÷（人数 × 科目数），保留 1 位小数；空列表防除零
+    var wwm_avgScore = wwm_count
+      ? Math.round(wwm_totalScore / (wwm_count * wwmSubjects.length) * 10) / 10
+      : 0;
+    // 及格人数：没有任何不及格科目的学生数
+    var wwm_passCount = list.filter(function (wwm_s) {
+      return wwmGetFails(wwm_s).length === 0;
+    }).length;
+    var wwm_passRate = wwm_count
+      ? Math.round(wwm_passCount / wwm_count * 100)
+      : 0;
+
+    document.getElementById("wwmStatCount").textContent = wwm_count;
+    document.getElementById("wwmStatTotalScore").textContent = wwm_totalScore;
+    document.getElementById("wwmStatAvgScore").textContent = wwm_avgScore;
+    // statPassRate 内部已有 % 的 span，用 firstChild 只改数字文本节点
+    document.getElementById("wwmStatPassRate").firstChild.textContent = wwm_passRate;
+  }
+
+
+  /* ② 渲染学生卡片列表 —— 考察 forEach + createElement + classList
+   * 遍历 list 生成卡片 DOM，结构参考 target.html
+   * 每张卡片含：头像+姓名+学号+排名徽章 / 五科分数网格 / 总分+均分
+   * 排名 = 在当前 list 中的序号+1
+   */
+  function wwmRenderStudentCards(list) {
+    var wwm_box = document.getElementById("wwmStudentList");
+    wwm_box.innerHTML = "";
+
+    list.forEach(function (wwm_s, wwm_i) {
+      var wwm_card = document.createElement("div");
+      wwm_card.className = "wwm-student-card";
+      wwm_card.setAttribute("data-id", wwm_s.id);
+
+      /* 头部 .wwm-hd：头像 + 姓名/学号·性别 + 排名徽章 */
+      var wwm_hd = document.createElement("div");
+      wwm_hd.className = "wwm-hd";
+
+      var wwm_avatar = document.createElement("div");
+      wwm_avatar.className = "wwm-avatar";
+      wwm_avatar.classList.add(wwm_s.gender === "男" ? "boy" : "girl");
+      wwm_avatar.textContent = wwmFirstName(wwm_s);
+      wwm_hd.appendChild(wwm_avatar);
+
+      var wwm_info = document.createElement("div");
+      var wwm_name = document.createElement("div");
+      wwm_name.className = "wwm-name";
+      wwm_name.textContent = wwm_s.wwm-name;
+      var wwm_meta = document.createElement("div");
+      wwm_meta.className = "wwm-meta";
+      wwm_meta.textContent = wwm_s.id + " · " + wwm_s.gender;
+      wwm_info.appendChild(wwm_name);
+      wwm_info.appendChild(wwm_meta);
+      wwm_hd.appendChild(wwm_info);
+
+      var wwm_rank = wwm_i + 1;
+      var wwm_badge = document.createElement("span");
+      wwm_badge.className = "wwm-rank-badge";
+      if (wwm_rank <= 3) wwm_badge.classList.add("wwm-gold");
+      wwm_badge.textContent = "第" + wwm_rank + "名";
+      wwm_hd.appendChild(wwm_badge);
+
+      wwm_card.appendChild(wwm_hd);
+
+      /* 分数网格 .wwm-score-grid：wwmSubjects forEach 建各科 .wwm-score-item */
+      var wwm_grid = document.createElement("div");
+      wwm_grid.className = "wwm-score-grid";
+      wwmSubjects.forEach(function (wwm_sub) {
+        var wwm_v = wwm_s[wwm_sub.key];
+        var wwm_item = document.createElement("div");
+        wwm_item.className = "wwm-score-item";
+        var wwm_sbj = document.createElement("div");
+        wwm_sbj.className = "wwm-sbj";
+        wwm_sbj.textContent = wwm_sub.abbr;
+        var wwm_val = document.createElement("div");
+        wwm_val.className = "wwm-val";
+        var wwm_cls = wwmScoreClass(wwm_v);
+        if (wwm_cls) wwm_val.classList.add(wwm_cls);
+        wwm_val.textContent = wwm_v;
+        wwm_item.appendChild(wwm_sbj);
+        wwm_item.appendChild(wwm_val);
+        wwm_grid.appendChild(wwm_item);
+      });
+      wwm_card.appendChild(wwm_grid);
+
+      /* 底部 .wwm-ft：总分 + 均分 */
+      var wwm_ft = document.createElement("div");
+      wwm_ft.className = "wwm-ft";
+      var wwm_total = document.createElement("span");
+      wwm_total.className = "wwm-total";
+      wwm_total.textContent = "总分 " + wwmGetTotal(wwm_s);
+      var wwm_avg = document.createElement("span");
+      wwm_avg.className = "wwm-avg";
+      wwm_avg.textContent = "均分 " + wwmGetAvg(wwm_s);
+      wwm_ft.appendChild(wwm_total);
+      wwm_ft.appendChild(wwm_avg);
+      wwm_card.appendChild(wwm_ft);
+
+      wwm_box.appendChild(wwm_card);
+    });
+  }
+
+
+  /* ③ 渲染不及格预警 —— 考察 filter + sort + forEach
+   * 筛出有不及格科目的学生，按不及格科目数降序，写入 #failWarningList
+   */
+  function wwmRenderFailWarning(list) {
+    var wwm_box = document.getElementById("wwmFailWarningList");
+    wwm_box.innerHTML = "";
+
+    // 筛出有不及格科目的学生，按不及格科目数降序（并列保持传入顺序）
+    var wwm_warnList = list.filter(function (wwm_s) {
+      return wwmGetFails(wwm_s).length > 0;
+    }).sort(function (wwm_a, wwm_b) {
+      return wwmGetFails(wwm_b).length - wwmGetFails(wwm_a).length;
+    });
+
+    if (wwm_warnList.length === 0) {
+      var wwm_empty = document.createElement("div");
+      wwm_empty.className = "wwm-empty";
+      wwm_empty.textContent = "全员通过，无预警";
+      wwm_box.appendChild(wwm_empty);
+      return;
+    }
+
+    wwm_warnList.forEach(function (wwm_s) {
+      var wwm_fails = wwmGetFails(wwm_s);
+
+      var wwm_row = document.createElement("div");
+      wwm_row.className = "wwm-rank-row";
+
+      var wwm_rk = document.createElement("span");
+      wwm_rk.className = "wwm-rk";
+      wwm_rk.textContent = wwm_fails.length;
+
+      var wwm_nm = document.createElement("span");
+      wwm_nm.className = "wwm-nm";
+      wwm_nm.textContent = wwm_s.wwm-name + "（" + wwm_fails.map(function (wwm_sub) {
+        return wwm_sub.wwm-name;
+      }).join("、") + "）";
+
+      var wwm_vl = document.createElement("span");
+      wwm_vl.className = "wwm-vl";
+      wwm_vl.textContent = wwmGetTotal(wwm_s) + "分";
+
+      wwm_row.appendChild(wwm_rk);
+      wwm_row.appendChild(wwm_nm);
+      wwm_row.appendChild(wwm_vl);
+      wwm_box.appendChild(wwm_row);
+    });
+  }
+
+
+  /* ④ 搜索 —— 考察 filter + input 事件
+   * 按姓名或学号过滤 wwmStudents（忽略大小写、去空格）
+   * 无关键字时返回全部学生
+   */
+  function wwmSearch(keyword) {
+    var wwm_kw = String(keyword).trim().toLowerCase();
+    if (!wwm_kw) return wwmStudents.slice();
+    return wwmStudents.filter(function (wwm_s) {
+      return wwm_s.wwm-name.toLowerCase().indexOf(wwm_kw) > -1 ||
+        String(wwm_s.id).toLowerCase().indexOf(wwm_kw) > -1;
+    });
+  }
+
+
+  /* ⑤ 排序 —— 考察 sort + slice + querySelectorAll + classList
+   * by="total" 按总分降序；by="id" 按学号升序
+   * 返回新数组（不修改原数组）
+   */
+  var wwmCurrentSort = "total";
+  function wwmSortList(list, by) {
+    var wwm_arr = list.slice();
+    if (by === "id") {
+      wwm_arr.sort(function (wwm_a, wwm_b) {
+        return wwm_a.id > wwm_b.id ? 1 : -1;
+      });
+    } else {
+      wwm_arr.sort(function (wwm_a, wwm_b) {
+        return wwmGetTotal(wwm_b) - wwmGetTotal(wwm_a);
+      });
+    }
+    return wwm_arr;
+  }
+
+
+  /* ---------- 主刷新流程：依次调用上述函数 ---------- */
+  function wwmRefresh() {
+    var kw = document.getElementById("wwmSearchInput").value;
+    var data = wwmSortList(wwmSearch(kw), wwmCurrentSort);
+    wwmRenderStats(data);
+    wwmRenderStudentCards(data);
+    wwmRenderFailWarning(data);
+  }
+
+
+  /* ---------- 事件绑定（已给出，无需修改） ---------- */
+  var wwmTimer = null;
+  document.getElementById("wwmSearchInput").addEventListener("input", function () {
+    clearTimeout(wwmTimer);
+    wwmTimer = setTimeout(wwmRefresh, 200);
+  });
+
+  // 排序按钮：事件委托 + querySelectorAll 切换高亮
+  document.getElementById("wwmSortBtns").addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    wwmCurrentSort = btn.getAttribute("data-wwm-sort");
+    this.querySelectorAll("button").forEach(function (b) { b.classList.remove("wwm-active"); });
+    btn.classList.add("wwm-active");
+    wwmRefresh();
+  });
+
+  /* ---------- 初始化 ---------- */
+  wwmRefresh();
+})();
+</script>
+</body>
+</html>

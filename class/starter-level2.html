@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学生成绩分析面板 · 等级二（起始模板）</title>
+<style>
+  /* 样式与 target.html 完全一致，方便一比一对照还原 */
+  :root{
+    --bg-1:#1a1c2c; --bg-2:#243b55;
+    --card:#ffffff; --card-soft:rgba(255,255,255,.92);
+    --ink:#1f2733; --ink-soft:#5b6472; --line:#e7eaf0;
+    --primary:#5b7cfa; --primary-d:#3f5fd9;
+    --accent:#21d4b4; --warn:#ff7a59; --gold:#f5b945; --rose:#ff5d8f;
+    --radius:14px; --shadow:0 10px 30px rgba(20,28,48,.18);
+    --shadow-sm:0 4px 14px rgba(20,28,48,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;background:linear-gradient(135deg,var(--bg-1),var(--bg-2));min-height:100vh;color:var(--ink);line-height:1.6;padding:24px}
+  .wwm-wrap{max-width:1180px;margin:0 auto}
+  header.wwm-head{background:var(--card-soft);border-radius:var(--radius);padding:22px 26px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+  .wwm-head h1{font-size:22px;display:flex;align-items:center;gap:10px}
+  .wwm-head h1 .wwm-logo{width:38px;height:38px;border-radius:11px;flex:none;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;color:#fff;font-weight:700}
+  .wwm-head .wwm-sub{color:var(--ink-soft);font-size:13px}
+  .wwm-tag-level{font-size:12px;font-weight:700;color:#fff;background:var(--primary);padding:4px 10px;border-radius:20px}
+  section.wwm-block{background:var(--card);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow-sm);margin-bottom:18px}
+  .wwm-block-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:16px;color:var(--ink)}
+  .wwm-block-title::before{content:"";width:4px;height:16px;border-radius:3px;background:var(--primary)}
+  .wwm-block-title .wwm-hint{font-weight:400;color:var(--ink-soft);font-size:12px}
+  .wwm-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .wwm-stat-card{background:linear-gradient(135deg,#f6f8ff,#fff);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
+  .wwm-stat-card .wwm-stat-value{font-size:30px;font-weight:800;color:var(--primary);line-height:1.2}
+  .wwm-stat-card .wwm-stat-label{font-size:13px;color:var(--ink-soft);margin-top:4px}
+  .wwm-stat-card .wwm-stat-unit{font-size:14px;color:var(--ink-soft);font-weight:600;margin-left:3px}
+  .wwm-stat-card.wwm-accent .wwm-stat-value{color:var(--accent)}
+  .wwm-stat-card.wwm-warn .wwm-stat-value{color:var(--warn)}
+  .wwm-stat-card.wwm-gold .wwm-stat-value{color:var(--gold)}
+  .wwm-subject-list{display:flex;flex-direction:column;gap:12px}
+  .wwm-subject-item{display:grid;grid-template-columns:80px 1fr 54px;align-items:center;gap:12px}
+  .wwm-subject-name{font-size:14px;font-weight:600}
+  .wwm-subject-bar{height:14px;border-radius:8px;background:#eef1f7;overflow:hidden}
+  .wwm-subject-bar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,var(--primary),var(--accent));width:0;transition:width .6s ease}
+  .wwm-subject-value{text-align:right;font-weight:700;color:var(--ink)}
+  .wwm-controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  .wwm-search-box{position:relative;flex:1;min-width:220px}
+  .wwm-search-box input{width:100%;padding:11px 14px 11px 38px;border:1px solid var(--line);border-radius:10px;font-size:14px;outline:none;transition:border-color .2s}
+  .wwm-search-box input:focus{border-color:var(--primary)}
+  .wwm-search-box .wwm-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-soft)}
+  .wwm-btn-group{display:flex;gap:6px;background:#eef1f7;padding:4px;border-radius:10px}
+  .wwm-btn-group button{border:none;background:transparent;padding:8px 14px;border-radius:7px;font-size:13px;color:var(--ink-soft);cursor:pointer;transition:all .18s}
+  .wwm-btn-group button.wwm-active{background:#fff;color:var(--primary);font-weight:700;box-shadow:var(--shadow-sm)}
+  .wwm-rank-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .wwm-rank-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff}
+  .wwm-rank-card h4{font-size:13px;color:var(--ink-soft);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .wwm-rank-card h4 .wwm-dot{width:8px;height:8px;border-radius:50%;background:var(--primary)}
+  .wwm-rank-card.wwm-champions h4 .wwm-dot{background:var(--gold)}
+  .wwm-rank-card.wwm-fail h4 .wwm-dot{background:var(--warn)}
+  .wwm-rank-list{display:flex;flex-direction:column;gap:8px}
+  .wwm-rank-row{display:flex;align-items:center;justify-content:space-between;font-size:13px}
+  .wwm-rank-row .wwm-rk{width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;font-size:12px}
+  .wwm-rank-row .wwm-rk.wwm-r1{background:#fff3d4;color:#b87d00}
+  .wwm-rank-row .wwm-rk.wwm-r2{background:#eef1f7;color:var(--ink-soft)}
+  .wwm-rank-row .wwm-rk.wwm-r3{background:#fde9dd;color:#c0602a}
+  .wwm-rank-row .wwm-nm{flex:1;margin:0 8px;font-weight:600}
+  .wwm-rank-row .wwm-vl{font-weight:700;color:var(--primary)}
+  .wwm-rank-card.wwm-fail .wwm-rank-row .wwm-vl{color:var(--warn)}
+  .wwm-champ-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .wwm-champ-row:last-child{border-bottom:none}
+  .wwm-champ-row .wwm-sbj{color:var(--ink-soft)}
+  .wwm-champ-row .wwm-nm{font-weight:700}
+  .wwm-champ-row .wwm-vl{color:var(--gold);font-weight:800}
+  .wwm-empty{color:var(--ink-soft);font-size:13px;font-style:italic;text-align:center;padding:10px 0}
+  .wwm-status-tip{padding:11px 16px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:8px;background:#eaf6ff;color:#1565c0;border:1px solid #cfe8fb}
+  .wwm-status-tip.wwm-bad{background:#fff0ec;color:#c0492a;border-color:#ffd9cd}
+  .wwm-student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+  .wwm-student-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;transition:transform .18s,box-shadow .18s;cursor:pointer}
+  .wwm-student-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+  .wwm-student-card .wwm-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .wwm-avatar{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;color:#fff;font-size:15px}
+  .wwm-avatar.wwm-boy{background:linear-gradient(135deg,#5b7cfa,#7a5bfa)}
+  .wwm-avatar.wwm-girl{background:linear-gradient(135deg,#ff5d8f,#ff8fb1)}
+  .wwm-student-card .wwm-name{font-weight:700;font-size:15px}
+  .wwm-student-card .wwm-meta{font-size:12px;color:var(--ink-soft)}
+  .wwm-student-card .wwm-rank-badge{margin-left:auto;font-size:12px;font-weight:700;color:#fff;background:var(--primary);padding:3px 9px;border-radius:20px}
+  .wwm-student-card .wwm-rank-badge.wwm-gold{background:var(--gold)}
+  .wwm-score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+  .wwm-score-item{text-align:center;background:#f6f8ff;border-radius:8px;padding:6px 2px}
+  .wwm-score-item .wwm-sbj{font-size:11px;color:var(--ink-soft)}
+  .wwm-score-item .wwm-val{font-size:14px;font-weight:700}
+  .wwm-score-item .wwm-val.wwm-fail{color:var(--warn)}
+  .wwm-score-item .wwm-val.wwm-full{color:var(--accent)}
+  .wwm-student-card .wwm-ft{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:8px;font-size:13px}
+  .wwm-student-card .wwm-ft .wwm-total{font-weight:800;color:var(--primary)}
+  .wwm-student-card .wwm-ft .wwm-avg{color:var(--ink-soft)}
+  .wwm-student-card .wwm-detail{margin-top:0;max-height:0;overflow:hidden;transition:all .28s ease;font-size:13px;color:var(--ink-soft)}
+  .wwm-student-card.wwm-open .wwm-detail{margin-top:10px;max-height:120px}
+  .wwm-detail p{padding:3px 0}
+  .wwm-detail b{color:var(--ink)}
+  footer.wwm-foot{text-align:center;color:rgba(255,255,255,.7);font-size:12px;padding:14px 0}
+  .wwm-task-note{background:#eef6ff;border:1px solid #cfe8fb;color:#1565c0;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:18px}
+  .wwm-task-note b{color:#0d47a1}
+</style>
+</head>
+<body>
+<div class="wwm-wrap">
+
+  <header class="wwm-head">
+    <h1><span class="wwm-logo">分</span>学生成绩分析面板</h1>
+    <div>
+      <span class="wwm-tag-level">等级二 · 进阶</span>
+      <div class="wwm-sub">DOM 查找 × 数组方法 × 函数 综合实战</div>
+    </div>
+  </header>
+
+  <!-- 区域1：统计卡片 -->
+  <section class="wwm-block">
+    <div class="wwm-block-title">班级概览 <span class="wwm-hint">getElementById / reduce / filter</span></div>
+    <div class="wwm-stat-grid">
+      <div class="wwm-stat-card"><div class="wwm-stat-value" id="wwmStatCount">0</div><div class="wwm-stat-label">班级人数（人）</div></div>
+      <div class="wwm-stat-card wwm-accent"><div class="wwm-stat-value" id="wwmStatTotalScore">0</div><div class="wwm-stat-label">班级总分</div></div>
+      <div class="wwm-stat-card wwm-gold"><div class="wwm-stat-value" id="wwmStatAvgScore">0</div><div class="wwm-stat-label">班级平均分</div></div>
+      <div class="wwm-stat-card wwm-warn"><div class="wwm-stat-value" id="wwmStatPassRate">0<span class="wwm-stat-unit">%</span></div><div class="wwm-stat-label">及格率（无不及格科目）</div></div>
+    </div>
+  </section>
+
+  <!-- 区域2：各科平均分（等级二新增）-->
+  <section class="wwm-block">
+    <div class="wwm-block-title">各科平均分 <span class="wwm-hint">reduce / forEach / querySelector / style</span></div>
+    <div class="wwm-subject-list" id="wwmSubjectList"></div>
+  </section>
+
+  <!-- 区域3：控制区（搜索 + 排序 + 筛选）-->
+  <section class="wwm-block">
+    <div class="wwm-block-title">数据操作 <span class="wwm-hint">filter / sort / querySelectorAll / getElementsByClassName / classList / 事件委托</span></div>
+    <div class="wwm-controls">
+      <div class="wwm-search-box">
+        <span class="wwm-ico">🔍</span>
+        <input type="text" id="wwmSearchInput" placeholder="按姓名或学号搜索…">
+      </div>
+      <div class="wwm-btn-group" id="wwmSortBtns">
+        <button class="wwm-active" data-wwm-sort="total">按总分↓</button>
+        <button data-wwm-sort="id">按学号↑</button>
+      </div>
+      <div class="wwm-btn-group" id="wwmFilterBtns">
+        <button class="wwm-active" data-wwm-filter="all">全部</button>
+        <button data-wwm-filter="excellent">优秀</button>
+        <button data-wwm-filter="fail">含不及格</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 区域4：榜单与预警（等级二新增）-->
+  <section class="wwm-block">
+    <div class="wwm-block-title">榜单与预警 <span class="wwm-hint">filter / sort / slice / map / reduce / find / some / every / 节点关系</span></div>
+    <div class="wwm-status-tip" id="wwmStatusTip"></div>
+    <div class="wwm-rank-grid" style="margin-top:14px">
+      <div class="wwm-rank-card">
+        <h4><span class="wwm-dot"></span>优秀学生 Top3（平均≥85）</h4>
+        <div class="wwm-rank-list" id="wwmTopStudentsList"></div>
+      </div>
+      <div class="wwm-rank-card wwm-champions">
+        <h4><span class="wwm-dot"></span>各科状元</h4>
+        <div class="wwm-rank-list" id="wwmSubjectChampionsList"></div>
+      </div>
+      <div class="wwm-rank-card wwm-fail">
+        <h4><span class="wwm-dot"></span>不及格预警</h4>
+        <div class="wwm-rank-list" id="wwmFailWarningList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 区域5：学生卡片列表 -->
+  <section class="wwm-block">
+    <div class="wwm-block-title">学生成绩卡片 <span class="wwm-hint">forEach / createElement / classList / closest / 节点关系 / 事件委托</span></div>
+    <div class="wwm-student-grid" id="wwmStudentList"></div>
+  </section>
+
+  <footer class="wwm-foot">高级网页设计课堂实践任务 · 等级二（进阶）· 起始模板</footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+/* ============================================================
+ * 等级二（进阶）· 起始模板
+ * 在下方补全全部函数，运行后与 target.html 一比一还原
+ * 数据来源：window.wwmStudents / window.wwmSubjects（见 data.js）
+ * ------------------------------------------------------------
+ * 【考察点速查表】
+ *   DOM 查找: getElementById / querySelector / querySelectorAll
+ *             / getElementsByClassName(动态集合) / 节点关系(parentNode,
+ *             children, nextElementSibling, firstElementChild, lastElementChild,
+ *             closest) / classList
+ *   数组方法: forEach / map / filter / reduce / sort / find / some / every / slice
+ *   函数    : 计算函数(纯函数) / 渲染函数 / 事件处理 / 事件委托 / 工具函数
+ * ============================================================ */
+(function () {
+  "use strict";
+  const wwmStudents = window.wwmStudents;
+  const wwmSubjects = window.wwmSubjects;
+
+  const WWM_PASS_LINE = 60;
+  const WWM_EXCELLENT_AVG = 85;
+
+
+  /* ---------- 工具函数 ---------- */
+  function wwmScoreClass(v) {
+    if (v < WWM_PASS_LINE) return "fail";
+    if (v >= 100) return "full";
+    return "";
+  }
+
+  function wwmGetTotal(s) {
+    return wwmSubjects.reduce(function (wwm_sum, wwm_sub) {
+      return wwm_sum + s[wwm_sub.key];
+    }, 0);
+  }
+
+  function wwmGetAvg(s) {
+    return Math.round(wwmGetTotal(s) / wwmSubjects.length * 10) / 10;
+  }
+
+  function wwmGetFails(s) {
+    return wwmSubjects.filter(function (wwm_sub) {
+      return s[wwm_sub.key] < WWM_PASS_LINE;
+    });
+  }
+
+  function wwmFirstName(s) {
+    return s.wwm-name.charAt(0);
+  }
+
+
+  /* ============ 以下为本等级必做函数 ============ */
+
+  /* ① 渲染统计卡片 */
+  function wwmRenderStats(list) {
+    var wwm_count = list.length;
+    var wwm_totalScore = list.reduce(function (wwm_sum, wwm_s) {
+      return wwm_sum + wwmGetTotal(wwm_s);
+    }, 0);
+    var wwm_avgScore = wwm_count
+      ? Math.round(wwm_totalScore / (wwm_count * wwmSubjects.length) * 10) / 10
+      : 0;
+    var wwm_passCount = list.filter(function (wwm_s) {
+      return wwmGetFails(wwm_s).length === 0;
+    }).length;
+    var wwm_passRate = wwm_count
+      ? Math.round(wwm_passCount / wwm_count * 100)
+      : 0;
+
+    document.getElementById("wwmStatCount").textContent = wwm_count;
+    document.getElementById("wwmStatTotalScore").textContent = wwm_totalScore;
+    document.getElementById("wwmStatAvgScore").textContent = wwm_avgScore;
+    document.getElementById("wwmStatPassRate").firstChild.textContent = wwm_passRate;
+  }
+
+
+  /* ② 渲染各科平均分（条形图） */
+  function wwmRenderSubjectAverages(list) {
+    var wwm_box = document.getElementById("wwmSubjectList");
+    wwm_box.innerHTML = "";
+    if (list.length === 0) {
+      var wwm_empty = document.createElement("div");
+      wwm_empty.className = "wwm-empty";
+      wwm_empty.textContent = "暂无数据";
+      wwm_box.appendChild(wwm_empty);
+      return;
+    }
+    wwmSubjects.forEach(function (wwm_sub) {
+      var wwm_avg = list.reduce(function (wwm_sum, wwm_s) {
+        return wwm_sum + wwm_s[wwm_sub.key];
+      }, 0) / list.length;
+      wwm_avg = Math.round(wwm_avg * 10) / 10;
+
+      var wwm_item = document.createElement("div");
+      wwm_item.className = "wwm-subject-item";
+
+      var wwm_name = document.createElement("div");
+      wwm_name.className = "wwm-subject-name";
+      wwm_name.textContent = wwm_sub.wwm-name;
+
+      var wwm_bar = document.createElement("div");
+      wwm_bar.className = "wwm-subject-bar";
+      var wwm_inner = document.createElement("i");
+      wwm_bar.appendChild(wwm_inner);
+
+      var wwm_val = document.createElement("div");
+      wwm_val.className = "wwm-subject-value";
+      wwm_val.textContent = wwm_avg;
+
+      wwm_item.appendChild(wwm_name);
+      wwm_item.appendChild(wwm_bar);
+      wwm_item.appendChild(wwm_val);
+      wwm_box.appendChild(wwm_item);
+
+      // requestAnimationFrame 触发 width 动画
+      requestAnimationFrame(function () {
+        wwm_inner.style.width = (wwm_avg / wwm_sub.wwm-full * 100) + "%";
+      });
+    });
+  }
+
+
+  /* ③ 渲染榜单与预警 */
+  function wwmRenderRankings(list) {
+    // 3-1 优秀 Top3
+    var wwm_excellent = list.filter(function (wwm_s) {
+      return wwmGetAvg(wwm_s) >= WWM_EXCELLENT_AVG;
+    }).slice().sort(function (wwm_a, wwm_b) {
+      return wwmGetTotal(wwm_b) - wwmGetTotal(wwm_a);
+    }).slice(0, 3);
+
+    var wwm_topBox = document.getElementById("wwmTopStudentsList");
+    wwm_topBox.innerHTML = "";
+    if (wwm_excellent.length === 0) {
+      var wwm_e1 = document.createElement("div");
+      wwm_e1.className = "wwm-empty";
+      wwm_e1.textContent = "暂无优秀学生";
+      wwm_topBox.appendChild(wwm_e1);
+    } else {
+      wwm_excellent.forEach(function (wwm_s, wwm_i) {
+        var wwm_row = document.createElement("div");
+        wwm_row.className = "wwm-rank-row";
+        var wwm_rk = document.createElement("span");
+        wwm_rk.className = "wwm-rk wwm-r" + (wwm_i + 1);
+        wwm_rk.textContent = wwm_i + 1;
+        var wwm_nm = document.createElement("span");
+        wwm_nm.className = "wwm-nm";
+        wwm_nm.textContent = wwm_s.wwm-name;
+        var wwm_vl = document.createElement("span");
+        wwm_vl.className = "wwm-vl";
+        wwm_vl.textContent = wwmGetTotal(wwm_s);
+        wwm_row.appendChild(wwm_rk);
+        wwm_row.appendChild(wwm_nm);
+        wwm_row.appendChild(wwm_vl);
+        wwm_topBox.appendChild(wwm_row);
+      });
+    }
+
+    // 3-2 各科状元
+    var wwm_champBox = document.getElementById("wwmSubjectChampionsList");
+    wwm_champBox.innerHTML = "";
+    wwmSubjects.forEach(function (wwm_sub) {
+      var wwm_champ = list.reduce(function (wwm_best, wwm_s) {
+        return !wwm_best || wwm_s[wwm_sub.key] > wwm_best[wwm_sub.key] ? wwm_s : wwm_best;
+      }, null);
+      if (!wwm_champ) return;
+
+      var wwm_row = document.createElement("div");
+      wwm_row.className = "wwm-champ-row";
+      var wwm_sbj = document.createElement("span");
+      wwm_sbj.className = "wwm-sbj";
+      wwm_sbj.textContent = wwm_sub.wwm-name;
+      var wwm_nm = document.createElement("span");
+      wwm_nm.className = "wwm-nm";
+      wwm_nm.textContent = wwm_champ.wwm-name;
+      var wwm_vl = document.createElement("span");
+      wwm_vl.className = "wwm-vl";
+      wwm_vl.textContent = wwm_champ[wwm_sub.key];
+      wwm_row.appendChild(wwm_sbj);
+      wwm_row.appendChild(wwm_nm);
+      wwm_row.appendChild(wwm_vl);
+      wwm_champBox.appendChild(wwm_row);
+    });
+
+    // 3-3 不及格预警
+    var wwm_warnList = list.filter(function (wwm_s) {
+      return wwmGetFails(wwm_s).length > 0;
+    }).slice().sort(function (wwm_a, wwm_b) {
+      return wwmGetFails(wwm_b).length - wwmGetFails(wwm_a).length;
+    });
+
+    var wwm_warnBox = document.getElementById("wwmFailWarningList");
+    wwm_warnBox.innerHTML = "";
+    if (wwm_warnList.length === 0) {
+      var wwm_e2 = document.createElement("div");
+      wwm_e2.className = "wwm-empty";
+      wwm_e2.textContent = "全员通过，无预警";
+      wwm_warnBox.appendChild(wwm_e2);
+    } else {
+      wwm_warnList.forEach(function (wwm_s) {
+        var wwm_fails = wwmGetFails(wwm_s);
+        var wwm_row = document.createElement("div");
+        wwm_row.className = "wwm-rank-row";
+        var wwm_rk = document.createElement("span");
+        wwm_rk.className = "wwm-rk";
+        wwm_rk.textContent = wwm_fails.length;
+        var wwm_nm = document.createElement("span");
+        wwm_nm.className = "wwm-nm";
+        wwm_nm.textContent = wwm_s.wwm-name + "（" + wwm_fails.map(function (wwm_f) {
+          return wwm_f.wwm-name;
+        }).join("、") + "）";
+        var wwm_vl = document.createElement("span");
+        wwm_vl.className = "wwm-vl";
+        wwm_vl.textContent = wwmGetTotal(wwm_s) + "分";
+        wwm_row.appendChild(wwm_rk);
+        wwm_row.appendChild(wwm_nm);
+        wwm_row.appendChild(wwm_vl);
+        wwm_warnBox.appendChild(wwm_row);
+      });
+    }
+
+    // 3-4 状态条
+    var wwm_tip = document.getElementById("wwmStatusTip");
+    wwm_tip.className = "wwm-status-tip"; // 重置
+    if (list.every(function (wwm_s) { return wwmGetAvg(wwm_s) >= WWM_EXCELLENT_AVG; })) {
+      wwm_tip.classList.remove("wwm-bad");
+      wwm_tip.textContent = "🎉 全员优秀！班级平均均达 85 分以上，表现出色。";
+    } else if (list.some(function (wwm_s) { return wwmGetFails(wwm_s).length > 0; })) {
+      wwm_tip.classList.add("wwm-bad");
+      wwm_tip.textContent = "⚠️ 班级存在不及格科目，请关注预警名单中的学生。";
+    } else {
+      wwm_tip.classList.remove("wwm-bad");
+      wwm_tip.textContent = "✅ 班级整体正常，暂无不及格科目；部分学生未达优秀线。";
+    }
+  }
+
+
+  /* ④ 渲染学生卡片列表（含 detail 展开区） */
+  function wwmRenderStudentCards(list) {
+    var wwm_box = document.getElementById("wwmStudentList");
+    wwm_box.innerHTML = "";
+
+    list.forEach(function (wwm_s, wwm_i) {
+      var wwm_card = document.createElement("div");
+      wwm_card.className = "wwm-student-card";
+      wwm_card.setAttribute("data-id", wwm_s.id);
+
+      // .wwm-hd: 头像 + 姓名/学号·性别 + 排名徽章
+      var wwm_hd = document.createElement("div");
+      wwm_hd.className = "wwm-hd";
+
+      var wwm_avatar = document.createElement("div");
+      wwm_avatar.className = "wwm-avatar";
+      wwm_avatar.classList.add(wwm_s.gender === "男" ? "boy" : "girl");
+      wwm_avatar.textContent = wwmFirstName(wwm_s);
+      wwm_hd.appendChild(wwm_avatar);
+
+      var wwm_info = document.createElement("div");
+      var wwm_name = document.createElement("div");
+      wwm_name.className = "wwm-name";
+      wwm_name.textContent = wwm_s.wwm-name;
+      var wwm_meta = document.createElement("div");
+      wwm_meta.className = "wwm-meta";
+      wwm_meta.textContent = wwm_s.id + " · " + wwm_s.gender;
+      wwm_info.appendChild(wwm_name);
+      wwm_info.appendChild(wwm_meta);
+      wwm_hd.appendChild(wwm_info);
+
+      var wwm_rank = wwm_i + 1;
+      var wwm_badge = document.createElement("span");
+      wwm_badge.className = "wwm-rank-badge";
+      if (wwm_rank <= 3) wwm_badge.classList.add("wwm-gold");
+      wwm_badge.textContent = "第" + wwm_rank + "名";
+      wwm_hd.appendChild(wwm_badge);
+      wwm_card.appendChild(wwm_hd);
+
+      // .wwm-score-grid: 五科
+      var wwm_grid = document.createElement("div");
+      wwm_grid.className = "wwm-score-grid";
+      wwmSubjects.forEach(function (wwm_sub) {
+        var wwm_v = wwm_s[wwm_sub.key];
+        var wwm_item = document.createElement("div");
+        wwm_item.className = "wwm-score-item";
+        var wwm_sbj = document.createElement("div");
+        wwm_sbj.className = "wwm-sbj";
+        wwm_sbj.textContent = wwm_sub.abbr;
+        var wwm_val = document.createElement("div");
+        wwm_val.className = "wwm-val";
+        var wwm_cls = wwmScoreClass(wwm_v);
+        if (wwm_cls) wwm_val.classList.add(wwm_cls);
+        wwm_val.textContent = wwm_v;
+        wwm_item.appendChild(wwm_sbj);
+        wwm_item.appendChild(wwm_val);
+        wwm_grid.appendChild(wwm_item);
+      });
+      wwm_card.appendChild(wwm_grid);
+
+      // .wwm-ft: 总分 + 均分
+      var wwm_ft = document.createElement("div");
+      wwm_ft.className = "wwm-ft";
+      var wwm_total = document.createElement("span");
+      wwm_total.className = "wwm-total";
+      wwm_total.textContent = "总分 " + wwmGetTotal(wwm_s);
+      var wwm_avg = document.createElement("span");
+      wwm_avg.className = "wwm-avg";
+      wwm_avg.textContent = "均分 " + wwmGetAvg(wwm_s);
+      wwm_ft.appendChild(wwm_total);
+      wwm_ft.appendChild(wwm_avg);
+      wwm_card.appendChild(wwm_ft);
+
+      // .wwm-detail: 展开详情（最后一个子元素，供 lastElementChild 定位）
+      var wwm_detail = document.createElement("div");
+      wwm_detail.className = "wwm-detail";
+      var wwm_p1 = document.createElement("p");
+      wwm_p1.innerHTML = "<b>不及格科目：</b>" + (wwmGetFails(wwm_s).length === 0 ? "无 ✅" : wwmGetFails(wwm_s).map(function (wwm_f) { return wwm_f.wwm-name + "(" + wwm_s[wwm_f.key] + ")"; }).join("、"));
+      var wwm_p2 = document.createElement("p");
+      var wwm_isExc = wwmGetAvg(wwm_s) >= WWM_EXCELLENT_AVG;
+      wwm_p2.innerHTML = "<b>等级判定：</b>" + (wwm_isExc ? "优秀（均分≥85）🎉" : "普通（均分<85）");
+      var wwm_p3 = document.createElement("p");
+      var wwm_maxSub = wwmSubjects.reduce(function (wwm_best, wwm_sub) {
+        return !wwm_best || wwm_s[wwm_sub.key] > wwm_best.score ? { sub: wwm_sub, score: wwm_s[wwm_sub.key] } : wwm_best;
+      }, null);
+      wwm_p3.innerHTML = "<b>最高科目：</b>" + wwm_maxSub.wwm-sub.wwm-name + "（" + wwm_maxSub.score + "分）";
+      wwm_detail.appendChild(wwm_p1);
+      wwm_detail.appendChild(wwm_p2);
+      wwm_detail.appendChild(wwm_p3);
+      wwm_card.appendChild(wwm_detail);
+
+      wwm_box.appendChild(wwm_card);
+    });
+  }
+
+
+  /* ⑤ 搜索 */
+  function wwmSearch(keyword) {
+    var wwm_kw = String(keyword).trim().toLowerCase();
+    if (!wwm_kw) return wwmStudents.slice();
+    return wwmStudents.filter(function (wwm_s) {
+      return wwm_s.wwm-name.toLowerCase().indexOf(wwm_kw) > -1 ||
+        String(wwm_s.id).toLowerCase().indexOf(wwm_kw) > -1;
+    });
+  }
+
+
+  /* ⑥ 排序 */
+  var wwmCurrentSort = "total";
+  function wwmSortList(list, by) {
+    var wwm_arr = list.slice();
+    if (by === "id") {
+      wwm_arr.sort(function (wwm_a, wwm_b) {
+        return wwm_a.id > wwm_b.id ? 1 : -1;
+      });
+    } else {
+      wwm_arr.sort(function (wwm_a, wwm_b) {
+        return wwmGetTotal(wwm_b) - wwmGetTotal(wwm_a);
+      });
+    }
+    return wwm_arr;
+  }
+
+
+  /* ⑦ 筛选 */
+  var wwmCurrentFilter = "all";
+  function wwmFilterList(list, mode) {
+    if (mode === "excellent") {
+      return list.filter(function (wwm_s) { return wwmGetAvg(wwm_s) >= WWM_EXCELLENT_AVG; });
+    }
+    if (mode === "fail") {
+      return list.filter(function (wwm_s) { return wwmGetFails(wwm_s).length > 0; });
+    }
+    return list.slice();
+  }
+
+
+  /* ---------- 主刷新流程：依次调用上述函数 ---------- */
+  function wwmRefresh() {
+    var kw = document.getElementById("wwmSearchInput").value;
+    var data = wwmFilterList(wwmSortList(wwmSearch(kw), wwmCurrentSort), wwmCurrentFilter);
+    wwmRenderStats(data);
+    wwmRenderSubjectAverages(data);
+    wwmRenderRankings(data);
+    wwmRenderStudentCards(data);
+  }
+
+
+  /* ---------- 事件绑定（已给出，无需修改，但需理解 closest / 事件委托） ---------- */
+  var wwmTimer = null;
+  document.getElementById("wwmSearchInput").addEventListener("input", function () {
+    clearTimeout(wwmTimer);
+    wwmTimer = setTimeout(wwmRefresh, 200);
+  });
+
+  // 排序按钮：事件委托 + closest + querySelectorAll(静态集合)
+  document.getElementById("wwmSortBtns").addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    wwmCurrentSort = btn.getAttribute("data-wwm-sort");
+    this.querySelectorAll("button").forEach(function (b) { b.classList.remove("wwm-active"); });
+    btn.classList.add("wwm-active");
+    wwmRefresh();
+  });
+
+  // 筛选按钮：事件委托 + closest + getElementsByClassName(动态集合) —— 考察动态vs静态集合
+  document.getElementById("wwmFilterBtns").addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    wwmCurrentFilter = btn.getAttribute("data-wwm-filter");
+    var btns = this.getElementsByClassName("wwm-active");
+    while (btns.length) { btns[0].classList.remove("wwm-active"); }
+    btn.classList.add("wwm-active");
+    wwmRefresh();
+  });
+
+  // 卡片展开：事件委托 + closest + 节点关系(lastElementChild) + classList.toggle
+  document.getElementById("wwmStudentList").addEventListener("click", function (e) {
+    var card = e.target.closest(".wwm-student-card");
+    if (!card) return;
+    var detail = card.lastElementChild; // detail 是卡片最后一个子元素
+    card.classList.toggle("open");
+  });
+
+  /* ---------- 初始化 ---------- */
+  wwmRefresh();
+})();
+</script>
+</body>
+</html>

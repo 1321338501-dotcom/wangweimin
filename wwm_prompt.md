@@ -29,3 +29,19 @@ AGENTS.md 所有说明、检查条目统一简体中文；文件路径、HTML、
 ## 2026-11-05 | 模型: Seed-2.1-Turbo
 用户提示词：
 课程进阶任务：任务二添加 creative 第七种效果（参考 swiper/demo/257-effect-creative.html 的 creativeEffect.transform）；任务三添加第6个展品"爱达魔都号"图片，并任选一个课堂未讲的 Swiper 能力（keyboard 键盘控制 + mousewheel 滚轮）
+
+## 2026-11-09 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+答辩抽问:transform 里的百分号是相对谁的?改一个数值让卡片转 20 度试试?
+
+## 2026-11-09 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+`https://slh0816.github.io/sunlihao513/class/index.html`把里面所有的孙立豪改为王伟民 把所有的513改为617 所有sunlihao改为wangweimin 所有slh改为wwm 所有SLH改为WWM
+
+## 2026-11-09 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+未改动`cdn/` 与`font/` 目录——里面的`slh` 、`513` 是第三方字体 base64 数据中的偶然字符，替换会损坏字体文件。 未改动的这些也替换 想办法不损坏字体文件
+
+## 2026-11-09 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+`C:/Users/lenovo/Documents/Trae-CN/default/class/swiper-task.html` 里面的wy改为wwm

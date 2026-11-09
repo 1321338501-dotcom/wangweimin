@@ -1,0 +1,315 @@
+@charset "UTF-8";
+
+/* ============================================================
+   字形标本 · Font Awesome 字体图标样张页
+   暖纸底色 + 钴蓝单一高亮；衬线标题、无衬线正文
+   ============================================================ */
+
+:root {
+  --wwm-paper: #f4f1e9;
+  --wwm-paper-deep: #ece7db;
+  --wwm-ink: #1c1b19;
+  --wwm-ink-soft: #5c574d;
+  --wwm-ink-faint: #8d867a;
+  --wwm-rule: #d8d1c1;
+  --wwm-accent: #23409e;
+  --wwm-accent-soft: rgba(35, 64, 158, 0.08);
+  --wwm-serif: "Songti SC", "Source Han Serif SC", "Noto Serif SC", Georgia, "Times New Roman", serif;
+  --wwm-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+  --wwm-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0 24px 56px;
+  background-color: var(--wwm-paper);
+  background-image:
+    radial-gradient(circle at 18% -10%, rgba(255, 255, 255, 0.7), transparent 55%),
+    radial-gradient(circle at 92% 8%, rgba(218, 208, 188, 0.55), transparent 48%);
+  background-repeat: no-repeat;
+  color: var(--wwm-ink);
+  font-family: var(--wwm-sans);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ---------- 页头 ---------- */
+
+.wwm_masthead {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 28px;
+  align-items: start;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 56px 0 40px;
+  border-bottom: 1px solid var(--wwm-rule);
+}
+
+.wwm_masthead__glyph {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border: 1px solid var(--wwm-rule);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--wwm-accent);
+  font-size: 34px;
+  box-shadow: 0 2px 0 rgba(28, 27, 25, 0.06);
+}
+
+.wwm_masthead__inner {
+  min-width: 0;
+}
+
+.wwm_masthead__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.wwm_masthead__kicker {
+  margin: 0;
+  color: var(--wwm-ink-faint);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.wwm_back-home {
+  color: var(--wwm-ink-soft);
+  font-size: 13px;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.wwm_back-home:hover,
+.wwm_back-home:focus-visible {
+  color: var(--wwm-accent);
+  border-bottom-color: var(--wwm-accent);
+}
+
+.wwm_masthead__title {
+  margin: 14px 0 10px;
+  font-family: var(--wwm-serif);
+  font-size: clamp(40px, 7vw, 64px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+}
+
+.wwm_masthead__lead {
+  max-width: 34em;
+  margin: 0;
+  color: var(--wwm-ink-soft);
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+.wwm_masthead__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 26px 0 0;
+  background: var(--wwm-rule);
+  border: 1px solid var(--wwm-rule);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.wwm_masthead__meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.wwm_masthead__meta dt {
+  color: var(--wwm-ink-faint);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+}
+
+.wwm_masthead__meta dd {
+  margin: 0;
+  font-family: var(--wwm-serif);
+  font-size: 15px;
+}
+
+/* ---------- 标本区 ---------- */
+
+.wwm_specimen {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.wwm_specimen__section {
+  padding: 44px 0 8px;
+}
+
+.wwm_specimen__section + .wwm_specimen__section {
+  border-top: 1px solid var(--wwm-rule);
+}
+
+.wwm_specimen__title {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0 0 24px;
+  font-family: var(--wwm-serif);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.wwm_specimen__title::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-right: -6px;
+  border-radius: 50%;
+  background: var(--wwm-accent);
+  transform: translateY(-4px);
+}
+
+.wwm_specimen__count {
+  color: var(--wwm-ink-faint);
+  font-family: var(--wwm-sans);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+.wwm_specimen__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wwm_item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 14px 16px;
+  border: 1px solid var(--wwm-rule);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.72);
+  text-align: center;
+  transition: border-color 0.18s ease, background-color 0.18s ease,
+    transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.wwm_item:hover {
+  border-color: var(--wwm-accent);
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(35, 64, 158, 0.1);
+}
+
+.wwm_item__glyph {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  color: var(--wwm-accent);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.wwm_item__glyph i {
+  line-height: 1;
+}
+
+.wwm_item__name {
+  font-family: var(--wwm-serif);
+  font-size: 15px;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.wwm_item__code {
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 2px;
+  background: var(--wwm-accent-soft);
+  color: var(--wwm-ink-faint);
+  font-family: var(--wwm-mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- 页脚 ---------- */
+
+.wwm_page-footer {
+  max-width: 1080px;
+  margin: 56px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--wwm-rule);
+  color: var(--wwm-ink-faint);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 720px) {
+  body {
+    padding: 0 16px 40px;
+  }
+
+  .wwm_masthead {
+    grid-template-columns: 64px 1fr;
+    gap: 18px;
+    padding: 36px 0 28px;
+  }
+
+  .wwm_masthead__glyph {
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
+  }
+
+  .wwm_masthead__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .wwm_specimen__grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .wwm_item {
+    padding: 18px 10px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wwm_item,
+  .wwm_back-home {
+    transition: none;
+  }
+
+  .wwm_item:hover {
+    transform: none;
+  }
+}
