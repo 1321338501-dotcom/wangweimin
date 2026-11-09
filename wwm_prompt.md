@@ -45,3 +45,11 @@ AGENTS.md 所有说明、检查条目统一简体中文；文件路径、HTML、
 ## 2026-11-09 | 模型: DeepSeek-V4.1-Flash
 用户提示词：
 `C:/Users/lenovo/Documents/Trae-CN/default/class/swiper-task.html` 里面的wy改为wwm
+
+## 2026-11-09 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+请帮我检查 class 目录下的字体文件是否已正确替换
+
+## 2026-11-09 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+先帮我清理掉那些无用的 font-face 引用
