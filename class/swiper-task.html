@@ -245,7 +245,7 @@
 
   // ── 任务 1：初始化 #wwmSw1，让它至少可以拖动 ──    
   // TODO: 在这里写你的代码
-  var wwmSw1 = new Swiper("#wwmSw1", { mousewheel: { forceToAxis: true } });
+  var wwmSw1 = new Swiper("#wwmSw1", { mousewheel: { forceToAxis: true, sensitivity: 1, thresholdDelta: 40, thresholdTime: 400 } });
 
   // ── 任务 2：初始化 #wwmSw2，循环 + 600ms + 圆点可点 + 箭头切换 ──
   // TODO: 在这里写你的代码
@@ -253,7 +253,7 @@ var swiper2 = new Swiper('#wwmSw2', {
   slidesPerView: 1,
   loop: true,                        // 无缝循环：最后一张再往后翻，回到第一张
   speed: 600,                       // 切换动画时长（毫秒）
-  mousewheel: { forceToAxis: true },                 // 鼠标滚轮切换幻灯片
+  mousewheel: { forceToAxis: true, sensitivity: 1, thresholdDelta: 40, thresholdTime: 400 },                 // 鼠标滚轮切换幻灯片
   pagination: { el: '#wwmPag2', clickable: true },  // 圆点可点击
   navigation: { nextEl: '#wwmNext2', prevEl: '#wwmPrev2' }  // 前后箭头
 });
@@ -267,7 +267,7 @@ var swiper3 = new Swiper('#wwmSw3', {
     disableOnInteraction: false       // 用户拖动后，自动播放继续
   },
   speed: 700,
-  mousewheel: { forceToAxis: true },
+  mousewheel: { forceToAxis: true, sensitivity: 1, thresholdDelta: 40, thresholdTime: 400 },
   pagination: { el: '#wwmPag3', clickable: true }
 });
 
@@ -277,7 +277,7 @@ var swiper4 = new Swiper('#wwmSw4', {
   loop: true,
   effect: 'cube', 
   speed: 800,
-  mousewheel: { forceToAxis: true },
+  mousewheel: { forceToAxis: true, sensitivity: 1, thresholdDelta: 40, thresholdTime: 400 },
   autoplay: { delay: 3200, disableOnInteraction: false },
   pagination: { el: '#wwmPag4', clickable: true },
   cubeEffect: { shadow: true, slideShadows: true, shadowOffset: 20, shadowScale: 0.94 }
@@ -301,7 +301,7 @@ var swiper4 = new Swiper('#wwmSw4', {
         loop: true,
         effect: fx,
         speed: 800,
-        mousewheel: { forceToAxis: true },
+        mousewheel: { forceToAxis: true, sensitivity: 1, thresholdDelta: 40, thresholdTime: 400 },
         autoplay: { delay: 3200, disableOnInteraction: false },
         pagination: { el: '#wwmPag4', clickable: true },
         cubeEffect: { shadow: true, slideShadows: true, shadowOffset: 20, shadowScale: 0.94 },
@@ -312,14 +312,14 @@ var swiper4 = new Swiper('#wwmSw4', {
           shadowPerProgress: true,
           prev: {
             translate: ['-38%', 0, -220],
-            rotate: [0, 0, 20],
+            rotate: [0, 0, 30],
             scale: 0.82,
             opacity: 0.6,
             shadow: true
           },
           next: {
             translate: ['38%', 0, -90],
-            rotate: [0, 0, 6],
+            rotate: [0, 0, 10],
             scale: 1.06,
             opacity: 0.65,
             shadow: true

@@ -73,3 +73,7 @@ AGENTS.md 所有说明、检查条目统一简体中文；文件路径、HTML、
 ## 2026-11-12 | 模型: DeepSeek-V4.1-Flash
 用户提示词：
 按方案 B 对齐文档（以 swiper-task.html 页面实际 swiper4 配置为准，删除 loopAdditionalSlides、补上 mousewheel，并修正任务一结论与记录说明中与之矛盾的表述）
+
+## 2026-11-12 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+调整 creative 的旋转角度和 mousewheel 灵敏度（方案：creative prev.rotate 20→30、next.rotate 6→10；mousewheel 补 sensitivity:1 thresholdDelta:40 thresholdTime:400）

@@ -175,8 +175,8 @@ swiper4 = new Swiper('#wwmSw4', {
   creativeEffect: {
     limitProgress: 2,
     shadowPerProgress: true,
-    prev: { translate: ['-38%', 0, -220], rotate: [0, 0, 20], scale: 0.82, opacity: 0.6, shadow: true },
-    next: { translate: ['38%', 0, -90],  rotate: [0, 0, 6],  scale: 1.06, opacity: 0.65, shadow: true }
+    prev: { translate: ['-38%', 0, -220], rotate: [0, 0, 30], scale: 0.82, opacity: 0.6, shadow: true },
+    next: { translate: ['38%', 0, -90],  rotate: [0, 0, 10],  scale: 1.06, opacity: 0.65, shadow: true }
   }
 });</div>
     </div>
@@ -184,7 +184,7 @@ swiper4 = new Swiper('#wwmSw4', {
     <div class="wwm_sec">4. 验证</div>
     <div class="wwm_verify">
       操作：点「creative 电影墙」，再点 next 箭头连续翻两张；随后切回 cube、fade。<br>
-      现象：上一张缩小左偏并带 20° 倾角退场，下一张从右侧 38% 处放大进场并半透明，中间卡片正常；切其它效果照常工作。<br>
+      现象：上一张缩小左偏并带 30° 倾角退场，下一张从右侧 38% 处放大进场并半透明，中间卡片正常；切其它效果照常工作。<br>
       结论一句话：<b>creativeEffect 是"位置状态"而非"动画脚本"，两套静态状态由 Swiper 按进度插值。</b>
     </div>
   </article>
