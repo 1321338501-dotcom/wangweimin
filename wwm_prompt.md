@@ -61,3 +61,7 @@ AGENTS.md 所有说明、检查条目统一简体中文；文件路径、HTML、
 ## 2026-11-09 | 模型: DeepSeek-V4.1-Flash
 用户提示词：
 好的，提交并推送吧
+
+## 2026-11-12 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+`https://1321338501-dotcom.github.io/wangweimin/class/index.html` 在网址里面做出这三个任务 按照图片里面的要求做出来（图片为课堂任务卡：任务一提示词工程师生成 #mySw4 配置含 loop/3.2s autoplay disableOnInteraction false/clickable pagination/effect cube，迭代2轮并保留记录；任务二 creative 仿写新增第7个按钮电影墙，prev/next transform；任务三 新增爱达魔都号展品 + 一个未讲能力 keyboard/mousewheel/zoom/parallax；并给提示词留有访问入口）
