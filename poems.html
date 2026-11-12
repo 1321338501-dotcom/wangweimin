@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>从 JSON 到 fetch · 诗词图文展</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8edf5 100%);
+    color: #1f2937;
+    line-height: 1.7;
+  }
+  .wwm-wrap { max-width: 1100px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* ===== 页头 ===== */
+  .wwm-hero {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 36px 20px;
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    border-radius: 20px;
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.25);
+  }
+  .wwm-hero h1 { font-size: 30px; letter-spacing: 2px; margin-bottom: 10px; }
+  .wwm-hero p { opacity: 0.92; font-size: 15px; }
+  .wwm-hero .wwm-chain {
+    margin-top: 18px;
+    font-size: 13px;
+    background: rgba(255,255,255,0.15);
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 999px;
+  }
+
+  /* ===== 关卡导航 ===== */
+  .wwm-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+  .wwm-nav a {
+    text-decoration: none;
+    color: #2563eb;
+    background: #fff;
+    border: 1px solid #dbe4ff;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all .2s;
+  }
+  .wwm-nav a:hover { background: #2563eb; color: #fff; }
+
+  /* ===== 通用区块 ===== */
+  .wwm-section {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 16px rgba(31, 41, 55, 0.06);
+  }
+  .wwm-section h2 {
+    font-size: 22px;
+    color: #111827;
+    margin-bottom: 6px;
+    padding-left: 12px;
+    border-left: 5px solid #2563eb;
+  }
+  .wwm-section .wwm-sub { color: #6b7280; font-size: 14px; margin-bottom: 18px; }
+  .wwm-section p { margin-bottom: 12px; color: #374151; }
+  .wwm-section code {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #be185d;
+  }
+  .wwm-pre {
+    background: #1f2937;
+    color: #e5e7eb;
+    padding: 16px;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 14px 0;
+  }
+
+  /* ===== 按钮 ===== */
+  .wwm-btn {
+    display: inline-block;
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 4px 4px 4px 0;
+    transition: background .2s, transform .1s;
+    font-weight: 600;
+  }
+  .wwm-btn:hover { background: #1d4ed8; }
+  .wwm-btn:active { transform: scale(0.97); }
+  .wwm-btn.wwm-btn--ghost {
+    background: #fff;
+    color: #2563eb;
+    border: 1px solid #2563eb;
+  }
+  .wwm-btn.wwm-btn--ghost:hover { background: #eff6ff; }
+  .wwm-btn.wwm-btn--warn { background: #f59e0b; }
+  .wwm-btn.wwm-btn--warn:hover { background: #d97706; }
+  .wwm-btn.wwm-btn--success { background: #10b981; }
+  .wwm-btn.wwm-btn--success:hover { background: #059669; }
+
+  /* ===== 动手区输出框 ===== */
+  .wwm-output {
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 14px;
+    min-height: 60px;
+    font-size: 14px;
+    color: #374151;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  /* ===== 第二关卡片列表 ===== */
+  .wwm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    margin-top: 18px;
+  }
+  .wwm-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(31, 41, 55, 0.06);
+    transition: transform .25s, box-shadow .25s;
+    display: flex;
+    flex-direction: column;
+  }
+  .wwm-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(31, 41, 55, 0.12); }
+  .wwm-card img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    display: block;
+    background: #e5e7eb;
+  }
+  .wwm-card-body { padding: 14px 16px 18px; flex: 1; }
+  .wwm-card h3 {
+    font-size: 17px;
+    color: #111827;
+    margin-bottom: 6px;
+    border-left: 3px solid #2563eb;
+    padding-left: 8px;
+  }
+  .wwm-card .wwm-author { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+  .wwm-card p { font-size: 14px; color: #4b5563; line-height: 1.7; }
+
+  /* ===== 搜索框 ===== */
+  .wwm-searchbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+    align-items: center;
+  }
+  .wwm-searchbar input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .wwm-searchbar input:focus { border-color: #2563eb; }
+
+  /* ===== 作者标签 ===== */
+  .wwm-authors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .wwm-author-tag {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* ===== 报错表 ===== */
+  .wwm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 14px;
+  }
+  .wwm-table th, .wwm-table td {
+    border: 1px solid #e5e7eb;
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .wwm-table th {
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 700;
+  }
+  .wwm-table tr:nth-child(even) td { background: #fafafa; }
+  .wwm-table td code { background: #fef2f2; color: #be123c; }
+
+  /* ===== 状态提示 ===== */
+  .wwm-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-left: 8px;
+  }
+  .wwm-status.wwm-on { background: #d1fae5; color: #065f46; }
+  .wwm-status.wwm-off { background: #fee2e2; color: #991b1b; }
+
+  .wwm-tip {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 14px 0;
+    font-size: 14px;
+    color: #78350f;
+  }
+  .wwm-tip strong { color: #92400e; }
+
+  .wwm-back {
+    text-align: center;
+    margin-top: 30px;
+  }
+  .wwm-back a {
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .wwm-back a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wwm-wrap">
+
+  <!-- ===== 页头 ===== -->
+  <header class="wwm-hero">
+    <h1>从 JSON 到 fetch · 诗词图文展</h1>
+    <p>数据文件 db.json → Express 服务器 → 浏览器 fetch → JSON 解析 → 渲染成页面</p>
+    <div class="wwm-chain">db.json &nbsp;➜&nbsp; localhost:3004/api/poems &nbsp;➜&nbsp; fetch &nbsp;➜&nbsp; 渲染</div>
+  </header>
+
+  <!-- ===== 关卡导航 ===== -->
+  <nav class="wwm-nav">
+    <a href="#wwmLv1">第 1 关 · 认识 JSON</a>
+    <a href="#wwmLv2">第 2 关 · 数据变页面</a>
+    <a href="#wwmLv3">第 3 关 · 启动本地服务器</a>
+    <a href="#wwmLv4">第 4 关 · fetch 取数据</a>
+    <a href="#wwmLv5">第 5 关 · 报错排雷</a>
+    <a href="#wwmTask1">任务一</a>
+    <a href="#wwmTask2">任务二</a>
+    <a href="#wwmTask3">任务三</a>
+  </nav>
+
+  <!-- ============ 第 1 关：认识 JSON ============ -->
+  <section class="wwm-section" id="wwmLv1">
+    <h2>第 1 关 · 认识 JSON：数据的"通用快递箱"</h2>
+    <p class="wwm-sub">对象 → 字符串 → 对象，三次挥手</p>
+    <p>数据要在"服务器"和"浏览器"之间来回跑，得说同一种话——这种话就是 <strong>JSON</strong>。它长得和 JS 对象几乎一样，但本质是<strong>字符串</strong>：发出去时把对象变成字符串，收回来时再变回对象。</p>
+    <p>📦 一句话记住：<strong>JSON 就是数据的"通用快递箱"</strong>。<code>JSON.stringify</code> 装箱，<code>JSON.parse</code> 拆箱。箱子里的规矩只有三条：键名加双引号、字符串加双引号、最后一项后面不加逗号。</p>
+    <pre class="wwm-pre">// ① 数据的样子：一个数组，里面装着一堆对象
+var wwm_poems = [
+  { title: "短歌行", content: "对酒当歌，人生几何！" },
+  { title: "雨晴", content: "雨前初见花间蕊。" }
+];
+
+// ② 装箱：对象 → JSON 字符串（服务器发数据时干的事）
+var wwm_str = JSON.stringify(wwm_poems);
+console.log(wwm_str); // [{"title":"短歌行",...}]
+
+// ③ 拆箱：JSON 字符串 → 对象（浏览器收到数据时干的事）
+var wwm_arr = JSON.parse(wwm_str);
+console.log(wwm_arr[0].title); // 短歌行</pre>
+    <p>🔍 怎么判断手里是"箱子"还是"东西"？<code>typeof</code> 一下：字符串会告诉你 <code>string</code>，对象会告诉你 <code>object</code>。搞混了就会报 <code>undefined</code>。</p>
+
+    <p><strong>动手区 1</strong>：亲眼看看"装箱"和"拆箱"</p>
+    <button class="wwm-btn" onclick="wwmDemoStringify()">① JSON.stringify（装箱）</button>
+    <button class="wwm-btn wwm-btn--ghost" onclick="wwmDemoParse()">② JSON.parse（拆箱）</button>
+    <button class="wwm-btn wwm-btn--ghost" onclick="wwmDemoTypeof()">③ 看看它俩的类型</button>
+    <div class="wwm-output" id="wwmOut1">点击上面的按钮，结果显示在这里 👇</div>
+  </section>
+
+  <!-- ============ 第 2 关：数据变页面 ============ -->
+  <section class="wwm-section" id="wwmLv2">
+    <h2>第 2 关 · 数据变页面：一条数据 = 一张卡片</h2>
+    <p class="wwm-sub">createElement + 模板字符串 + appendChild</p>
+    <p>有了数据，下一步就是把它"画"到页面上。套路只有三步：<strong>建元素 → 塞内容 → 挂到页面</strong>。数据有几条，就循环几遍；所以只要改数据，页面自动跟着变——这就是"数据驱动页面"的起点。</p>
+    <pre class="wwm-pre">// 数据（本关先用"写死在页面里"的数组，第 4 关再换成从服务器取）
+var json = [
+  { pic: "图片地址", title: "标题", content: "这里是内容" }
+];
+
+var wwmList = document.querySelector(".wwm-grid");
+for (var v of json) {
+  var li = document.createElement("div");     // ① 建元素
+  li.className = "wwm-card";
+  li.innerHTML = `
+    &lt;img src="${v.pic}" alt=""&gt;
+    &lt;div class="wwm-card-body"&gt;
+      &lt;h3&gt;${v.title}&lt;/h3&gt;
+      &lt;p&gt;${v.content}&lt;/p&gt;
+    &lt;/div&gt;`;                                    // ② 塞内容（反引号模板 + ${}）
+  wwmList.appendChild(li);                      // ③ 挂到页面
+}</pre>
+    <p>💡 模板字符串的两个要点：<strong>反引号 `` ` ``</strong> 包起来的内容可以换行；<strong>${ }</strong> 里能直接写变量和表达式。</p>
+
+    <p><strong>动手区 2</strong>：点击按钮，把本地数据渲染成诗词卡片</p>
+    <button class="wwm-btn wwm-btn--success" onclick="wwmRenderLocal()">渲染 6 条本地数据</button>
+    <button class="wwm-btn wwm-btn--warn" onclick="wwmClearGrid('wwmGrid2')">清空</button>
+    <div class="wwm-grid" id="wwmGrid2"></div>
+  </section>
+
+  <!-- ============ 第 3 关：启动本地服务器 ============ -->
+  <section class="wwm-section" id="wwmLv3">
+    <h2>第 3 关 · 启动本地数据服务：让数据有个"门牌号"</h2>
+    <p class="wwm-sub">项目\db\db.json → localhost:3004/api/poems</p>
+    <p>直接把 <code>db.json</code> 双击打开，只是"看见"了数据；网页里的 JS <strong>读不到本地文件</strong>。我们要在本机用 <strong>Express</strong> 开一台小型服务器，把数据通过一个网址（接口）发出去。</p>
+
+    <table class="wwm-table">
+      <tr><th>名词</th><th>餐厅里对应什么</th><th>在你项目里是什么</th></tr>
+      <tr><td><strong>服务器</strong></td><td>后厨：一直在上班，随时能出菜</td><td><code>node server.js</code> 跑起来的程序</td></tr>
+      <tr><td><strong>接口</strong></td><td>取餐窗口：窗口号就是地址</td><td><code>http://localhost:3004/api/poems</code></td></tr>
+      <tr><td><strong>路由</strong></td><td>窗口上挂的菜单</td><td><code>app.get('/api/poems', ...)</code></td></tr>
+    </table>
+
+    <p>🍜 串成一句话：<strong>浏览器（顾客）照着窗口号 fetch 点单 → 服务器（后厨）按路由找到对应窗口 → 把 db.json 里的数据端出来（res.json）→ 浏览器 .json() 拆开"开吃"并渲染。</strong></p>
+
+    <pre class="wwm-pre">const express = require('express');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const wwm_port = 3004;
+
+// ① 定义一个 GET 接口：/api/poems
+app.get('/api/poems', (req, res) => {
+  // ② 读 db.json（字符串）→ JSON.parse 转对象
+  const wwm_data = JSON.parse(
+    fs.readFileSync(path.join(__dirname, 'db.json'), 'utf-8')
+  );
+  // ③ 允许跨域
+  res.set('Access-Control-Allow-Origin', '*');
+  // ④ res.json() 自动 JSON.stringify + 设置 Content-Type
+  res.json(wwm_data.poems);
+});
+
+app.listen(wwm_port, () => {
+  console.log(`数据服务器已启动：http://localhost:${wwm_port}/api/poems`);
+});</pre>
+
+    <p><strong>动手区 3</strong>：探测服务是否在线（先在 db 文件夹执行 <code>node server.js</code>）</p>
+    <button class="wwm-btn" onclick="wwmProbeServer()">探测服务是否在线</button>
+    <span class="wwm-status wwm-off" id="wwmServerStatus">未探测</span>
+    <div class="wwm-output" id="wwmOut3">点"探测服务是否在线"，看看服务器启动了没有 👇</div>
+    <div class="wwm-tip"><strong>三条纪律：</strong>① <code>npm init -y</code> 和 <code>npm install express</code> 只做一次；② 启动命令必须在 <strong>db 文件夹内</strong>执行；③ 服务器窗口不能关。</div>
+  </section>
+
+  <!-- ============ 第 4 关：fetch 取数据 ============ -->
+  <section class="wwm-section" id="wwmLv4">
+    <h2>第 4 关 · fetch 取数据：把服务器"喊"过来</h2>
+    <p class="wwm-sub">fetch → .json() → 渲染（then 链 / async await）</p>
+    <p><code>fetch()</code> 是浏览器自带的网络请求函数。它发出请求后<strong>不会立刻给你数据</strong>，而是先给你一个"承诺"（Promise），数据回来了再去处理——所以要用 <code>.then()</code> 接，或者用 <code>await</code> 等。</p>
+    <p>🔗 一句话理清前后端分工：<strong>服务器</strong>用 <code>res.json(对象)</code> 把数据"发出去"；<strong>浏览器</strong>用 <code>fetch().then(r => r.json())</code> 把数据"收回来并解析"。一进一出，正好各一次 JSON 转换。</p>
+
+    <pre class="wwm-pre">// ── 写法 A：then 链 ──
+var wwm_api = 'http://localhost:3004/api/poems';
+
+function wwm_loadPoems() {
+  fetch(wwm_api)
+    .then(function (wwm_res) { return wwm_res.json(); })   // 第一次：响应头
+    .then(function (wwm_poems) { wwm_renderPoems(wwm_poems); }) // 第二次：响应体
+    .catch(function () {
+      document.getElementById('wwm_poemList').innerHTML =
+        '数据获取失败！请先在 db 文件夹运行 node server.js（端口 3004）';
+    });
+}
+
+// ── 写法 B：async / await（更接近"同步"思维，推荐）──
+async function wwm_loadPoems2() {
+  try {
+    const wwm_resp = await fetch('http://localhost:3004/api/poems');
+    const wwm_poems = await wwm_resp.json();
+    wwm_renderPoems(wwm_poems);
+  } catch (err) { console.log('请求失败：', err); }
+}</pre>
+    <p>🔑 为什么是两次 <code>.then</code>？第一次等到的是"快递到了门口"（响应头），第二次 <code>wwm_res.json()</code> 才是"拆开包裹拿东西"（响应体）。</p>
+
+    <p><strong>动手区 4</strong>：真实 fetch 请求（需先启动服务器）</p>
+    <button class="wwm-btn" onclick="wwmFetchThen()">fetch 请求（then 链）</button>
+    <button class="wwm-btn wwm-btn--success" onclick="wwmFetchAsync()">用 async / await 版本</button>
+    <button class="wwm-btn wwm-btn--warn" onclick="wwmClearGrid('wwmGrid4')">清空</button>
+    <div class="wwm-grid" id="wwmGrid4"></div>
+  </section>
+
+  <!-- ============ 第 5 关：报错排雷 ============ -->
+  <section class="wwm-section" id="wwmLv5">
+    <h2>第 5 关 · 报错排雷：6 类高频错误对照表</h2>
+    <p class="wwm-sub">先看报错，再改代码</p>
+    <table class="wwm-table">
+      <tr><th>你看到的报错</th><th>真正的原因</th><th>怎么修</th></tr>
+      <tr><td><code>ERR_CONNECTION_REFUSED</code></td><td>服务器没启动，或端口不是 3004</td><td>在 db 文件夹执行 <code>node server.js</code>；端口被占用就改 <code>wwm_port</code></td></tr>
+      <tr><td><code>404 Not Found</code></td><td>接口路径写错</td><td>浏览器打开 <code>http://localhost:3004/api/poems</code> 验证，路径必须和 <code>app.get</code> 一字不差</td></tr>
+      <tr><td><code>Cannot find module 'express'</code></td><td>没装依赖，或终端不在 db 文件夹</td><td>进入 db 文件夹执行 <code>npm init -y</code> 再 <code>npm install express</code></td></tr>
+      <tr><td><code>blocked by CORS policy</code></td><td>服务器没给"跨域通行证"</td><td>加 <code>res.setHeader('Access-Control-Allow-Origin','*')</code></td></tr>
+      <tr><td><code>Unexpected token '&lt;', ... is not valid JSON</code></td><td>请求回来的是 HTML（404 页面），不是 JSON</td><td>先 <code>console.log(await resp.text())</code> 看拿到了什么</td></tr>
+      <tr><td><code>Cannot read properties of undefined</code></td><td>字段名对不上（数据叫 pic，代码写了 img）</td><td>打开接口地址核对字段名，<code>console.log(res[0])</code> 先看清结构</td></tr>
+    </table>
+    <p>🧭 调试固定动作：<strong>F12 → Network</strong> 看请求状态码；<strong>F12 → Console</strong> 看红色报错。90% 的问题在这两处能直接看出来。</p>
+  </section>
+
+  <!-- ============ 任务一：跑通全链路 ============ -->
+  <section class="wwm-section" id="wwmTask1">
+    <h2>任务一 · 跑通全链路 ⭐</h2>
+    <p class="wwm-sub">fetch 两段式 + 错误处理（关闭服务器再刷新，页面应给出提示而不是白屏）</p>
+    <p>启动 <code>server.js</code>，让 6 首诗词全部渲染出图片、标题、内容。<strong>验收：关闭服务器再刷新，页面应给出提示而不是白屏。</strong></p>
+    <button class="wwm-btn" onclick="wwmTask1Fetch()">加载诗词（带错误处理）</button>
+    <div class="wwm-grid" id="wwmGridT1"></div>
+  </section>
+
+  <!-- ============ 任务二：数据我来定（多接口） ============ -->
+  <section class="wwm-section" id="wwmTask2">
+    <h2>任务二 · 数据我来定 ⭐⭐</h2>
+    <p class="wwm-sub">db.json 新增 2 条数据 + 第二个接口 /api/authors + Promise.all 并发请求</p>
+    <p>已在 <code>db.json</code> 的 poems 数组新增 2 条（静夜思、春晓），并给 <code>server.js</code> 增加了 <code>app.get('/api/authors', ...)</code>。下面用 <code>Promise.all</code> 同时取回两份数据。</p>
+    <button class="wwm-btn" onclick="wwmTask2Fetch()">Promise.all 并发获取诗词 + 作者</button>
+    <div id="wwmAuthorsT2"></div>
+    <div class="wwm-grid" id="wwmGridT2"></div>
+  </section>
+
+  <!-- ============ 任务三：加交互 + 答辩 ============ -->
+  <section class="wwm-section" id="wwmTask3">
+    <h2>任务三 · 加交互 + 现场答辩 ⭐⭐⭐</h2>
+    <p class="wwm-sub">搜索框过滤 + 按标题长度排序 + 答辩四问</p>
+    <p>数据来自 fetch，搜索和排序都在前端对已取回的数据做加工，不重新请求。</p>
+    <div class="wwm-searchbar">
+      <input type="text" id="wwmSearchInput" placeholder="输入关键字，匹配标题或内容…" oninput="wwmTask3Filter()">
+      <button class="wwm-btn" onclick="wwmTask3Sort()">按标题长度排序</button>
+      <button class="wwm-btn wwm-btn--ghost" onclick="wwmTask3Reset()">重置</button>
+    </div>
+    <div class="wwm-grid" id="wwmGridT3"></div>
+
+    <div class="wwm-tip" style="margin-top:24px;">
+      <strong>答辩四问：</strong><br>
+      ① 为什么 fetch 要写两个 then？—— 第一个 then 拿到的是"响应对象"（快递到门口），第二个 <code>res.json()</code> 才是"拆开包裹拿数据"（解析响应体）。<br>
+      ② <code>.json()</code> 之前拿到的是什么？—— 是 Response 对象，包含状态码、响应头等元信息，还不是数据本身。<br>
+      ③ CORS 是谁拦的？—— 是<strong>浏览器</strong>拦的。服务器没返回 <code>Access-Control-Allow-Origin</code> 头时，浏览器出于安全策略阻止 JS 读取响应。<br>
+      ④ 如果服务器没启动，页面表现如何？—— <code>fetch</code> 会 reject，进入 <code>catch</code> 分支，显示友好提示而不是白屏。
+    </div>
+  </section>
+
+  <div class="wwm-back"><a href="index.html">← 返回首页</a></div>
+</div>
+
+<script>
+/* ========== 配置：本地服务器优先，失败则回退到静态 db.json（适配 GitHub Pages） ========== */
+var wwm_API_POEMS   = 'http://localhost:3004/api/poems';
+var wwm_API_AUTHORS = 'http://localhost:3004/api/authors';
+var wwm_FALLBACK    = './DB/db.json';   // GitHub Pages 上直接读静态 JSON
+
+// 通用：取诗词（优先服务器，回退静态文件）
+function wwmFetchPoems() {
+  return fetch(wwm_API_POEMS)
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .catch(function () {
+      // 服务器不可用 → 读静态 db.json
+      return fetch(wwm_FALLBACK)
+        .then(function (r) { return r.json(); })
+        .then(function (db) { return db.poems || []; });
+    });
+}
+
+// 通用：取作者（优先服务器，回退静态文件）
+function wwmFetchAuthors() {
+  return fetch(wwm_API_AUTHORS)
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .catch(function () {
+      return fetch(wwm_FALLBACK)
+        .then(function (r) { return r.json(); })
+        .then(function (db) { return db.authors || []; });
+    });
+}
+
+// 渲染卡片列表
+function wwmRenderCards(containerId, poems) {
+  var box = document.getElementById(containerId);
+  box.innerHTML = '';
+  if (!poems || poems.length === 0) {
+    box.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#6b7280;padding:24px;">暂无数据</div>';
+    return;
+  }
+  poems.forEach(function (p) {
+    var card = document.createElement('div');
+    card.className = 'wwm-card';
+    card.innerHTML =
+      '<img src="' + (p.pic || '') + '" alt="' + (p.title || '') + '" onerror="this.style.background=\'#e5e7eb\'">' +
+      '<div class="wwm-card-body">' +
+        '<h3>' + (p.title || '') + '</h3>' +
+        (p.author ? '<div class="wwm-author">—— ' + p.author + '</div>' : '') +
+        '<p>' + (p.content || '') + '</p>' +
+      '</div>';
+    box.appendChild(card);
+  });
+}
+
+function wwmClearGrid(id) { document.getElementById(id).innerHTML = ''; }
+
+/* ========== 第 1 关：JSON 装箱/拆箱/类型 ========== */
+var wwm_demoData = [
+  { title: "短歌行", content: "对酒当歌，人生几何！" },
+  { title: "雨晴", content: "雨前初见花间蕊。" }
+];
+function wwmDemoStringify() {
+  var s = JSON.stringify(wwm_demoData);
+  document.getElementById('wwmOut1').textContent =
+    '【JSON.stringify 装箱】对象 → 字符串\n' + s + '\n\ntypeof 结果：' + typeof s;
+}
+function wwmDemoParse() {
+  var s = JSON.stringify(wwm_demoData);
+  var arr = JSON.parse(s);
+  document.getElementById('wwmOut1').textContent =
+    '【JSON.parse 拆箱】字符串 → 对象\n' +
+    'arr[0].title = ' + arr[0].title + '\n' +
+    'arr[1].content = ' + arr[1].content + '\n\n' +
+    'typeof 结果：' + typeof arr;
+}
+function wwmDemoTypeof() {
+  var s = JSON.stringify(wwm_demoData);
+  var arr = JSON.parse(s);
+  document.getElementById('wwmOut1').textContent =
+    '【typeof 对比】\n' +
+    'typeof 字符串  → ' + typeof s + '\n' +
+    'typeof 对象    → ' + typeof arr + '\n\n' +
+    '结论：装箱后是 string（箱子），拆箱后是 object（东西）。搞混了就会报 undefined。';
+}
+
+/* ========== 第 2 关：本地数据渲染 ========== */
+var wwm_localPoems = [
+  { title: "短歌行", content: "对酒当歌，人生几何！譬如朝露，去日苦多。", pic: "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/6.jpg", author: "曹操" },
+  { title: "雨晴", content: "雨前初见花间蕊，雨后全无叶底花。", pic: "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/2.jpg", author: "王驾" },
+  { title: "脊楼", content: "花近高楼伤客心，万方多难此登临。", pic: "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/3.jpg", author: "杜甫" },
+  { title: "鹊桥仙·纤云弄巧", content: "纤云弄巧，飞星传恨，银汉迢迢暗度。", pic: "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/4.jpg", author: "秦观" },
+  { title: "静夜思", content: "床前明月光，疑是地上霜。举头望明月，低头思故乡。", pic: "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/1.jpg", author: "李白" },
+  { title: "春晓", content: "春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。", pic: "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/5.jpg", author: "孟浩然" }
+];
+function wwmRenderLocal() { wwmRenderCards('wwmGrid2', wwm_localPoems); }
+
+/* ========== 第 3 关：探测服务器 ========== */
+function wwmProbeServer() {
+  var out = document.getElementById('wwmOut3');
+  var st = document.getElementById('wwmServerStatus');
+  out.textContent = '正在探测 http://localhost:3004/api/poems …';
+  fetch(wwm_API_POEMS, { cache: 'no-store' })
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function (data) {
+      st.textContent = '在线';
+      st.className = 'wwm-status wwm-on';
+      out.textContent = '✅ 服务器在线！接口返回 ' + data.length + ' 首诗：\n' +
+        data.map(function (p) { return '· ' + p.title; }).join('\n');
+    })
+    .catch(function (e) {
+      st.textContent = '离线';
+      st.className = 'wwm-status wwm-off';
+      out.textContent = '❌ 服务器未启动：' + e.message +
+        '\n请在 DB 文件夹执行：node server.js（端口 3004）';
+    });
+}
+
+/* ========== 第 4 关：fetch（then 链 / async await） ========== */
+function wwmFetchThen() {
+  var box = document.getElementById('wwmGrid4');
+  box.innerHTML = '<div style="grid-column:1/-1;color:#6b7280;">正在 fetch…</div>';
+  fetch(wwm_API_POEMS)
+    .then(function (res) { return res.json(); })
+    .then(function (poems) { wwmRenderCards('wwmGrid4', poems); })
+    .catch(function () {
+      box.innerHTML = '<div style="grid-column:1/-1;background:#fef2f2;color:#991b1b;padding:16px;border-radius:8px;">数据获取失败！请先在 DB 文件夹运行 node server.js（端口 3004）</div>';
+    });
+}
+
+async function wwmFetchAsync() {
+  var box = document.getElementById('wwmGrid4');
+  box.innerHTML = '<div style="grid-column:1/-1;color:#6b7280;">正在 fetch（async/await）…</div>';
+  try {
+    var resp = await fetch(wwm_API_POEMS);
+    var poems = await resp.json();
+    wwmRenderCards('wwmGrid4', poems);
+  } catch (err) {
+    box.innerHTML = '<div style="grid-column:1/-1;background:#fef2f2;color:#991b1b;padding:16px;border-radius:8px;">请求失败：' + err.message + '<br>请先在 DB 文件夹运行 node server.js</div>';
+  }
+}
+
+/* ========== 任务一：跑通全链路（带错误处理） ========== */
+function wwmTask1Fetch() {
+  var box = document.getElementById('wwmGridT1');
+  box.innerHTML = '<div style="grid-column:1/-1;color:#6b7280;">加载中…</div>';
+  fetch(wwm_API_POEMS)
+    .then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function (poems) { wwmRenderCards('wwmGridT1', poems); })
+    .catch(function (e) {
+      // 服务器没启动：尝试静态回退，仍失败则提示
+      fetch(wwm_FALLBACK)
+        .then(function (r) { return r.json(); })
+        .then(function (db) { wwmRenderCards('wwmGridT1', db.poems || []); })
+        .catch(function () {
+          box.innerHTML = '<div style="grid-column:1/-1;background:#fef2f2;color:#991b1b;padding:16px;border-radius:8px;">数据获取失败！请先在 DB 文件夹运行 node server.js（端口 3004）</div>';
+        });
+    });
+}
+
+/* ========== 任务二：Promise.all 并发获取诗词 + 作者 ========== */
+function wwmTask2Fetch() {
+  var box = document.getElementById('wwmGridT2');
+  var abox = document.getElementById('wwmAuthorsT2');
+  box.innerHTML = '<div style="grid-column:1/-1;color:#6b7280;">Promise.all 并发请求中…</div>';
+  abox.innerHTML = '';
+
+  Promise.all([wwmFetchPoems(), wwmFetchAuthors()])
+    .then(function (results) {
+      var poems = results[0];
+      var authors = results[1];
+      // 渲染作者标签
+      var html = '<p style="margin:12px 0 8px;font-weight:600;">作者列表（来自 /api/authors）：</p><div class="wwm-authors">';
+      authors.forEach(function (a) {
+        html += '<span class="wwm-author-tag">' + a.name + ' · ' + a.dynasty + '</span>';
+      });
+      html += '</div>';
+      abox.innerHTML = html;
+      wwmRenderCards('wwmGridT2', poems);
+    })
+    .catch(function (e) {
+      box.innerHTML = '<div style="grid-column:1/-1;background:#fef2f2;color:#991b1b;padding:16px;border-radius:8px;">并发请求失败：' + e.message + '</div>';
+    });
+}
+
+/* ========== 任务三：搜索 + 排序 ========== */
+var wwm_allPoems = [];   // 缓存全部诗词，搜索/排序都基于它
+function wwmTask3Init() {
+  if (wwm_allPoems.length > 0) { wwmRenderCards('wwmGridT3', wwm_allPoems); return; }
+  var box = document.getElementById('wwmGridT3');
+  box.innerHTML = '<div style="grid-column:1/-1;color:#6b7280;">加载中…</div>';
+  wwmFetchPoems().then(function (poems) {
+    wwm_allPoems = poems;
+    wwmRenderCards('wwmGridT3', wwm_allPoems);
+  }).catch(function () {
+    box.innerHTML = '<div style="grid-column:1/-1;color:#991b1b;">加载失败</div>';
+  });
+}
+function wwmTask3Filter() {
+  if (wwm_allPoems.length === 0) { wwmTask3Init(); return; }
+  var kw = document.getElementById('wwmSearchInput').value.trim().toLowerCase();
+  var filtered = kw
+    ? wwm_allPoems.filter(function (p) {
+        return (p.title || '').toLowerCase().indexOf(kw) > -1 ||
+               (p.content || '').toLowerCase().indexOf(kw) > -1;
+      })
+    : wwm_allPoems;
+  wwmRenderCards('wwmGridT3', filtered);
+}
+function wwmTask3Sort() {
+  if (wwm_allPoems.length === 0) { wwmTask3Init(); return; }
+  var sorted = wwm_allPoems.slice().sort(function (a, b) {
+    return (a.title || '').length - (b.title || '').length;
+  });
+  wwmRenderCards('wwmGridT3', sorted);
+}
+function wwmTask3Reset() {
+  document.getElementById('wwmSearchInput').value = '';
+  wwmRenderCards('wwmGridT3', wwm_allPoems);
+}
+
+// 页面加载完成后自动初始化任务三数据
+window.addEventListener('DOMContentLoaded', wwmTask3Init);
+</script>
+</body>
+</html>
