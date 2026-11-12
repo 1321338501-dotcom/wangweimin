@@ -3,37 +3,37 @@
     {
       "title": "短歌行",
       "content": "对酒当歌，人生几何！譬如朝露，去日苦多。",
-      "pic": "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/6.jpg",
+      "pic": "DB/img/6.jpg",
       "author": "曹操"
     },
     {
       "title": "雨晴",
       "content": "雨前初见花间蕊，雨后全无叶底花。",
-      "pic": "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/2.jpg",
+      "pic": "DB/img/2.jpg",
       "author": "王驾"
     },
     {
       "title": "脊楼",
       "content": "花近高楼伤客心，万方多难此登临。",
-      "pic": "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/3.jpg",
+      "pic": "DB/img/3.jpg",
       "author": "杜甫"
     },
     {
       "title": "鹊桥仙·纤云弄巧",
       "content": "纤云弄巧，飞星传恨，银汉迢迢暗度。",
-      "pic": "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/4.jpg",
+      "pic": "DB/img/4.jpg",
       "author": "秦观"
     },
     {
       "title": "静夜思",
       "content": "床前明月光，疑是地上霜。举头望明月，低头思故乡。",
-      "pic": "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/1.jpg",
+      "pic": "DB/img/1.jpg",
       "author": "李白"
     },
     {
       "title": "春晓",
       "content": "春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。",
-      "pic": "https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/5.jpg",
+      "pic": "DB/img/5.jpg",
       "author": "孟浩然"
     }
   ],
