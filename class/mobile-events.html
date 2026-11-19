@@ -30,6 +30,21 @@
   .wwm_hero h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: 1px; }
   .wwm_hero p { margin: 0; font-size: 14px; color: #ddd6fe; }
   .wwm_hero__tip { margin-top: 14px; font-size: 13px; background: rgba(255,255,255,.12); padding: 9px 14px; border-radius: 10px; }
+  .wwm_hero__img {
+    display: block; width: 100%; height: 220px; object-fit: cover;
+    margin-top: 16px; border-radius: 12px;
+    border: 1px solid rgba(196, 181, 253, .35);
+  }
+  .wwm_figure { margin: 14px 0 0; }
+  .wwm_figure img {
+    display: block; width: 100%; border-radius: 12px;
+    border: 1px solid #ede9fe; background: #faf5ff;
+  }
+  .wwm_figure figcaption { margin-top: 7px; font-size: 12px; color: #9ca3af; text-align: center; }
+  .wwm_task__thumb {
+    display: block; width: 100%; height: 140px; object-fit: cover;
+    border-radius: 10px; margin-bottom: 12px;
+  }
   .wwm_back { display: inline-block; margin-top: 14px; color: #c4b5fd; font-size: 13px; text-decoration: none; }
   .wwm_back:hover { text-decoration: underline; }
 
@@ -158,6 +173,7 @@
     <p class="wwm_hero__kicker">移 动 端 · 触 摸 交 互</p>
     <h1>按下 · 滑动 · 缩放</h1>
     <p>手机上用户用的是手指——按下、滑动、长按、双指缩放、摇一摇。这节课把触摸事件讲清、演示透，再用 4 个递进任务练熟。</p>
+    <img class="wwm_hero__img" src="img/mobile-touch-cover.jpg" alt="手指按下手机屏幕，触点泛起触控涟漪">
     <div class="wwm_hero__tip">本页演示全部基于 <code>touch</code> 触摸事件，请用手机打开；没有手机时可用浏览器设备模式体验单指操作。</div>
     <a class="wwm_back" href="index.html">← 返回课堂实践中心</a>
     <a class="wwm_back" href="mobile-submit.html" style="margin-left:16px;">提交说明与答案 →</a>
@@ -201,6 +217,10 @@
         </tbody>
       </table>
     </div>
+    <figure class="wwm_figure">
+      <img src="img/mobile-events.jpg" alt="三根手指同时触摸屏幕，显示发光触点与各自的移动轨迹">
+      <figcaption>手指是"多个触点 + 一段轨迹"：touches 装着所有手指，changedTouches 只放本次变化的那根</figcaption>
+    </figure>
     <pre>wwm_pad.addEventListener('touchstart', function (e) {
   // touches       屏幕上所有手指（含其他元素上的）
   // targetTouches 只在当前元素上的手指
@@ -314,6 +334,11 @@ wwm_el.addEventListener('touchcancel', function () { clearTimeout(wwm_timer); })
     <h2>6 · 双指缩放与设备能力</h2>
     <p class="wwm_sec__sub">两指距离的变化 = 缩放比例</p>
 
+    <figure class="wwm_figure">
+      <img src="img/mobile-pinch.jpg" alt="两根手指在手机屏幕上向外张开，中间的图片随之放大">
+      <figcaption>双指间距变大 = 放大，变小 = 缩小；缩放要以两指中点为基准，图片才不会"跳走"</figcaption>
+    </figure>
+
     <div class="wwm_demo">
       <div class="wwm_demo__hd">
         <span class="wwm_demo__title">双指缩放演示</span>
@@ -381,24 +406,28 @@ wwm_el.addEventListener('touchmove', function (e) {
 
     <div class="wwm_tasks">
       <a class="wwm_task" href="mobile-gesture.html">
+        <img class="wwm_task__thumb" src="img/mobile-food.jpg" alt="北京烤鸭、麻婆豆腐、白切鸡、兰州牛肉面四道中华美食">
         <span class="wwm_task__star">⭐⭐ 任务二</span>
         <h3>手势卡片：左右滑动切换</h3>
         <p>4 道中华美食卡片，左滑下一道、右滑上一道，阈值 40px，边界提示，300ms 冷却防连跳。</p>
         <span class="wwm_task__go">打开卡片页 →</span>
       </a>
       <a class="wwm_task" href="mobile-zoom.html">
+        <img class="wwm_task__thumb" src="../DB/img/3.jpg" alt="云雾中的中式楼阁，图片查看器的示例大图">
         <span class="wwm_task__star">⭐⭐⭐ 任务三</span>
         <h3>图片查看器：双指缩放</h3>
         <p>双指 1x～4x 以两指中点为基准缩放，双击 1x/2x 切换，放大后可单指拖动，边界回弹。</p>
         <span class="wwm_task__go">打开查看器 →</span>
       </a>
       <a class="wwm_task" href="mobile-sensor.html">
+        <img class="wwm_task__thumb" src="img/mobile-shake.jpg" alt="手握手机摇动，周围有弧线与闪电">
         <span class="wwm_task__star">⭐⭐⭐⭐ 任务四</span>
         <h3>摇一摇彩蛋</h3>
         <p>摇动手机随机抽一道菜，1.5s 冷却；无传感器时显示"不支持"并给降级按钮，iOS 走权限申请。</p>
         <span class="wwm_task__go">打开摇一摇 →</span>
       </a>
       <a class="wwm_task" href="#wwmProbePad">
+        <img class="wwm_task__thumb" src="img/mobile-events.jpg" alt="手指触摸屏幕与触点轨迹">
         <span class="wwm_task__star">⭐ 任务一</span>
         <h3>事件侦探：观察记录</h3>
         <p>用第 3 节探针区做 5 种操作，记录触发顺序；能回答 move 次数、click 时机、touchcancel 影响。</p>
