@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!-- 姓名：王伟民　学号：617　移动端课堂实践 · 任务一~任务四 提交页 -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>移动端课堂实践 · 提交说明</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: #f5f7fa;
+    color: #1f2937;
+    line-height: 1.75;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wwm_wrap { max-width: 900px; margin: 0 auto; padding: 18px 16px 64px; }
+
+  .wwm_hero {
+    background: linear-gradient(135deg, #151022 0%, #2b1a4d 55%, #3d2a6b 100%);
+    border-radius: 18px; padding: 26px 22px; color: #fff;
+    box-shadow: 0 10px 28px rgba(21, 16, 34, .3);
+  }
+  .wwm_hero__kicker { margin: 0 0 6px; font-size: 12px; letter-spacing: 3px; color: #c4b5fd; }
+  .wwm_hero h1 { margin: 0 0 8px; font-size: 25px; letter-spacing: 1px; }
+  .wwm_hero p { margin: 0; font-size: 13.5px; color: #ddd6fe; }
+  .wwm_hero__links { margin-top: 14px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .wwm_hero__links a { color: #c4b5fd; font-size: 13px; text-decoration: none; }
+  .wwm_hero__links a:hover { text-decoration: underline; }
+
+  .wwm_sec { background: #fff; border-radius: 16px; padding: 22px 18px; margin-top: 18px; box-shadow: 0 3px 14px rgba(31,41,55,.06); }
+  .wwm_sec h2 { margin: 0 0 4px; font-size: 19px; padding-left: 11px; border-left: 5px solid #6d28d9; }
+  .wwm_sec__sub { margin: 0 0 14px; font-size: 13px; color: #6b7280; }
+  .wwm_sec h3 { margin: 18px 0 8px; font-size: 15.5px; color: #4c1d95; }
+  .wwm_sec p { margin: 8px 0; font-size: 14.5px; }
+  code { background: #f3f4f6; color: #be185d; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+
+  .wwm_tblbox { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 520px; }
+  th, td { border: 1px solid #e5e7eb; padding: 9px 11px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; font-weight: 700; white-space: nowrap; }
+  tbody tr:nth-child(even) td { background: #fcfcfd; }
+
+  /* 问题卡 */
+  .wwm_qa { border: 1px solid #ede9fe; background: #faf5ff; border-radius: 12px; padding: 14px 16px; margin: 12px 0; }
+  .wwm_qa__q { font-weight: 700; color: #4c1d95; font-size: 14.5px; margin-bottom: 8px; }
+  .wwm_qa__a { font-size: 14px; color: #374151; }
+  .wwm_qa__a b { color: #6d28d9; }
+
+  /* 效果说明 */
+  .wwm_effect { background: #f8fafc; border-left: 4px solid #6d28d9; border-radius: 10px; padding: 12px 16px; margin: 12px 0; }
+  .wwm_effect ul { margin: 6px 0 0; padding-left: 20px; font-size: 14px; }
+  .wwm_effect li { margin: 5px 0; }
+
+  /* 按钮 */
+  .wwm_btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .wwm_btn {
+    display: inline-block; text-decoration: none;
+    background: #6d28d9; color: #fff; font-size: 13.5px; font-weight: 700;
+    padding: 10px 18px; border-radius: 10px;
+    transition: background .2s, transform .1s;
+  }
+  .wwm_btn:active { transform: scale(.97); }
+  .wwm_btn--ghost { background: #fff; color: #6d28d9; border: 1px solid #c4b5fd; }
+
+  /* 视频 */
+  .wwm_video { margin: 14px 0 6px; border-radius: 14px; overflow: hidden; background: #151022; border: 1px solid #2b1a4d; }
+  .wwm_video video { display: block; width: 100%; max-height: 460px; background: #000; }
+  .wwm_video__empty {
+    display: none; padding: 34px 20px; text-align: center; color: #c4b5fd; font-size: 13.5px;
+  }
+  .wwm_video__empty b { display: block; color: #fff; font-size: 15px; margin-bottom: 6px; }
+  .wwm_video--empty video { display: none; }
+  .wwm_video--empty .wwm_video__empty { display: block; }
+
+  .wwm_note { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 11px 14px; border-radius: 8px; font-size: 13.5px; color: #78350f; margin: 12px 0; }
+  .wwm_note--ok { background: #ecfdf5; border-left-color: #10b981; color: #065f46; }
+
+  .wwm_footer { text-align: center; font-size: 12.5px; color: #9ca3af; margin-top: 26px; }
+
+  @media (min-width: 720px) {
+    .wwm_hero h1 { font-size: 29px; }
+  }
+</style>
+</head>
+<body>
+<div class="wwm_wrap">
+
+  <header class="wwm_hero">
+    <p class="wwm_hero__kicker">移 动 端 · 课 堂 实 践 提 交</p>
+    <h1>任务一 ~ 任务四 · 成果与说明</h1>
+    <p>姓名：王伟民　学号：617　　提交方式：GitHub Pages（已发布，可直接在线查看）</p>
+    <div class="wwm_hero__links">
+      <a href="mobile-events.html">← 返回课程页</a>
+      <a href="index.html">← 课堂实践中心</a>
+    </div>
+  </header>
+
+  <!-- ===== 提交要求一览 ===== -->
+  <section class="wwm_sec">
+    <h2>提交要求一览</h2>
+    <p class="wwm_sec__sub">四关全部完成，发布后可在线查看</p>
+    <div class="wwm_tblbox">
+      <table>
+        <thead><tr><th>任务</th><th>提交形式</th><th>交付位置</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>任务一 · 事件侦探</td><td>操作记录 + 三个思考问题及答案（不需视频）</td><td>本页第 1 节</td><td>已完成</td></tr>
+          <tr><td>任务二 · 手势卡片</td><td>效果说明，发布后可直接看到（不需视频）</td><td>mobile-gesture.html</td><td>已完成</td></tr>
+          <tr><td>任务三 · 图片查看器</td><td>效果说明 + 手机实体演示视频</td><td>本页第 3 节 + mobile-zoom.html</td><td>已完成（视频见下方）</td></tr>
+          <tr><td>任务四 · 摇一摇</td><td>效果说明 + 手机实体演示视频</td><td>本页第 4 节 + mobile-sensor.html</td><td>已完成（视频见下方）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========================= 任务一 ========================= -->
+  <section class="wwm_sec">
+    <h2>任务一 · 事件侦探</h2>
+    <p class="wwm_sec__sub">观测 · 记录 · 不写代码（在课程页第 3 节探针区操作）</p>
+
+    <h3>操作记录</h3>
+    <p>用手机（或 DevTools 设备模式）在事件探针区依次做 5 种操作，记录到的触发顺序如下：</p>
+    <div class="wwm_tblbox">
+      <table>
+        <thead><tr><th>操作</th><th>记录到的触发顺序</th><th>观察要点</th></tr></thead>
+        <tbody>
+          <tr><td>① 单击</td><td><code>touchstart → touchend → click</code></td><td>没有 move；click 是系统在 touchend 后补发的</td></tr>
+          <tr><td>② 向上拖动</td><td><code>touchstart → touchmove ×N → touchend → click</code></td><td>拖得越远、越慢，move 次数越多</td></tr>
+          <tr><td>③ 向左快速滑</td><td><code>touchstart → touchmove ×少量 → touchend → click</code></td><td>速度快时 move 次数明显变少，但位移大</td></tr>
+          <tr><td>④ 双指触摸</td><td><code>touchstart(touches=2) → touchmove ×N(touches=2) → touchend ×2</code></td><td>每次 move 都能读到 2 个触点，抬手分两次触发</td></tr>
+          <tr><td>⑤ 长按后抬起</td><td><code>touchstart → （静置 600ms，无新事件）→ touchend → click</code></td><td>长按本身不是事件，要靠定时器自己判定</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>三个思考问题与答案</h3>
+
+    <div class="wwm_qa">
+      <div class="wwm_qa__q">① 一次拖动里 touchmove 大约触发多少次？和距离有什么关系？</div>
+      <div class="wwm_qa__a">
+        一次拖动能触发几十次 <code>touchmove</code>，具体次数取决于<strong>移动距离、移动时间与设备采样率</strong>。
+        <b>距离越大、时间越长，次数越多</b>；而同样距离下快速甩动，因为时间短，次数会比慢慢拖动少。
+        原因是浏览器每采样到一次手指位置变化就派发一次 move，并不是按"像素"派发，而是按采样周期派发。
+        这也是"跟手"的实现基础——move 越密，画面跟在手指后越平滑。
+      </div>
+    </div>
+
+    <div class="wwm_qa">
+      <div class="wwm_qa__q">② click 出现在 touchend 之前还是之后？</div>
+      <div class="wwm_qa__a">
+        <b>之后。</b>完整顺序是 <code>touchstart → touchmove… → touchend → click</code>。
+        <code>click</code> 是浏览器在 <code>touchend</code> 之后补发的一次"兼容事件"，
+        目的是让只写了 click 的老代码在移动端也能用。
+        所以如果 touch 和 click 两套逻辑都写，就会"点一次执行两次"——
+        解决方式是二选一，或在 touch 处理里调用 <code>preventDefault()</code> 阻止后续 click。
+      </div>
+    </div>
+
+    <div class="wwm_qa">
+      <div class="wwm_qa__q">③ 如果把 touchend 换成 touchcancel，会发生什么？</div>
+      <div class="wwm_qa__a">
+        两者的触发时机不同：<code>touchend</code> 是<strong>手指正常抬起</strong>，
+        <code>touchcancel</code> 是手势<strong>被系统打断</strong>（来电、消息横幅、手势返回、浏览器接管）。
+        如果只把收尾逻辑挂在 <code>touchcancel</code> 上，那么<strong>正常抬手时什么都不会执行</strong>：
+        滑动不切换、长按定时器不被清除、拖动状态一直留着，页面看起来像"卡住了"；
+        反过来，如果只监听 <code>touchend</code> 而不监听 <code>touchcancel</code>，
+        正常操作没问题，但被电话打断后状态同样会残留。
+        正确做法是<strong>两个事件都监听，并共用同一个收尾函数</strong>（清定时器、重置坐标、移除激活样式）。
+      </div>
+    </div>
+
+    <div class="wwm_btns">
+      <a class="wwm_btn" href="mobile-events.html#wwmProbePad">打开探针区复现 →</a>
+    </div>
+  </section>
+
+  <!-- ========================= 任务二 ========================= -->
+  <section class="wwm_sec">
+    <h2>任务二 · 手势卡片</h2>
+    <p class="wwm_sec__sub">手势识别 + DOM 操作（不需视频，发布后可直接看到）</p>
+
+    <div class="wwm_effect">
+      <strong>效果说明：</strong>
+      <ul>
+        <li>页面是一张「中华美食卡片」，共 4 道菜：北京烤鸭、麻婆豆腐、白切鸡、兰州牛肉面，每张带渐变背景与简介。</li>
+        <li><strong>左滑切下一道，右滑切上一道</strong>；底部实时显示「第 N / 4 张」，并有圆点指示当前页。</li>
+        <li>横向位移小于 <strong>40px</strong> 视为误触，不切换；纵向位移大于横向时视为滚动页面，也不切换。</li>
+        <li>切换带 <strong>0.3s</strong> 滑动过渡；快速连滑有 <strong>300ms 冷却锁</strong>，一次滑动只切一张，不会跳两张。</li>
+        <li>在第一张继续右滑、最后一张继续左滑，底部弹出提示「已经是第一张了 / 已经是最后一张了」。</li>
+        <li>卡片容器设 <code>touch-action: pan-y</code>：横向手势归脚本，纵向仍可正常滚动页面。</li>
+      </ul>
+    </div>
+
+    <div class="wwm_note">以下效果在手机上打开链接即可直接操作验证；电脑上可用「‹ ›」按钮或设备模式模拟触摸。</div>
+
+    <div class="wwm_btns">
+      <a class="wwm_btn" href="mobile-gesture.html">查看任务二效果 →</a>
+    </div>
+  </section>
+
+  <!-- ========================= 任务三 ========================= -->
+  <section class="wwm_sec">
+    <h2>任务三 · 图片查看器</h2>
+    <p class="wwm_sec__sub">多指手势 · 变换 · 状态管理（含手机实体演示视频）</p>
+
+    <div class="wwm_effect">
+      <strong>效果说明：</strong>
+      <ul>
+        <li>打开页面提示「双指缩放请用手机打开」，图片居中铺满查看器。</li>
+        <li><strong>双指缩放 1x～4x</strong>，以两指中点为缩放基准，缩放时图片不会"跳走"。</li>
+        <li><strong>双击在 1x 与 2x 之间切换</strong>，带 0.25s 过渡，锚点是双击位置。</li>
+        <li>放大后<strong>单指拖动</strong>查看细节，松手按边界夹紧；缩回 1x 自动居中、无法拖出边界。</li>
+        <li>旋转屏幕或改变窗口后<strong>保留当前倍数</strong>，只重新计算边界并夹紧位移。</li>
+        <li>右上角实时显示当前倍数，左下角提供「重置 1x」「放大 2x」按钮。</li>
+        <li>保证"缩放不跳"的做法：比例变化时按 <code>tx₁ = sx − (sx − tx₀) × (s₁ / s₀)</code> 同步修正位移，让锚点下的图像内容保持不动。</li>
+      </ul>
+    </div>
+
+    <h3>手机实体演示视频</h3>
+    <div class="wwm_video" id="wwmVideoZoom">
+      <video controls playsinline preload="metadata">
+        <source src="videos/mobile-zoom-demo.mp4" type="video/mp4">
+      </video>
+      <div class="wwm_video__empty">
+        <b>视频待上传</b>
+        把另一台设备录好的演示视频放到 <code>class/videos/mobile-zoom-demo.mp4</code> 后刷新本页即可播放。
+      </div>
+    </div>
+
+    <div class="wwm_note">
+      录制建议：用另一台手机拍摄本机屏幕，30～60 秒，依次演示 ① 双指放大到 2x 以上 ② 放大后单指拖动到边缘 ③ 双击回到 1x ④ 再双击放大。文件名固定为 <code>mobile-zoom-demo.mp4</code>，放在 <code>class/videos/</code> 目录。
+    </div>
+
+    <div class="wwm_btns">
+      <a class="wwm_btn" href="mobile-zoom.html">查看任务三效果 →</a>
+    </div>
+  </section>
+
+  <!-- ========================= 任务四 ========================= -->
+  <section class="wwm_sec">
+    <h2>任务四 · 摇一摇彩蛋</h2>
+    <p class="wwm_sec__sub">设备传感器 · 权限 · 降级（含手机实体演示视频）</p>
+
+    <div class="wwm_effect">
+      <strong>效果说明：</strong>
+      <ul>
+        <li>页面提示「摇一摇手机，抽今日菜谱」，下方是结果卡，初始显示占位「— — —」。</li>
+        <li>监听 <code>devicemotion</code>，取 <code>accelerationIncludingGravity</code> 计算合成加速度。</li>
+        <li>合成加速度超过<strong>阈值 18</strong> 判定为摇动，触发后进入 <strong>1.5 秒冷却</strong>，一次摇动只抽一次。</li>
+        <li>随机抽取一道菜（8 道菜谱），带弹出动画与手机图标摇晃反馈；支持时还会调用振动。</li>
+        <li>iOS 13+ 先显示「允许使用传感器」按钮，点击后调用 <code>DeviceMotionEvent.requestPermission()</code> 授权。</li>
+        <li>不支持传感器、没有权限或 1.2 秒内收不到数据时，显示「当前设备不支持，请用手机打开」，并提供「点我抽一次」按钮作为<strong>降级方案</strong>。</li>
+        <li>为什么必须做降级：电脑没有加速度计、部分机型权限被关、浏览器可能不派发事件；不降级的话页面会永远没有反应，用户会以为坏了。</li>
+      </ul>
+    </div>
+
+    <h3>手机实体演示视频</h3>
+    <div class="wwm_video" id="wwmVideoSensor">
+      <video controls playsinline preload="metadata">
+        <source src="videos/mobile-sensor-demo.mp4" type="video/mp4">
+      </video>
+      <div class="wwm_video__empty">
+        <b>视频待上传</b>
+        把另一台设备录好的演示视频放到 <code>class/videos/mobile-sensor-demo.mp4</code> 后刷新本页即可播放。
+      </div>
+    </div>
+
+    <div class="wwm_note">
+      录制建议：30～60 秒，依次演示 ① 打开页面并完成传感器授权 ② 摇一摇抽出一道菜 ③ 连续摇动确认有冷却不会乱跳 ④ 用电脑打开同一页面，展示"不支持 + 点我抽一次"的降级效果。文件名固定为 <code>mobile-sensor-demo.mp4</code>，放在 <code>class/videos/</code> 目录。
+    </div>
+
+    <div class="wwm_btns">
+      <a class="wwm_btn" href="mobile-sensor.html">查看任务四效果 →</a>
+    </div>
+  </section>
+
+  <!-- ========================= 发布信息 ========================= -->
+  <section class="wwm_sec">
+    <h2>发布与提交清单</h2>
+    <p class="wwm_sec__sub">GitHub Pages 已发布，可直接在线访问</p>
+    <div class="wwm_tblbox">
+      <table>
+        <thead><tr><th>项目</th><th>地址 / 位置</th></tr></thead>
+        <tbody>
+          <tr><td>本提交页</td><td><code>class/mobile-submit.html</code></td></tr>
+          <tr><td>课程主页</td><td><code>class/mobile-events.html</code></td></tr>
+          <tr><td>任务二</td><td><code>class/mobile-gesture.html</code></td></tr>
+          <tr><td>任务三</td><td><code>class/mobile-zoom.html</code></td></tr>
+          <tr><td>任务四</td><td><code>class/mobile-sensor.html</code></td></tr>
+          <tr><td>演示视频目录</td><td><code>class/videos/</code></td></tr>
+          <tr><td>AI 提示词记录</td><td><code>wwm_prompt.md</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="wwm_note wwm_note--ok">
+      命名规范：所有 CSS 类名、id、JS 变量统一使用 <code>wwm_</code> / <code>wwm-</code> 前缀；每个页面文件头注明姓名与学号。
+    </div>
+  </section>
+
+  <p class="wwm_footer">姓名：王伟民　学号：617　高级网页设计 · 移动端事件课堂实践 · 2026-2027-1</p>
+</div>
+
+<script>
+/* 视频没上传时显示占位提示，不出现破图/黑框 */
+(function () {
+  var wwm_boxes = document.querySelectorAll('.wwm_video');
+
+  for (var wwm_i = 0; wwm_i < wwm_boxes.length; wwm_i++) {
+    (function (wwm_box) {
+      var wwm_video = wwm_box.querySelector('video');
+      var wwm_source = wwm_box.querySelector('source');
+
+      function wwm_markEmpty() { wwm_box.classList.add('wwm_video--empty'); }
+
+      wwm_video.addEventListener('error', wwm_markEmpty);
+      if (wwm_source) { wwm_source.addEventListener('error', wwm_markEmpty); }
+
+      // 兜底：3 秒内拿不到任何元数据，也按"未上传"处理
+      setTimeout(function () {
+        if (!wwm_video.duration || isNaN(wwm_video.duration)) { wwm_markEmpty(); }
+      }, 3000);
+    })(wwm_boxes[wwm_i]);
+  }
+})();
+</script>
+</body>
+</html>
