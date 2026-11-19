@@ -67,6 +67,16 @@ tbody tr:nth-child(even) td{background:#faf6ec}
 .wwm_video__empty b{display:block;margin-bottom:6px;color:var(--ink);font:normal 1.05rem Georgia,serif}
 .wwm_video--empty video{display:none}
 .wwm_video--empty .wwm_video__empty{display:block}
+.wwm_video__hint{display:block;max-width:480px;margin:0 auto 16px;line-height:1.7}
+.wwm_video__hint code{font-size:12px}
+.wwm_video__pick{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.wwm_btn--pick{cursor:pointer}
+.wwm_video__file{color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
+.wwm_video__file--on{color:var(--blue);font-weight:bold}
+.wwm_video__bar{display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;background:#fffdf8;border-top:2px solid var(--ink)}
+.wwm_video__bar>span{color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
+.wwm_video__bar-btns{display:flex;gap:8px}
+.wwm_video--ready .wwm_video__bar{display:flex}
 
 /* 提示条 */
 .wwm_note{margin:14px 0;padding:11px 14px;background:#fffdf8;border:2px solid var(--ink);border-left:12px solid var(--lime);border-radius:0;color:var(--muted);font:13.5px "Trebuchet MS",sans-serif}
@@ -97,8 +107,8 @@ tbody tr:nth-child(even) td{background:#faf6ec}
         <tbody>
           <tr><td>任务一 · 事件侦探</td><td>操作记录 + 三个思考问题及答案（不需视频）</td><td>本页第 1 节</td><td>已完成</td></tr>
           <tr><td>任务二 · 手势卡片</td><td>效果说明，发布后可直接看到（不需视频）</td><td>mobile-gesture.html</td><td>已完成</td></tr>
-          <tr><td>任务三 · 图片查看器</td><td>效果说明 + 手机实体演示视频</td><td>本页第 3 节 + mobile-zoom.html</td><td>已完成（视频见下方）</td></tr>
-          <tr><td>任务四 · 摇一摇</td><td>效果说明 + 手机实体演示视频</td><td>本页第 4 节 + mobile-sensor.html</td><td>已完成（视频见下方）</td></tr>
+          <tr><td>任务三 · 图片查看器</td><td>效果说明 + 手机实体演示视频</td><td>本页第 3 节 + mobile-zoom.html</td><td>已完成（视频见文末汇总）</td></tr>
+          <tr><td>任务四 · 摇一摇</td><td>效果说明 + 手机实体演示视频</td><td>本页第 4 节 + mobile-sensor.html</td><td>已完成（视频见文末汇总）</td></tr>
         </tbody>
       </table>
     </div>
@@ -192,7 +202,7 @@ tbody tr:nth-child(even) td{background:#faf6ec}
   <!-- ========================= 任务三 ========================= -->
   <section class="wwm_sec">
     <h2>任务三 · 图片查看器</h2>
-    <p class="wwm_sec__sub">多指手势 · 变换 · 状态管理（含手机实体演示视频）</p>
+    <p class="wwm_sec__sub">多指手势 · 变换 · 状态管理（演示视频见文末汇总）</p>
 
     <div class="wwm_effect">
       <strong>效果说明：</strong>
@@ -207,21 +217,6 @@ tbody tr:nth-child(even) td{background:#faf6ec}
       </ul>
     </div>
 
-    <h3>手机实体演示视频</h3>
-    <div class="wwm_video" id="wwmVideoZoom">
-      <video controls playsinline preload="metadata">
-        <source src="videos/mobile-zoom-demo.mp4" type="video/mp4">
-      </video>
-      <div class="wwm_video__empty">
-        <b>视频待上传</b>
-        把另一台设备录好的演示视频放到 <code>class/videos/mobile-zoom-demo.mp4</code> 后刷新本页即可播放。
-      </div>
-    </div>
-
-    <div class="wwm_note">
-      录制建议：用另一台手机拍摄本机屏幕，30～60 秒，依次演示 ① 双指放大到 2x 以上 ② 放大后单指拖动到边缘 ③ 双击回到 1x ④ 再双击放大。文件名固定为 <code>mobile-zoom-demo.mp4</code>，放在 <code>class/videos/</code> 目录。
-    </div>
-
     <div class="wwm_btns">
       <a class="wwm_btn" href="mobile-zoom.html">查看任务三效果 →</a>
     </div>
@@ -230,7 +225,7 @@ tbody tr:nth-child(even) td{background:#faf6ec}
   <!-- ========================= 任务四 ========================= -->
   <section class="wwm_sec">
     <h2>任务四 · 摇一摇彩蛋</h2>
-    <p class="wwm_sec__sub">设备传感器 · 权限 · 降级（含手机实体演示视频）</p>
+    <p class="wwm_sec__sub">设备传感器 · 权限 · 降级（演示视频见文末汇总）</p>
 
     <div class="wwm_effect">
       <strong>效果说明：</strong>
@@ -245,23 +240,40 @@ tbody tr:nth-child(even) td{background:#faf6ec}
       </ul>
     </div>
 
-    <h3>手机实体演示视频</h3>
-    <div class="wwm_video" id="wwmVideoSensor">
+    <div class="wwm_btns">
+      <a class="wwm_btn" href="mobile-sensor.html">查看任务四效果 →</a>
+    </div>
+  </section>
+
+  <!-- ========================= 手机实体演示视频（任务三 + 任务四） ========================= -->
+  <section class="wwm_sec">
+    <h2>手机实体演示视频</h2>
+    <p class="wwm_sec__sub">任务三、任务四 · 另一台设备拍摄本机屏幕</p>
+
+    <div class="wwm_video" id="wwmVideoDemo">
       <video controls playsinline preload="metadata">
-        <source src="videos/mobile-sensor-demo.mp4" type="video/mp4">
+        <source src="videos/mobile-demo.mp4" type="video/mp4">
       </video>
       <div class="wwm_video__empty">
         <b>视频待上传</b>
-        把另一台设备录好的演示视频放到 <code>class/videos/mobile-sensor-demo.mp4</code> 后刷新本页即可播放。
+        <span class="wwm_video__hint">把另一台设备录好的演示视频放到 <code>class/videos/mobile-demo.mp4</code> 后刷新本页即可在线播放；也可以先选本地文件即时预览。</span>
+        <div class="wwm_video__pick">
+          <button class="wwm_btn wwm_btn--pick" type="button" data-wwm-pick>选择视频文件</button>
+          <span class="wwm_video__file">未选择文件</span>
+        </div>
       </div>
+      <div class="wwm_video__bar">
+        <span>本地预览中 · 未上传到服务器</span>
+        <div class="wwm_video__bar-btns">
+          <button class="wwm_btn" type="button" data-wwm-pick>重新选择</button>
+          <button class="wwm_btn wwm_btn--ghost" type="button" data-wwm-clear>移除</button>
+        </div>
+      </div>
+      <input class="wwm_video__input" type="file" accept="video/*" hidden>
     </div>
 
     <div class="wwm_note">
-      录制建议：30～60 秒，依次演示 ① 打开页面并完成传感器授权 ② 摇一摇抽出一道菜 ③ 连续摇动确认有冷却不会乱跳 ④ 用电脑打开同一页面，展示"不支持 + 点我抽一次"的降级效果。文件名固定为 <code>mobile-sensor-demo.mp4</code>，放在 <code>class/videos/</code> 目录。
-    </div>
-
-    <div class="wwm_btns">
-      <a class="wwm_btn" href="mobile-sensor.html">查看任务四效果 →</a>
+      本段视频依次展示：① 任务三 · 图片查看器的双指缩放（开头约 1 秒）② 任务四 · 摇一摇抽菜谱（后续约 10 秒）。
     </div>
   </section>
 
@@ -292,7 +304,7 @@ tbody tr:nth-child(even) td{background:#faf6ec}
 </div>
 
 <script>
-/* 视频没上传时显示占位提示，不出现破图/黑框 */
+/* 视频没上传时显示占位提示；支持选本地文件即时预览 */
 (function () {
   var wwm_boxes = document.querySelectorAll('.wwm_video');
 
@@ -300,11 +312,54 @@ tbody tr:nth-child(even) td{background:#faf6ec}
     (function (wwm_box) {
       var wwm_video = wwm_box.querySelector('video');
       var wwm_source = wwm_box.querySelector('source');
+      var wwm_input = wwm_box.querySelector('.wwm_video__input');
+      var wwm_file = wwm_box.querySelector('.wwm_video__file');
+      var wwm_objUrl = null;
 
-      function wwm_markEmpty() { wwm_box.classList.add('wwm_video--empty'); }
+      function wwm_markEmpty() {
+        if (wwm_objUrl) { return; }
+        wwm_box.classList.add('wwm_video--empty');
+      }
 
       wwm_video.addEventListener('error', wwm_markEmpty);
       if (wwm_source) { wwm_source.addEventListener('error', wwm_markEmpty); }
+
+      var wwm_picks = wwm_box.querySelectorAll('[data-wwm-pick]');
+      for (var wwm_j = 0; wwm_j < wwm_picks.length; wwm_j++) {
+        wwm_picks[wwm_j].addEventListener('click', function () { wwm_input.click(); });
+      }
+
+      var wwm_clear = wwm_box.querySelector('[data-wwm-clear]');
+      wwm_clear.addEventListener('click', function () {
+        if (wwm_objUrl) { URL.revokeObjectURL(wwm_objUrl); wwm_objUrl = null; }
+        wwm_video.removeAttribute('src');
+        wwm_video.load();
+        wwm_box.classList.remove('wwm_video--ready');
+        wwm_box.classList.add('wwm_video--empty');
+        wwm_input.value = '';
+        wwm_file.textContent = '未选择文件';
+        wwm_file.classList.remove('wwm_video__file--on');
+      });
+
+      wwm_input.addEventListener('change', function () {
+        var wwm_f = wwm_input.files && wwm_input.files[0];
+        if (!wwm_f) { return; }
+        if (wwm_f.type.indexOf('video/') !== 0) {
+          wwm_file.textContent = '请选择视频文件';
+          wwm_file.classList.remove('wwm_video__file--on');
+          return;
+        }
+        if (wwm_objUrl) { URL.revokeObjectURL(wwm_objUrl); }
+        wwm_objUrl = URL.createObjectURL(wwm_f);
+        wwm_video.src = wwm_objUrl;
+        wwm_video.load();
+        wwm_box.classList.remove('wwm_video--empty');
+        wwm_box.classList.add('wwm_video--ready');
+        wwm_file.textContent = wwm_f.name;
+        wwm_file.classList.add('wwm_video__file--on');
+        var wwm_play = wwm_video.play();
+        if (wwm_play && wwm_play.catch) { wwm_play.catch(function () {}); }
+      });
 
       // 兜底：3 秒内拿不到任何元数据，也按"未上传"处理
       setTimeout(function () {

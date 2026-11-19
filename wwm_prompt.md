@@ -97,3 +97,19 @@ https://spontaneous-valkyrie-4e4229.netlify.app/mobile-events-lesson
 ## 2026-11-19 | 模型: DeepSeek-V4.1-Flash
 用户提示词：
 好的，按方案 2 连移动端四页一起改
+
+## 2026-11-19 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+请为提交页的视频上传功能添加占位提示和上传按钮
+
+## 2026-11-19 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+把这个视频穿入进去（上传 video.mp4，已放入 class/videos/mobile-sensor-demo.mp4，挂在任务四视频位）
+
+## 2026-11-19 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+不挂在任务四 把视频放在任务三和人物四的后面 帮我重新改一下
+
+## 2026-11-19 | 模型: DeepSeek-V4.1-Flash
+用户提示词：
+任务四不再挂视频 ，恢复为浅色占位面板（「视频待上传」+「选择视频文件」按钮）；任务三同样保持占位 把这两个按钮去掉 只留最后一个视频即可
