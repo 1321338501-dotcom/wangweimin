@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!-- 姓名：王伟民　学号：617　任务三：图片查看器（双指缩放 + 双击放大 + 拖动） -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>图片查看器 · 双指缩放 / 双击放大 / 拖动</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: #0f0a1a;
+    color: #e5e7eb;
+    line-height: 1.7;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
+  }
+  .wwm_wrap { max-width: 760px; margin: 0 auto; padding: 16px 14px 40px; }
+
+  .wwm_head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .wwm_head h1 { margin: 0; font-size: 18px; color: #fff; }
+  .wwm_head p { margin: 2px 0 0; font-size: 12px; color: #9ca3af; }
+  .wwm_back { font-size: 13px; color: #c4b5fd; text-decoration: none; white-space: nowrap; }
+  .wwm_back:hover { text-decoration: underline; }
+
+  /* ===== 提示 ===== */
+  .wwm_hint {
+    background: rgba(109, 40, 217, .22);
+    border: 1px solid rgba(167, 139, 250, .35);
+    color: #ddd6fe;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+
+  /* ===== 查看器容器 ===== */
+  .wwm_viewer {
+    position: relative;
+    height: 62vh;
+    min-height: 300px;
+    background: #000;
+    border-radius: 14px;
+    overflow: hidden;              /* 放大后超出部分裁掉 */
+    touch-action: none;            /* 手势完全由脚本接管 */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  /* 图片：居中显示，变换由 JS 写入 transform */
+  .wwm_img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    max-width: 100%;
+    max-height: 100%;
+    transform: translate(-50%, -50%);   /* 基础居中，缩放/拖动叠加在 JS 里 */
+    transform-origin: center center;
+    will-change: transform;
+    pointer-events: none;
+    display: block;
+  }
+  /* 双击 / 重置时开启过渡，捏合与拖动时关闭，保证跟手 */
+  .wwm_img.wwm_anim { transition: transform .25s ease-out; }
+
+  .wwm_scale {
+    position: absolute; right: 12px; top: 12px;
+    background: rgba(0, 0, 0, .55);
+    color: #fff; font-size: 12px; font-weight: 700;
+    padding: 4px 11px; border-radius: 999px;
+    backdrop-filter: blur(4px);
+  }
+  .wwm_tools {
+    position: absolute; left: 12px; bottom: 12px;
+    display: flex; gap: 8px;
+  }
+  .wwm_btn {
+    border: 1px solid rgba(255, 255, 255, .28);
+    background: rgba(0, 0, 0, .5);
+    color: #fff; font-size: 12.5px;
+    padding: 7px 14px; border-radius: 999px;
+    cursor: pointer;
+  }
+  .wwm_btn:active { background: rgba(109, 40, 217, .7); }
+
+  /* ===== 说明 ===== */
+  .wwm_sec { background: #1a1229; border-radius: 14px; padding: 18px 16px; margin-top: 16px; border: 1px solid #2b1a4d; }
+  .wwm_sec h3 { margin: 0 0 10px; font-size: 15.5px; color: #fff; padding-left: 10px; border-left: 4px solid #a855f7; }
+  .wwm_sec p, .wwm_sec li { font-size: 13.5px; color: #cbd5e1; }
+  .wwm_sec ul { margin: 0; padding-left: 20px; }
+  .wwm_sec li { margin: 6px 0; }
+  code { background: rgba(168, 85, 247, .18); color: #f0abfc; padding: 2px 6px; border-radius: 4px; font-size: 12.5px; }
+  pre { background: #0a0612; color: #d1d5db; padding: 13px; border-radius: 10px; overflow-x: auto; font-size: 12px; line-height: 1.6; border: 1px solid #2b1a4d; }
+  .wwm_footer { text-align: center; font-size: 12px; color: #6b7280; margin-top: 22px; }
+</style>
+</head>
+<body>
+<div class="wwm_wrap">
+
+  <div class="wwm_head">
+    <div>
+      <h1>图片查看器</h1>
+      <p>任务三 · 双指缩放 / 双击放大 / 拖动</p>
+    </div>
+    <a class="wwm_back" href="mobile-events.html">← 返回课程</a>
+  </div>
+
+  <div class="wwm_hint">双指缩放请用手机打开；电脑上可用鼠标滚轮缩放、按住拖动、双击切换 1x / 2x。</div>
+
+  <!-- ===== 查看器 ===== -->
+  <div class="wwm_viewer" id="wwmViewer">
+    <img class="wwm_img" id="wwmImg" src="../DB/img/3.jpg" alt="云雾中的中式楼阁">
+    <span class="wwm_scale" id="wwmScaleTag">1.00×</span>
+    <div class="wwm_tools">
+      <button class="wwm_btn" id="wwmReset" type="button">重置 1x</button>
+      <button class="wwm_btn" id="wwmTwice" type="button">放大 2x</button>
+    </div>
+  </div>
+
+  <!-- ===== 说明 ===== -->
+  <section class="wwm_sec">
+    <h3>如何保证"缩放不跳"</h3>
+    <ul>
+      <li>缩放前后都锚定<strong>同一个屏幕点</strong>：捏合时取两指中点，双击时取点击位置。</li>
+      <li>比例变化时同步修正位移：<code>tx₁ = sx − (sx − tx₀) × (s₁ / s₀)</code>，让锚点下的图像内容保持不动。</li>
+      <li>位移用 <code>px</code>、坐标统一用 <code>clientX/clientY</code>，不与 <code>pageX</code> 混用。</li>
+      <li>捏合与拖动时关闭 CSS 过渡（保证跟手），只在双击、重置、回弹时开启 0.25s 过渡。</li>
+      <li>每次变换后按边界夹紧：<code>maxTx = (图宽×倍数 − 容器宽) / 2</code>，1x 时归零。</li>
+    </ul>
+  </section>
+
+  <section class="wwm_sec">
+    <h3>核心代码</h3>
+    <pre>// 捏合：以两指中点为基准缩放
+var wwm_ratio = wwm_dist(e.touches[0], e.touches[1]) / wwm_startDist;
+var wwm_next = wwm_clamp(wwm_startScale * wwm_ratio, 1, 4);
+
+// 锚点（相对容器中心）
+var wwm_sx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - wwm_cx;
+var wwm_sy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - wwm_cy;
+
+// 让锚点下的内容不动
+wwm_tx = wwm_sx - (wwm_sx - wwm_startTx) * (wwm_next / wwm_startScale);
+wwm_ty = wwm_sy - (wwm_sy - wwm_startTy) * (wwm_next / wwm_startScale);
+
+wwm_scale = wwm_next;
+wwm_clampPos();     // 边界夹紧
+wwm_apply();        // 写入 transform</pre>
+  </section>
+
+  <section class="wwm_sec">
+    <h3>验收自查</h3>
+    <ul>
+      <li>① 缩放以两指中心为基准，图片不会"跳走" —— 已用锚点公式修正位移。</li>
+      <li>② 缩放到边界有限制 —— 倍数夹在 1～4，位移按图与容器尺寸夹紧。</li>
+      <li>③ 1x 时不能拖出边界 —— 1x 时位移强制归零。</li>
+      <li>④ 缩放后旋转屏幕不丢失状态 —— 监听 <code>resize / orientationchange</code> 重算边界并保留倍数。</li>
+    </ul>
+  </section>
+
+  <p class="wwm_footer">姓名：王伟民　学号：617　高级网页设计 · 移动端触摸交互</p>
+</div>
+
+<script>
+(function () {
+  var wwm_viewer = document.getElementById('wwmViewer');
+  var wwm_img = document.getElementById('wwmImg');
+  var wwm_scaleTag = document.getElementById('wwmScaleTag');
+  var wwm_resetBtn = document.getElementById('wwmReset');
+  var wwm_twiceBtn = document.getElementById('wwmTwice');
+
+  var wwm_MIN = 1;            // 最小倍数
+  var wwm_MAX = 4;            // 最大倍数
+  var wwm_DBL = 250;          // 双击间隔阈值 250ms
+  var wwm_TAP_MOVE = 12;      // 判定为"点击"的最大位移
+
+  var wwm_scale = 1;          // 当前总倍数
+  var wwm_tx = 0;             // 当前横向位移（px）
+  var wwm_ty = 0;             // 当前纵向位移（px）
+
+  var wwm_mode = 'none';      // none | drag | pinch
+  var wwm_startX = 0, wwm_startY = 0;
+  var wwm_startTx = 0, wwm_startTy = 0;
+  var wwm_startDist = 0, wwm_startScale = 1;
+  var wwm_lastTap = 0;
+  var wwm_moved = 0;
+
+  var wwm_baseW = 0, wwm_baseH = 0;   // 1x 时图片实际显示尺寸
+  var wwm_boxW = 0, wwm_boxH = 0;     // 容器尺寸
+  var wwm_cx = 0, wwm_cy = 0;         // 容器中心（client 坐标）
+
+  function wwm_clamp(wwm_v, wwm_min, wwm_max) {
+    return Math.min(wwm_max, Math.max(wwm_min, wwm_v));
+  }
+
+  function wwm_dist(wwm_t1, wwm_t2) {
+    return Math.hypot(wwm_t2.clientX - wwm_t1.clientX, wwm_t2.clientY - wwm_t1.clientY);
+  }
+
+  // 重新测量容器与 1x 图片尺寸（旋转屏幕、窗口变化时调用）
+  function wwm_measure() {
+    var wwm_rect = wwm_viewer.getBoundingClientRect();
+    wwm_boxW = wwm_rect.width;
+    wwm_boxH = wwm_rect.height;
+    wwm_cx = wwm_rect.left + wwm_boxW / 2;
+    wwm_cy = wwm_rect.top + wwm_boxH / 2;
+
+    // 1x 时图片按 contain 规则缩放后的显示尺寸
+    if (wwm_img.naturalWidth) {
+      var wwm_ratio = Math.min(wwm_boxW / wwm_img.naturalWidth, wwm_boxH / wwm_img.naturalHeight);
+      wwm_baseW = wwm_img.naturalWidth * wwm_ratio;
+      wwm_baseH = wwm_img.naturalHeight * wwm_ratio;
+    }
+  }
+
+  // 边界夹紧：放大后允许拖到边缘，1x 时强制居中
+  function wwm_clampPos() {
+    var wwm_maxTx = Math.max(0, (wwm_baseW * wwm_scale - wwm_boxW) / 2);
+    var wwm_maxTy = Math.max(0, (wwm_baseH * wwm_scale - wwm_boxH) / 2);
+    wwm_tx = wwm_clamp(wwm_tx, -wwm_maxTx, wwm_maxTx);
+    wwm_ty = wwm_clamp(wwm_ty, -wwm_maxTy, wwm_maxTy);
+    if (wwm_scale <= 1) { wwm_tx = 0; wwm_ty = 0; }
+  }
+
+  // 写入 transform：先居中，再位移与缩放
+  function wwm_apply() {
+    wwm_img.style.transform =
+      'translate(-50%, -50%) translate(' + wwm_tx.toFixed(2) + 'px, ' + wwm_ty.toFixed(2) + 'px) ' +
+      'scale(' + wwm_scale.toFixed(4) + ')';
+    wwm_scaleTag.textContent = wwm_scale.toFixed(2) + '×';
+  }
+
+  function wwm_setAnim(wwm_on) {
+    wwm_img.classList.toggle('wwm_anim', wwm_on);
+  }
+
+  // 以容器内某点为锚点缩放到目标倍数
+  function wwm_zoomTo(wwm_target, wwm_sx, wwm_sy) {
+    wwm_target = wwm_clamp(wwm_target, wwm_MIN, wwm_MAX);
+    var wwm_k = wwm_target / wwm_scale;
+    wwm_tx = wwm_sx - (wwm_sx - wwm_tx) * wwm_k;
+    wwm_ty = wwm_sy - (wwm_sy - wwm_ty) * wwm_k;
+    wwm_scale = wwm_target;
+    wwm_clampPos();
+  }
+
+  /* ==================== 触摸：捏合 / 拖动 / 双击 ==================== */
+  wwm_viewer.addEventListener('touchstart', function (e) {
+    wwm_moved = 0;
+
+    if (e.touches.length >= 2) {
+      // ---- 双指：进入捏合 ----
+      wwm_mode = 'pinch';
+      wwm_setAnim(false);                       // 跟手，关闭过渡
+      wwm_startDist = wwm_dist(e.touches[0], e.touches[1]);
+      wwm_startScale = wwm_scale;
+      wwm_startTx = wwm_tx;
+      wwm_startTy = wwm_ty;
+    } else {
+      // ---- 单指：放大时才是拖动，否则等待判断双击 ----
+      wwm_mode = (wwm_scale > 1) ? 'drag' : 'none';
+      wwm_startX = e.touches[0].clientX;
+      wwm_startY = e.touches[0].clientY;
+      wwm_startTx = wwm_tx;
+      wwm_startTy = wwm_ty;
+      wwm_setAnim(false);
+    }
+  }, { passive: true });
+
+  wwm_viewer.addEventListener('touchmove', function (e) {
+    if (wwm_mode === 'pinch' && e.touches.length >= 2) {
+      e.preventDefault();                       // 阻止页面跟着缩放
+
+      var wwm_ratio = wwm_dist(e.touches[0], e.touches[1]) / wwm_startDist;
+      var wwm_next = wwm_clamp(wwm_startScale * wwm_ratio, wwm_MIN, wwm_MAX);
+
+      // 两指中点，作为本次缩放的锚点（相对容器中心）
+      var wwm_sx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - wwm_cx;
+      var wwm_sy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - wwm_cy;
+
+      // 锚点下的内容保持不动 → 不"跳"
+      wwm_tx = wwm_sx - (wwm_sx - wwm_startTx) * (wwm_next / wwm_startScale);
+      wwm_ty = wwm_sy - (wwm_sy - wwm_startTy) * (wwm_next / wwm_startScale);
+      wwm_scale = wwm_next;
+
+      wwm_clampPos();
+      wwm_apply();
+      return;
+    }
+
+    if (wwm_mode === 'drag' && e.touches.length === 1 && wwm_scale > 1) {
+      e.preventDefault();                       // 拖动图片时不滚动页面
+      var wwm_dx = e.touches[0].clientX - wwm_startX;
+      var wwm_dy = e.touches[0].clientY - wwm_startY;
+      wwm_moved = Math.max(wwm_moved, Math.hypot(wwm_dx, wwm_dy));
+
+      wwm_tx = wwm_startTx + wwm_dx;
+      wwm_ty = wwm_startTy + wwm_dy;
+      wwm_clampPos();
+      wwm_apply();
+      return;
+    }
+
+    // 未放大时单指移动也算"不是点击"
+    if (e.touches.length === 1 && wwm_mode === 'none') {
+      var wwm_mdx = e.touches[0].clientX - wwm_startX;
+      var wwm_mdy = e.touches[0].clientY - wwm_startY;
+      wwm_moved = Math.max(wwm_moved, Math.hypot(wwm_mdx, wwm_mdy));
+    }
+  }, { passive: false });
+
+  wwm_viewer.addEventListener('touchend', function (e) {
+    // ---- 双击判断（单指、位移很小）----
+    if (wwm_mode !== 'pinch' && e.changedTouches.length === 1 && wwm_moved < wwm_TAP_MOVE) {
+      var wwm_now = Date.now();
+      var wwm_t = e.changedTouches[0];
+      if (wwm_now - wwm_lastTap < wwm_DBL) {
+        // 双击：1x ↔ 2x，以点击位置为锚点
+        var wwm_sx = wwm_t.clientX - wwm_cx;
+        var wwm_sy = wwm_t.clientY - wwm_cy;
+        wwm_setAnim(true);                       // 双击要 0.25s 过渡
+        wwm_zoomTo(wwm_scale > 1.05 ? 1 : 2, wwm_sx, wwm_sy);
+        wwm_apply();
+        wwm_lastTap = 0;                         // 重置，避免三击触发两次
+      } else {
+        wwm_lastTap = wwm_now;
+      }
+    }
+
+    if (e.touches.length === 0) {
+      // 手势全部结束：收尾夹紧，松手后回到合法范围
+      wwm_mode = 'none';
+      wwm_setAnim(true);
+      wwm_clampPos();
+      wwm_apply();
+    } else if (e.touches.length === 1) {
+      // 双指变单指：切回拖动，重新记录起点
+      wwm_mode = 'drag';
+      wwm_startX = e.touches[0].clientX;
+      wwm_startY = e.touches[0].clientY;
+      wwm_startTx = wwm_tx;
+      wwm_startTy = wwm_ty;
+    }
+  }, { passive: true });
+
+  // 被来电、通知打断：清理状态，避免"卡住"
+  wwm_viewer.addEventListener('touchcancel', function () {
+    wwm_mode = 'none';
+    wwm_setAnim(true);
+    wwm_clampPos();
+    wwm_apply();
+  }, { passive: true });
+
+  /* ==================== 桌面等价操作（便于设备模式以外体验） ==================== */
+  // 双击
+  wwm_viewer.addEventListener('dblclick', function (e) {
+    var wwm_sx = e.clientX - wwm_cx;
+    var wwm_sy = e.clientY - wwm_cy;
+    wwm_setAnim(true);
+    wwm_zoomTo(wwm_scale > 1.05 ? 1 : 2, wwm_sx, wwm_sy);
+    wwm_apply();
+  });
+
+  // 滚轮缩放
+  wwm_viewer.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    var wwm_sx = e.clientX - wwm_cx;
+    var wwm_sy = e.clientY - wwm_cy;
+    wwm_setAnim(false);
+    wwm_zoomTo(wwm_scale + (e.deltaY < 0 ? 0.2 : -0.2), wwm_sx, wwm_sy);
+    wwm_apply();
+  }, { passive: false });
+
+  // 鼠标拖动（放大后）
+  var wwm_mouseDown = false;
+  wwm_viewer.addEventListener('mousedown', function (e) {
+    if (wwm_scale <= 1) return;
+    wwm_mouseDown = true;
+    wwm_startX = e.clientX;
+    wwm_startY = e.clientY;
+    wwm_startTx = wwm_tx;
+    wwm_startTy = wwm_ty;
+    wwm_setAnim(false);
+  });
+  window.addEventListener('mousemove', function (e) {
+    if (!wwm_mouseDown) return;
+    wwm_tx = wwm_startTx + (e.clientX - wwm_startX);
+    wwm_ty = wwm_startTy + (e.clientY - wwm_startY);
+    wwm_clampPos();
+    wwm_apply();
+  });
+  window.addEventListener('mouseup', function () {
+    if (!wwm_mouseDown) return;
+    wwm_mouseDown = false;
+    wwm_setAnim(true);
+    wwm_clampPos();
+    wwm_apply();
+  });
+
+  /* ==================== 按钮 ==================== */
+  wwm_resetBtn.addEventListener('click', function () {
+    wwm_setAnim(true);
+    wwm_scale = 1;
+    wwm_tx = 0;
+    wwm_ty = 0;
+    wwm_apply();
+  });
+  wwm_twiceBtn.addEventListener('click', function () {
+    wwm_setAnim(true);
+    wwm_zoomTo(wwm_scale > 1.05 ? 1 : 2, 0, 0);
+    wwm_apply();
+  });
+
+  /* ==================== 尺寸变化：旋转屏幕不丢状态 ==================== */
+  function wwm_onResize() {
+    wwm_measure();
+    wwm_clampPos();     // 保留 wwm_scale，只重新夹紧位移
+    wwm_apply();
+  }
+  window.addEventListener('resize', wwm_onResize);
+  window.addEventListener('orientationchange', function () {
+    setTimeout(wwm_onResize, 260);   // 等系统完成旋转后再测量
+  });
+
+  /* ==================== 初始化 ==================== */
+  function wwm_init() {
+    wwm_measure();
+    wwm_apply();
+  }
+  if (wwm_img.complete) { wwm_init(); }
+  else { wwm_img.addEventListener('load', wwm_init); }
+  window.addEventListener('load', wwm_init);
+})();
+</script>
+</body>
+</html>

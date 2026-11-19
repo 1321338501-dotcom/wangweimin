@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!-- 姓名：王伟民　学号：617　课程：高级网页设计 · 移动端触摸交互 -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>移动端触摸交互 · 按下 / 滑动 / 缩放</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: #f5f7fa;
+    color: #1f2937;
+    line-height: 1.7;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wwm_wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 64px; }
+
+  /* 页头 */
+  .wwm_hero {
+    background: linear-gradient(135deg, #151022 0%, #2b1a4d 55%, #3d2a6b 100%);
+    border-radius: 18px;
+    padding: 28px 22px;
+    color: #fff;
+    box-shadow: 0 10px 28px rgba(21, 16, 34, .3);
+  }
+  .wwm_hero__kicker { margin: 0 0 6px; font-size: 12px; letter-spacing: 3px; color: #c4b5fd; }
+  .wwm_hero h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: 1px; }
+  .wwm_hero p { margin: 0; font-size: 14px; color: #ddd6fe; }
+  .wwm_hero__tip { margin-top: 14px; font-size: 13px; background: rgba(255,255,255,.12); padding: 9px 14px; border-radius: 10px; }
+  .wwm_back { display: inline-block; margin-top: 14px; color: #c4b5fd; font-size: 13px; text-decoration: none; }
+  .wwm_back:hover { text-decoration: underline; }
+
+  /* 区块 */
+  .wwm_sec { background: #fff; border-radius: 16px; padding: 22px 18px; margin-top: 18px; box-shadow: 0 3px 14px rgba(31,41,55,.06); }
+  .wwm_sec h2 { margin: 0 0 4px; font-size: 19px; padding-left: 11px; border-left: 5px solid #6d28d9; }
+  .wwm_sec__sub { margin: 0 0 14px; font-size: 13px; color: #6b7280; }
+  .wwm_sec p { margin: 10px 0; font-size: 14.5px; }
+  code { background: #f3f4f6; color: #be185d; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+
+  /* 表格：手机上横向滚动 */
+  .wwm_tblbox { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 560px; }
+  th, td { border: 1px solid #e5e7eb; padding: 9px 11px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; font-weight: 700; white-space: nowrap; }
+  tbody tr:nth-child(even) td { background: #fcfcfd; }
+
+  /* 代码块 */
+  pre {
+    background: #151022; color: #e5e7eb; padding: 14px;
+    border-radius: 10px; overflow-x: auto; font-size: 12.5px; line-height: 1.65;
+    margin: 12px 0;
+  }
+
+  /* 演示区通用 */
+  .wwm_demo {
+    border: 1px solid #ede9fe; background: #faf5ff;
+    border-radius: 14px; padding: 14px; margin-top: 14px;
+  }
+  .wwm_demo__hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .wwm_demo__title { font-weight: 700; font-size: 14.5px; color: #4c1d95; }
+  .wwm_badge { font-size: 11.5px; background: #ede9fe; color: #6d28d9; padding: 3px 9px; border-radius: 999px; font-weight: 700; }
+
+  /* 触摸板 */
+  .wwm_pad {
+    height: 170px;
+    border-radius: 12px;
+    background: #151022;
+    color: #a78bfa;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; font-size: 14px; padding: 12px;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    cursor: pointer;
+  }
+  .wwm_pad.wwm_pad--active { background: #241a3d; color: #ddd6fe; }
+
+  /* 日志 */
+  .wwm_log {
+    margin-top: 10px; height: 150px; overflow-y: auto;
+    background: #0f0a1a; color: #d1d5db; border-radius: 10px;
+    padding: 10px 12px; font-family: Consolas, "Courier New", monospace;
+    font-size: 12px; line-height: 1.75;
+  }
+  .wwm_log__row { white-space: pre-wrap; word-break: break-all; }
+  .wwm_log__row b { color: #fbbf24; }
+  .wwm_log__row i { color: #6ee7b7; font-style: normal; }
+
+  /* 结果大字 */
+  .wwm_result {
+    margin-top: 10px; background: #fff; border: 1px dashed #d8cff5;
+    border-radius: 10px; padding: 12px 14px; font-size: 14px; color: #374151;
+  }
+  .wwm_result b { color: #6d28d9; }
+
+  /* 长按测试块 */
+  .wwm_tap {
+    height: 120px; border-radius: 12px;
+    background: linear-gradient(135deg, #6d28d9, #a855f7);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    text-align: center; font-size: 15px; font-weight: 700; padding: 12px;
+    touch-action: manipulation;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    cursor: pointer;
+  }
+  .wwm_tap.wwm_tap--long { background: linear-gradient(135deg, #b91c1c, #f97316); }
+
+  /* 缩放演示 */
+  .wwm_zoombox {
+    height: 200px; border-radius: 12px; background: #ede9fe;
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+    touch-action: none; user-select: none; -webkit-user-select: none;
+  }
+  .wwm_zoombox__item {
+    width: 92px; height: 92px; border-radius: 18px;
+    background: linear-gradient(135deg, #6d28d9, #22d3ee);
+    color: #fff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 8px; will-change: transform;
+  }
+
+  /* 任务入口 */
+  .wwm_tasks { display: grid; gap: 14px; margin-top: 14px; }
+  .wwm_task {
+    display: block; text-decoration: none; color: inherit;
+    border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px;
+    background: #fff; transition: transform .2s, box-shadow .2s, border-color .2s;
+  }
+  .wwm_task:hover, .wwm_task:active { transform: translateY(-3px); border-color: #c4b5fd; box-shadow: 0 10px 22px rgba(109,40,217,.12); }
+  .wwm_task__star { font-size: 12px; color: #b45309; font-weight: 700; }
+  .wwm_task h3 { margin: 4px 0 6px; font-size: 16.5px; color: #111827; }
+  .wwm_task p { margin: 0; font-size: 13.5px; color: #4b5563; }
+  .wwm_task__go { display: inline-block; margin-top: 10px; font-size: 13px; color: #6d28d9; font-weight: 700; }
+
+  /* 提示条 */
+  .wwm_note {
+    background: #fffbeb; border-left: 4px solid #f59e0b;
+    padding: 10px 14px; border-radius: 8px; font-size: 13.5px; color: #78350f; margin: 12px 0;
+  }
+  .wwm_note--danger { background: #fef2f2; border-left-color: #dc2626; color: #991b1b; }
+
+  .wwm_footer { text-align: center; font-size: 12.5px; color: #9ca3af; margin-top: 26px; }
+
+  @media (min-width: 720px) {
+    .wwm_hero h1 { font-size: 30px; }
+    .wwm_tasks { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wwm_wrap">
+
+  <header class="wwm_hero">
+    <p class="wwm_hero__kicker">移 动 端 · 触 摸 交 互</p>
+    <h1>按下 · 滑动 · 缩放</h1>
+    <p>手机上用户用的是手指——按下、滑动、长按、双指缩放、摇一摇。这节课把触摸事件讲清、演示透，再用 4 个递进任务练熟。</p>
+    <div class="wwm_hero__tip">本页演示全部基于 <code>touch</code> 触摸事件，请用手机打开；没有手机时可用浏览器设备模式体验单指操作。</div>
+    <a class="wwm_back" href="index.html">← 返回课堂实践中心</a>
+  </header>
+
+  <!-- ============ 1 四个坑 ============ -->
+  <section class="wwm_sec">
+    <h2>1 · 先避坑，再动手</h2>
+    <p class="wwm_sec__sub">手机上最容易踩的四个坑</p>
+    <div class="wwm_tblbox">
+      <table>
+        <thead><tr><th>写出来的现象</th><th>真正的原因</th><th>正确做法</th></tr></thead>
+        <tbody>
+          <tr><td>按钮点一下变色，之后一直是那个颜色</td><td>用了 <code>:hover</code>，手指没有"悬停"，触摸后状态不会撤销</td><td>改用 <code>:active</code>，或只在 <code>@media (hover:hover)</code> 里写 hover</td></tr>
+          <tr><td>点击按钮反应慢半拍</td><td>浏览器在等"是不是双击"，历史上会等 300ms</td><td>加 <code>touch-action: manipulation</code>，或直接用 touch 事件处理</td></tr>
+          <tr><td>拖动卡片时整个页面跟着滚</td><td>浏览器把手势优先给了页面滚动</td><td>容器加 <code>touch-action: none</code>（接管手势）或 <code>pan-y</code>（只接管横向）</td></tr>
+          <tr><td>判断不了"往哪滑、几根手指"</td><td>只监听了 <code>click</code>，它只告诉你"点完了"</td><td>监听 <code>touchstart / touchmove / touchend</code>，从 <code>touches</code> 取坐标与数量</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>手指是"多个触点 + 一段轨迹"。要跟手、要方向、要几根手指——这些都得靠触摸事件。</p>
+    <div class="wwm_note">
+      <strong>手机页面必备三件套：</strong>① <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code>；
+      ② <code>-webkit-tap-highlight-color: transparent</code> 去掉点击灰块；
+      ③ 要接管手势的容器加 <code>touch-action: none</code>，否则浏览器会先滚动页面。
+    </div>
+  </section>
+
+  <!-- ============ 2 核心模型 ============ -->
+  <section class="wwm_sec">
+    <h2>2 · 四个触摸事件 + TouchList</h2>
+    <p class="wwm_sec__sub">核心模型</p>
+    <div class="wwm_tblbox">
+      <table>
+        <thead><tr><th>事件</th><th>什么时候触发</th><th>典型用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>touchstart</code></td><td>手指刚按下</td><td>记录起点、开始长按计时</td></tr>
+          <tr><td><code>touchmove</code></td><td>手指在屏幕上移动（连续触发很多次）</td><td>跟手拖动、画板、判断方向</td></tr>
+          <tr><td><code>touchend</code></td><td>手指抬起</td><td>计算滑动距离与速度，决定是否翻页</td></tr>
+          <tr><td><code>touchcancel</code></td><td>被系统打断（来电、通知、手势返回）</td><td>清理状态，避免"卡住"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre>wwm_pad.addEventListener('touchstart', function (e) {
+  // touches       屏幕上所有手指（含其他元素上的）
+  // targetTouches 只在当前元素上的手指
+  // changedTouches 本次事件"变化"的手指（抬手时从 touches 里消失的就是它）
+  var wwm_t = e.touches[0];            // 第一根手指
+  console.log(wwm_t.clientX, wwm_t.clientY); // 相对可视区域
+  console.log(e.touches.length);       // 几根手指
+});</pre>
+    <p>抬手时一定要用 <code>changedTouches[0]</code>：<code>touchend</code> 触发时那根手指已经从 <code>touches</code> 移除，用 <code>touches[0]</code> 可能拿到别的指头甚至 undefined。</p>
+  </section>
+
+  <!-- ============ 3 演示一：事件探针 ============ -->
+  <section class="wwm_sec">
+    <h2>3 · 演示一：事件探针</h2>
+    <p class="wwm_sec__sub">用手指按一下、拖一拖、再抬起，观察真实触发顺序</p>
+
+    <div class="wwm_demo">
+      <div class="wwm_demo__hd">
+        <span class="wwm_demo__title">事件探针</span>
+        <span class="wwm_badge">请用手机 / 设备模式</span>
+      </div>
+      <div class="wwm_pad" id="wwmProbePad">用手指在这里按下并拖动</div>
+      <div class="wwm_log" id="wwmProbeLog"><div class="wwm_log__row">等待你的第一次触摸……</div></div>
+      <div class="wwm_result">已记录：<b id="wwmProbeCount">0</b> 条事件　|　touchmove 次数：<b id="wwmProbeMove">0</b></div>
+    </div>
+
+    <p><strong>你应该观察到：</strong>touchstart → 若干次 touchmove → touchend → 最后才是 click。移动距离越大，move 次数越多——这就是"跟手"的原理。</p>
+    <div class="wwm_note wwm_note--danger"><code>touchend</code> 之后系统还会补发一次 <code>click</code>。两套逻辑都写会"点一次执行两次"，记得二选一或在 touch 处理里 <code>preventDefault()</code>。</div>
+  </section>
+
+  <!-- ============ 4 演示二：滑动方向 ============ -->
+  <section class="wwm_sec">
+    <h2>4 · 演示二：识别滑动方向</h2>
+    <p class="wwm_sec__sub">记起点 → 算差值 → 比较绝对值（阈值 30px）</p>
+
+    <div class="wwm_demo">
+      <div class="wwm_demo__hd">
+        <span class="wwm_demo__title">滑动识别器</span>
+        <span class="wwm_badge">阈值 30px</span>
+      </div>
+      <div class="wwm_pad" id="wwmSwipePad">按住后朝 上 / 下 / 左 / 右 滑</div>
+      <div class="wwm_result">方向：<b id="wwmSwipeDir">—</b>　距离：<b id="wwmSwipeLen">—</b></div>
+    </div>
+
+    <pre>var wwm_startX = 0, wwm_startY = 0;
+
+wwm_pad.addEventListener('touchstart', function (e) {
+  var wwm_t = e.touches[0];
+  wwm_startX = wwm_t.clientX;
+  wwm_startY = wwm_t.clientY;
+}, { passive: true });
+
+wwm_pad.addEventListener('touchend', function (e) {
+  var wwm_t = e.changedTouches[0];        // 抬手时用它
+  var wwm_dx = wwm_t.clientX - wwm_startX;
+  var wwm_dy = wwm_t.clientY - wwm_startY;
+  var wwm_line = 30;                      // 阈值：太小会把抖动误判成滑动
+
+  if (Math.abs(wwm_dx) &lt; wwm_line &amp;&amp; Math.abs(wwm_dy) &lt; wwm_line) return; // 算点击
+
+  // 谁大听谁的
+  if (Math.abs(wwm_dx) &gt; Math.abs(wwm_dy)) {
+    console.log(wwm_dx &gt; 0 ? '向右滑' : '向左滑');
+  } else {
+    console.log(wwm_dy &gt; 0 ? '向下滑' : '向上滑');
+  }
+});</pre>
+    <p>为什么需要阈值？手指按下几乎不可能完全不动，几个像素的抖动会被误判成"滑动"。30px 是经验值，卡片越大可以适当加大。</p>
+  </section>
+
+  <!-- ============ 5 演示三：长按 / 双击 ============ -->
+  <section class="wwm_sec">
+    <h2>5 · 演示三：长按与双击</h2>
+    <p class="wwm_sec__sub">时间维度的判断（长按 600ms · 双击 300ms）</p>
+
+    <div class="wwm_demo">
+      <div class="wwm_demo__hd">
+        <span class="wwm_demo__title">长按 / 双击测试区</span>
+        <span class="wwm_badge">长按 600ms · 双击 300ms</span>
+      </div>
+      <div class="wwm_tap" id="wwmTapBox">长按我（0.6 秒）<br>或者快速点两下</div>
+      <div class="wwm_result">结果：<b id="wwmTapResult">—</b></div>
+    </div>
+
+    <pre>var wwm_timer = null;
+var wwm_lastTap = 0;
+
+wwm_el.addEventListener('touchstart', function () {
+  wwm_timer = setTimeout(function () { console.log('长按触发'); }, 600);
+}, { passive: true });
+
+wwm_el.addEventListener('touchend', function () {
+  clearTimeout(wwm_timer);                 // 抬手了，取消长按
+
+  var wwm_now = Date.now();
+  if (wwm_now - wwm_lastTap &lt; 300) {
+    console.log('双击');
+    wwm_lastTap = 0;                       // 重置，避免三击被算成两次双击
+  } else {
+    wwm_lastTap = wwm_now;
+  }
+});
+
+// 被电话、通知打断时也要清理定时器，否则状态会卡住
+wwm_el.addEventListener('touchcancel', function () { clearTimeout(wwm_timer); });</pre>
+    <p>长按还会触发系统菜单（选中文字、图片另存），记得加 <code>user-select:none</code> 和 <code>-webkit-touch-callout:none</code>（iOS）。</p>
+  </section>
+
+  <!-- ============ 6 双指缩放 ============ -->
+  <section class="wwm_sec">
+    <h2>6 · 双指缩放与设备能力</h2>
+    <p class="wwm_sec__sub">两指距离的变化 = 缩放比例</p>
+
+    <div class="wwm_demo">
+      <div class="wwm_demo__hd">
+        <span class="wwm_demo__title">双指缩放演示</span>
+        <span class="wwm_badge">1x ~ 4x</span>
+      </div>
+      <div class="wwm_zoombox" id="wwmZoomBox">
+        <div class="wwm_zoombox__item" id="wwmZoomItem">双指缩放<br>这块</div>
+      </div>
+      <div class="wwm_result">当前倍数：<b id="wwmZoomVal">1.00</b> ×　|　本帧比例：<b id="wwmZoomStep">—</b></div>
+    </div>
+
+    <pre>function wwm_dist(t1, t2) {                       // 两指直线距离
+  return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+}
+
+var wwm_lastDist = 0;
+var wwm_total = 1;
+
+wwm_el.addEventListener('touchstart', function () {
+  wwm_lastDist = 0;                               // 新一轮手势，清空上一轮残留
+}, { passive: true });
+
+wwm_el.addEventListener('touchmove', function (e) {
+  if (e.touches.length &lt; 2) return;               // 少于两根手指不处理
+  var wwm_d = wwm_dist(e.touches[0], e.touches[1]);
+
+  if (wwm_lastDist) {
+    var wwm_step = wwm_d / wwm_lastDist;          // &gt;1 放大，&lt;1 缩小
+    wwm_total = Math.min(4, Math.max(1, wwm_total * wwm_step)); // 每帧比例要累乘并限幅
+  }
+  wwm_lastDist = wwm_d;
+}, { passive: false });</pre>
+
+    <div class="wwm_tblbox">
+      <table>
+        <thead><tr><th>关键点</th><th>为什么这么写</th></tr></thead>
+        <tbody>
+          <tr><td><code>Math.hypot(dx, dy)</code></td><td>直接算两点直线距离，等价于 √(dx²+dy²)，少写乘法不易错</td></tr>
+          <tr><td><code>clientX / clientY</code></td><td>两指必须用同一套坐标系，混用 page 会算错</td></tr>
+          <tr><td><code>scale &gt; 1</code> 表示放大</td><td>两指间距变大 = 图片被"拉开"，比例是本帧相对上一帧的倍数</td></tr>
+          <tr><td><code>{ passive: false }</code></td><td>告诉浏览器"我要阻止默认行为"，否则 <code>preventDefault()</code> 失效并报警告</td></tr>
+          <tr><td><code>total = total × step</code></td><td>每帧比例只是"相对值"，真正要用的总倍数必须累乘并限制在 1～4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>还有三类在作业里很出彩的"设备事件"：</p>
+    <div class="wwm_tblbox">
+      <table>
+        <thead><tr><th>事件</th><th>能做什么</th><th>注意点</th></tr></thead>
+        <tbody>
+          <tr><td><code>orientationchange</code> / <code>resize</code></td><td>横竖屏切换时重排布局或重绘 canvas</td><td>resize 会连续触发，记得防抖</td></tr>
+          <tr><td><code>deviceorientation</code></td><td>陀螺仪：倾斜角度 α β γ，做水平仪、3D 视差</td><td>iOS 13+ 必须用户点击后调用 <code>DeviceOrientationEvent.requestPermission()</code></td></tr>
+          <tr><td><code>devicemotion</code></td><td>加速度：摇一摇、计步、晃动检测</td><td>阈值判断 + 冷却时间，否则一次摇动触发十几次</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="wwm_note wwm_note--danger">传感器事件必须在真机上测，电脑浏览器收不到数据。代码里一定要做"没有传感器"的降级分支，否则就是一片空白。</div>
+  </section>
+
+  <!-- ============ 7 任务入口 ============ -->
+  <section class="wwm_sec">
+    <h2>7 · 课堂实践任务</h2>
+    <p class="wwm_sec__sub">观察 → 实现 → 综合 → 拓展（至少完成 ⭐⭐ 两关）</p>
+
+    <div class="wwm_tasks">
+      <a class="wwm_task" href="mobile-gesture.html">
+        <span class="wwm_task__star">⭐⭐ 任务二</span>
+        <h3>手势卡片：左右滑动切换</h3>
+        <p>4 道中华美食卡片，左滑下一道、右滑上一道，阈值 40px，边界提示，300ms 冷却防连跳。</p>
+        <span class="wwm_task__go">打开卡片页 →</span>
+      </a>
+      <a class="wwm_task" href="mobile-zoom.html">
+        <span class="wwm_task__star">⭐⭐⭐ 任务三</span>
+        <h3>图片查看器：双指缩放</h3>
+        <p>双指 1x～4x 以两指中点为基准缩放，双击 1x/2x 切换，放大后可单指拖动，边界回弹。</p>
+        <span class="wwm_task__go">打开查看器 →</span>
+      </a>
+      <a class="wwm_task" href="mobile-sensor.html">
+        <span class="wwm_task__star">⭐⭐⭐⭐ 任务四</span>
+        <h3>摇一摇彩蛋</h3>
+        <p>摇动手机随机抽一道菜，1.5s 冷却；无传感器时显示"不支持"并给降级按钮，iOS 走权限申请。</p>
+        <span class="wwm_task__go">打开摇一摇 →</span>
+      </a>
+      <a class="wwm_task" href="#wwmProbePad">
+        <span class="wwm_task__star">⭐ 任务一</span>
+        <h3>事件侦探：观察记录</h3>
+        <p>用第 3 节探针区做 5 种操作，记录触发顺序；能回答 move 次数、click 时机、touchcancel 影响。</p>
+        <span class="wwm_task__go">回到探针区 →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ 8 评分与答辩 ============ -->
+  <section class="wwm_sec">
+    <h2>8 · 评分维度与现场答辩</h2>
+    <p class="wwm_sec__sub">不只看得分，更看讲得清</p>
+    <div class="wwm_tblbox">
+      <table>
+        <thead><tr><th>维度</th><th>分值</th><th>评分要点</th></tr></thead>
+        <tbody>
+          <tr><td>事件理解</td><td>25</td><td>四个触摸事件的触发时机、touches 三个列表的差别、为什么抬手用 changedTouches</td></tr>
+          <tr><td>手势实现</td><td>30</td><td>阈值、方向判断、冷却时间是否合理；边界与误触处理是否到位</td></tr>
+          <tr><td>移动端体验</td><td>20</td><td>是否跟手、有无页面误滚动、是否有过渡动画、横竖屏是否正常</td></tr>
+          <tr><td>降级与排错</td><td>15</td><td>不支持传感器/无权限时是否有友好提示；控制台无报错</td></tr>
+          <tr><td>规范与记录</td><td>10</td><td>命名前缀、文件头信息、AI 提示词记录、注释是否清晰</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="wwm_note">
+      <strong>现场答辩（随机 3 问）：</strong>① 为什么 <code>touchend</code> 里要用 <code>changedTouches[0]</code>？
+      ② 滑动阈值设成 5px 会怎样？③ 双指缩放怎么保证图片不"跳"？
+      ④ 页面加了 <code>touch-action:none</code> 后发生了什么？⑤ 没有传感器数据时代码怎么走？
+    </div>
+  </section>
+
+  <p class="wwm_footer">高级网页设计 · 移动端事件课堂案例 · 2026-2027-1<br>手指的"话"比想象中多：按下、移动、抬起、几根手指、往哪走——都要自己接管</p>
+</div>
+
+<script>
+/* ==================== 演示一：事件探针 ==================== */
+(function () {
+  var wwm_pad = document.getElementById('wwmProbePad');
+  var wwm_log = document.getElementById('wwmProbeLog');
+  var wwm_countEl = document.getElementById('wwmProbeCount');
+  var wwm_moveEl = document.getElementById('wwmProbeMove');
+  var wwm_n = 0, wwm_moves = 0, wwm_cleared = false;
+
+  function wwm_write(wwm_name, wwm_extra) {
+    if (!wwm_cleared) { wwm_log.innerHTML = ''; wwm_cleared = true; }
+    wwm_n++;
+    var wwm_now = new Date();
+    var wwm_ts = String(wwm_now.getMinutes()).padStart(2, '0') + ':' +
+                 String(wwm_now.getSeconds()).padStart(2, '0') + '.' +
+                 String(wwm_now.getMilliseconds()).padStart(3, '0');
+    var wwm_row = document.createElement('div');
+    wwm_row.className = 'wwm_log__row';
+    wwm_row.innerHTML = '<i>' + wwm_ts + '</i>  <b>' + wwm_name + '</b>  ' + (wwm_extra || '');
+    wwm_log.appendChild(wwm_row);
+    wwm_log.scrollTop = wwm_log.scrollHeight;
+    wwm_countEl.textContent = wwm_n;
+    if (wwm_name === 'touchmove') { wwm_moves++; wwm_moveEl.textContent = wwm_moves; }
+  }
+
+  wwm_pad.addEventListener('touchstart', function (e) {
+    var wwm_t = e.touches[0];
+    wwm_pad.classList.add('wwm_pad--active');
+    wwm_write('touchstart', '手指数=' + e.touches.length + '  起点(' + Math.round(wwm_t.clientX) + ',' + Math.round(wwm_t.clientY) + ')');
+  }, { passive: true });
+
+  wwm_pad.addEventListener('touchmove', function (e) {
+    var wwm_t = e.touches[0];
+    wwm_write('touchmove', '当前(' + Math.round(wwm_t.clientX) + ',' + Math.round(wwm_t.clientY) + ')');
+  }, { passive: true });
+
+  wwm_pad.addEventListener('touchend', function (e) {
+    var wwm_t = e.changedTouches[0];
+    wwm_pad.classList.remove('wwm_pad--active');
+    wwm_write('touchend', '抬起(' + Math.round(wwm_t.clientX) + ',' + Math.round(wwm_t.clientY) + ')  touches 剩 ' + e.touches.length);
+  }, { passive: true });
+
+  wwm_pad.addEventListener('touchcancel', function () {
+    wwm_pad.classList.remove('wwm_pad--active');
+    wwm_write('touchcancel', '被系统打断，状态已清理');
+  }, { passive: true });
+
+  wwm_pad.addEventListener('click', function () {
+    wwm_write('click', '（系统在 touchend 之后补发）');
+  });
+})();
+
+/* ==================== 演示二：滑动方向 ==================== */
+(function () {
+  var wwm_pad = document.getElementById('wwmSwipePad');
+  var wwm_dirEl = document.getElementById('wwmSwipeDir');
+  var wwm_lenEl = document.getElementById('wwmSwipeLen');
+  var wwm_startX = 0, wwm_startY = 0;
+  var wwm_LINE = 30;
+
+  wwm_pad.addEventListener('touchstart', function (e) {
+    var wwm_t = e.touches[0];
+    wwm_startX = wwm_t.clientX;
+    wwm_startY = wwm_t.clientY;
+    wwm_pad.classList.add('wwm_pad--active');
+  }, { passive: true });
+
+  wwm_pad.addEventListener('touchend', function (e) {
+    var wwm_t = e.changedTouches[0];
+    wwm_pad.classList.remove('wwm_pad--active');
+
+    var wwm_dx = wwm_t.clientX - wwm_startX;
+    var wwm_dy = wwm_t.clientY - wwm_startY;
+    var wwm_len = Math.round(Math.hypot(wwm_dx, wwm_dy));
+
+    if (Math.abs(wwm_dx) < wwm_LINE && Math.abs(wwm_dy) < wwm_LINE) {
+      wwm_dirEl.textContent = '点击（未达 30px 阈值）';
+      wwm_lenEl.textContent = wwm_len + ' px';
+      return;
+    }
+    var wwm_dir;
+    if (Math.abs(wwm_dx) > Math.abs(wwm_dy)) {
+      wwm_dir = wwm_dx > 0 ? '向右滑 →' : '← 向左滑';
+    } else {
+      wwm_dir = wwm_dy > 0 ? '向下滑 ↓' : '↑ 向上滑';
+    }
+    wwm_dirEl.textContent = wwm_dir;
+    wwm_lenEl.textContent = wwm_len + ' px';
+  }, { passive: true });
+})();
+
+/* ==================== 演示三：长按 / 双击 ==================== */
+(function () {
+  var wwm_box = document.getElementById('wwmTapBox');
+  var wwm_out = document.getElementById('wwmTapResult');
+  var wwm_timer = null;
+  var wwm_lastTap = 0;
+  var wwm_isLong = false;
+
+  function wwm_show(wwm_text) { wwm_out.textContent = wwm_text; }
+
+  wwm_box.addEventListener('touchstart', function () {
+    wwm_isLong = false;
+    wwm_timer = setTimeout(function () {
+      wwm_isLong = true;
+      wwm_box.classList.add('wwm_tap--long');
+      wwm_show('长按触发（600ms 未抬手）');
+    }, 600);
+  }, { passive: true });
+
+  wwm_box.addEventListener('touchend', function () {
+    clearTimeout(wwm_timer);
+    wwm_box.classList.remove('wwm_tap--long');
+    if (wwm_isLong) { wwm_isLong = false; return; }   // 长按已处理，不再判双击
+
+    var wwm_now = Date.now();
+    if (wwm_now - wwm_lastTap < 300) {
+      wwm_show('双击触发');
+      wwm_lastTap = 0;                                 // 重置，避免三击算两次双击
+    } else {
+      wwm_show('单击');
+      wwm_lastTap = wwm_now;
+    }
+  }, { passive: true });
+
+  wwm_box.addEventListener('touchcancel', function () {
+    clearTimeout(wwm_timer);
+    wwm_box.classList.remove('wwm_tap--long');
+    wwm_show('被系统打断，定时器已清理');
+  }, { passive: true });
+
+  // 设备模式用鼠标点也能体验
+  wwm_box.addEventListener('mousedown', function () {
+    wwm_isLong = false;
+    wwm_timer = setTimeout(function () {
+      wwm_isLong = true;
+      wwm_box.classList.add('wwm_tap--long');
+      wwm_show('长按触发（600ms 未松开）');
+    }, 600);
+  });
+  wwm_box.addEventListener('mouseup', function () {
+    clearTimeout(wwm_timer);
+    wwm_box.classList.remove('wwm_tap--long');
+    if (wwm_isLong) { wwm_isLong = false; return; }
+    var wwm_now = Date.now();
+    if (wwm_now - wwm_lastTap < 300) { wwm_show('双击触发'); wwm_lastTap = 0; }
+    else { wwm_show('单击'); wwm_lastTap = wwm_now; }
+  });
+})();
+
+/* ==================== 演示四：双指缩放 ==================== */
+(function () {
+  var wwm_box = document.getElementById('wwmZoomBox');
+  var wwm_item = document.getElementById('wwmZoomItem');
+  var wwm_valEl = document.getElementById('wwmZoomVal');
+  var wwm_stepEl = document.getElementById('wwmZoomStep');
+
+  var wwm_lastDist = 0;
+  var wwm_total = 1;
+
+  function wwm_dist(t1, t2) {
+    return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+  }
+
+  function wwm_apply() {
+    wwm_item.style.transform = 'scale(' + wwm_total.toFixed(3) + ')';
+    wwm_valEl.textContent = wwm_total.toFixed(2);
+  }
+
+  wwm_box.addEventListener('touchstart', function (e) {
+    wwm_lastDist = 0;
+    if (e.touches.length < 2) { wwm_total = 1; wwm_apply(); }  // 单指按下复位，方便反复演示
+  }, { passive: true });
+
+  wwm_box.addEventListener('touchmove', function (e) {
+    if (e.touches.length < 2) return;
+    e.preventDefault();                                        // 阻止页面被一起放大
+    var wwm_d = wwm_dist(e.touches[0], e.touches[1]);
+    if (wwm_lastDist) {
+      var wwm_step = wwm_d / wwm_lastDist;
+      wwm_total = Math.min(4, Math.max(1, wwm_total * wwm_step));
+      wwm_stepEl.textContent = wwm_step.toFixed(2);
+      wwm_apply();
+    }
+    wwm_lastDist = wwm_d;
+  }, { passive: false });
+
+  wwm_box.addEventListener('touchend', function (e) {
+    if (e.touches.length < 2) wwm_lastDist = 0;                // 松手清场，下一轮重新开始
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>

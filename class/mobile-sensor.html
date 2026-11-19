@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!-- 姓名：王伟民　学号：617　任务四：摇一摇彩蛋（设备传感器 + 权限 + 降级） -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>摇一摇 · 抽今日菜谱</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: radial-gradient(circle at 50% 0%, #2b1a4d 0%, #120c20 55%, #0b0714 100%);
+    min-height: 100vh;
+    color: #e5e7eb;
+    line-height: 1.7;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wwm_wrap { max-width: 620px; margin: 0 auto; padding: 18px 16px 48px; }
+
+  .wwm_head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .wwm_head h1 { margin: 0; font-size: 19px; color: #fff; }
+  .wwm_head p { margin: 2px 0 0; font-size: 12px; color: #9ca3af; }
+  .wwm_back { font-size: 13px; color: #c4b5fd; text-decoration: none; white-space: nowrap; }
+  .wwm_back:hover { text-decoration: underline; }
+
+  /* ===== 主舞台 ===== */
+  .wwm_stage {
+    text-align: center;
+    padding: 34px 20px 30px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(167, 139, 250, .25);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+  }
+  .wwm_phone {
+    width: 86px; height: 140px;
+    margin: 0 auto 20px;
+    border: 3px solid #a78bfa;
+    border-radius: 16px;
+    position: relative;
+    background: linear-gradient(160deg, rgba(167,139,250,.16), transparent);
+  }
+  .wwm_phone::before {
+    content: "";
+    position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+    width: 26px; height: 4px; border-radius: 999px; background: rgba(167, 139, 250, .55);
+  }
+  .wwm_phone::after {
+    content: "";
+    position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+    width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(167, 139, 250, .55);
+  }
+  /* 摇动动画 */
+  .wwm_phone.wwm_phone--shake { animation: wwm_shake .5s ease-in-out 2; }
+  @keyframes wwm_shake {
+    0%, 100% { transform: rotate(0); }
+    20% { transform: rotate(-13deg); }
+    40% { transform: rotate(11deg); }
+    60% { transform: rotate(-8deg); }
+    80% { transform: rotate(6deg); }
+  }
+
+  .wwm_title { margin: 0 0 6px; font-size: 17px; color: #fff; }
+  .wwm_sub { margin: 0; font-size: 13px; color: #9ca3af; }
+
+  /* ===== 结果卡 ===== */
+  .wwm_result {
+    margin: 22px auto 0;
+    min-height: 132px;
+    max-width: 340px;
+    border-radius: 18px;
+    padding: 20px 18px;
+    background: linear-gradient(135deg, #3b1f6e 0%, #6d28d9 55%, #a855f7 100%);
+    color: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    opacity: .55;
+    transform: scale(.96);
+  }
+  .wwm_result.wwm_result--pop { animation: wwm_pop .45s cubic-bezier(.2, 1.3, .4, 1) forwards; }
+  @keyframes wwm_pop {
+    0% { opacity: .55; transform: scale(.8); }
+    60% { opacity: 1; transform: scale(1.06); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .wwm_result__label { font-size: 12px; letter-spacing: 2px; color: #ddd6fe; margin-bottom: 6px; }
+  .wwm_result__dish { font-size: 25px; font-weight: 700; letter-spacing: 1px; }
+  .wwm_result__desc { font-size: 13px; color: rgba(255, 255, 255, .88); margin-top: 8px; }
+
+  /* ===== 按钮 ===== */
+  .wwm_actions { margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .wwm_btn {
+    border: 1px solid rgba(167, 139, 250, .5);
+    background: rgba(167, 139, 250, .16);
+    color: #e9d5ff; font-size: 14px; font-weight: 700;
+    padding: 11px 22px; border-radius: 999px;
+    cursor: pointer; transition: background .2s, transform .1s;
+  }
+  .wwm_btn:active { transform: scale(.96); background: rgba(167, 139, 250, .3); }
+  .wwm_btn--primary { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border-color: transparent; }
+  .wwm_btn--primary:active { background: linear-gradient(135deg, #6d28d9, #9333ea); }
+
+  /* ===== 状态提示 ===== */
+  .wwm_status {
+    margin-top: 18px; font-size: 13px; padding: 12px 14px; border-radius: 12px;
+    background: rgba(255, 255, 255, .06); color: #cbd5e1; text-align: left;
+  }
+  .wwm_status b { color: #fbbf24; }
+  .wwm_status--warn { background: rgba(245, 158, 11, .14); color: #fcd34d; }
+  .wwm_status--ok { background: rgba(16, 185, 129, .14); color: #6ee7b7; }
+  .wwm_status--off { display: none; }
+
+  /* ===== 说明区 ===== */
+  .wwm_sec { margin-top: 20px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(167, 139, 250, .18); border-radius: 14px; padding: 18px 16px; }
+  .wwm_sec h3 { margin: 0 0 10px; font-size: 15.5px; color: #fff; padding-left: 10px; border-left: 4px solid #a855f7; }
+  .wwm_sec p, .wwm_sec li { font-size: 13.5px; color: #cbd5e1; }
+  .wwm_sec ul { margin: 0; padding-left: 20px; }
+  .wwm_sec li { margin: 6px 0; }
+  code { background: rgba(168, 85, 247, .18); color: #f0abfc; padding: 2px 6px; border-radius: 4px; font-size: 12.5px; }
+  pre { background: #0a0612; color: #d1d5db; padding: 13px; border-radius: 10px; overflow-x: auto; font-size: 12px; line-height: 1.6; border: 1px solid #2b1a4d; }
+  .wwm_footer { text-align: center; font-size: 12px; color: #6b7280; margin-top: 22px; }
+</style>
+</head>
+<body>
+<div class="wwm_wrap">
+
+  <div class="wwm_head">
+    <div>
+      <h1>摇一摇 · 今日菜谱</h1>
+      <p>任务四 · 设备传感器 + 权限 + 降级</p>
+    </div>
+    <a class="wwm_back" href="mobile-events.html">← 返回课程</a>
+  </div>
+
+  <div class="wwm_stage">
+    <div class="wwm_phone" id="wwmPhone"></div>
+    <h2 class="wwm_title">摇一摇手机，抽今日菜谱</h2>
+    <p class="wwm_sub" id="wwmSub">把手机左右晃几下（需要真机）</p>
+
+    <div class="wwm_result" id="wwmResult">
+      <span class="wwm_result__label">今 日 菜 谱</span>
+      <span class="wwm_result__dish" id="wwmDish">— — —</span>
+      <span class="wwm_result__desc" id="wwmDesc">摇一摇，让今天吃点不一样的</span>
+    </div>
+
+    <div class="wwm_actions">
+      <button class="wwm_btn wwm_btn--primary wwm_status--off" id="wwmPermit" type="button">允许使用传感器</button>
+      <button class="wwm_btn" id="wwmDraw" type="button">点我抽一次</button>
+    </div>
+
+    <div class="wwm_status" id="wwmStatus">正在检测设备传感器…</div>
+  </div>
+
+  <!-- ===== 说明 ===== -->
+  <section class="wwm_sec">
+    <h3>为什么必须做降级</h3>
+    <p>传感器事件不是所有设备都有：电脑浏览器没有加速度计、部分安卓机权限被关闭、iOS 13+ 还要用户手动授权、浏览器也可能直接不派发 <code>devicemotion</code>。如果不写降级分支，页面就只剩一句"摇一摇"却永远没有反应，用户会以为页面坏了。</p>
+    <ul>
+      <li>先判断 <code>'DeviceMotionEvent' in window</code>，不支持就直接提示并给按钮。</li>
+      <li>监听后设一个 1.2s 的"看门狗"：期间没收到任何事件，就视为不可用。</li>
+      <li>降级按钮走同一套抽签逻辑，保证功能不缺失。</li>
+    </ul>
+  </section>
+
+  <section class="wwm_sec">
+    <h3>核心代码</h3>
+    <pre>// 1. 能力检测
+if (!('DeviceMotionEvent' in window)) wwm_fallback('当前设备不支持');
+
+// 2. iOS 13+ 需要用户点击后授权
+if (typeof DeviceMotionEvent.requestPermission === 'function') {
+  wwm_permitBtn.onclick = function () {
+    DeviceMotionEvent.requestPermission().then(function (wwm_state) {
+      if (wwm_state === 'granted') wwm_listen();
+      else wwm_fallback('未获得传感器权限');
+    });
+  };
+}
+
+// 3. 摇动判定：合成加速度 &gt; 18，冷却 1.5s
+function wwm_onMotion(e) {
+  var wwm_a = e.accelerationIncludingGravity;
+  if (!wwm_a) return;                                  // 没有数据
+  var wwm_mag = Math.hypot(wwm_a.x || 0, wwm_a.y || 0, wwm_a.z || 0);
+  var wwm_now = Date.now();
+  if (wwm_mag &gt; 18 &amp;&amp; wwm_now - wwm_last &gt; 1500) {
+    wwm_last = wwm_now;                                // 进入冷却
+    wwm_draw();                                        // 抽一道菜
+  }
+}</pre>
+    <p><code>accelerationIncludingGravity</code> 包含重力（静止约 9.8），适合判断"晃动幅度"；<code>acceleration</code> 已扣除重力，静止时接近 0。摇一摇用前者更稳。</p>
+  </section>
+
+  <section class="wwm_sec">
+    <h3>验收自查</h3>
+    <ul>
+      <li>① 一次摇动只触发一次 —— 1.5 秒冷却。</li>
+      <li>② 没有加速度传感器时显示"不支持"并给出降级按钮，不报错、不白屏。</li>
+      <li>③ iOS 上通过按钮触发 <code>requestPermission()</code>。</li>
+      <li>④ 能讲清 <code>accelerationIncludingGravity</code> 与 <code>acceleration</code> 的区别。</li>
+    </ul>
+  </section>
+
+  <p class="wwm_footer">姓名：王伟民　学号：617　高级网页设计 · 移动端触摸交互</p>
+</div>
+
+<script>
+(function () {
+  var wwm_phone = document.getElementById('wwmPhone');
+  var wwm_sub = document.getElementById('wwmSub');
+  var wwm_result = document.getElementById('wwmResult');
+  var wwm_dishEl = document.getElementById('wwmDish');
+  var wwm_descEl = document.getElementById('wwmDesc');
+  var wwm_status = document.getElementById('wwmStatus');
+  var wwm_drawBtn = document.getElementById('wwmDraw');
+  var wwm_permitBtn = document.getElementById('wwmPermit');
+
+  var wwm_THRESHOLD = 18;     // 合成加速度阈值（含重力，静止约 9.8）
+  var wwm_COOLDOWN = 1500;    // 冷却 1.5 秒，防止一次摇动触发多次
+  var wwm_lastShake = 0;      // 上次触发时间
+  var wwm_lastDish = -1;      // 避免连续抽到同一道
+  var wwm_gotData = false;    // 是否真的收到过传感器数据
+
+  var wwm_DISHES = [
+    { name: '北京烤鸭', desc: '皮脆肉嫩，卷饼蘸甜面酱' },
+    { name: '麻婆豆腐', desc: '麻辣鲜香烫，拌饭一绝' },
+    { name: '白切鸡',   desc: '皮爽肉滑，蘸姜葱豉油' },
+    { name: '兰州牛肉面', desc: '一清二白三红四绿五黄' },
+    { name: '小笼包',   desc: '皮薄汁多，先开窗后喝汤' },
+    { name: '东坡肉',   desc: '肥而不腻，酥而不烂' },
+    { name: '清蒸鲈鱼', desc: '鲜嫩清甜，淋一勺热油' },
+    { name: '扬州炒饭', desc: '粒粒分明，配料十样' }
+  ];
+
+  /* ---------- 抽一道菜并弹窗 ---------- */
+  function wwm_draw() {
+    var wwm_i = Math.floor(Math.random() * wwm_DISHES.length);
+    // 避免和上一次重复
+    while (wwm_DISHES.length > 1 && wwm_i === wwm_lastDish) {
+      wwm_i = Math.floor(Math.random() * wwm_DISHES.length);
+    }
+    wwm_lastDish = wwm_i;
+
+    var wwm_pick = wwm_DISHES[wwm_i];
+    wwm_dishEl.textContent = wwm_pick.name;
+    wwm_descEl.textContent = wwm_pick.desc;
+
+    // 重放弹出动画
+    wwm_result.classList.remove('wwm_result--pop');
+    void wwm_result.offsetWidth;          // 强制回流，动画才能重复播放
+    wwm_result.classList.add('wwm_result--pop');
+
+    // 手机也摇一下
+    wwm_phone.classList.remove('wwm_phone--shake');
+    void wwm_phone.offsetWidth;
+    wwm_phone.classList.add('wwm_phone--shake');
+
+    // 振动反馈（支持才生效）
+    if (navigator.vibrate) { navigator.vibrate(60); }
+  }
+
+  /* ---------- 状态提示 ---------- */
+  function wwm_setStatus(wwm_text, wwm_type) {
+    wwm_status.className = 'wwm_status' + (wwm_type ? ' wwm_status--' + wwm_type : '');
+    wwm_status.innerHTML = wwm_text;
+  }
+
+  /* ---------- 降级分支 ---------- */
+  function wwm_fallback(wwm_reason) {
+    wwm_setStatus('<b>' + wwm_reason + '</b><br>当前设备不支持，请用手机打开；也可以点下方「点我抽一次」直接抽取。', 'warn');
+    wwm_sub.textContent = '当前设备不支持摇一摇，请点按钮抽取';
+  }
+
+  /* ---------- 摇动处理 ---------- */
+  function wwm_onMotion(e) {
+    var wwm_a = e.accelerationIncludingGravity;
+    if (!wwm_a) return;                                   // 没有数据，交给看门狗
+
+    // 部分浏览器会派发"全 0"的空壳数据，等同没有传感器
+    if ((wwm_a.x || 0) === 0 && (wwm_a.y || 0) === 0 && (wwm_a.z || 0) === 0) return;
+
+    if (!wwm_gotData) {
+      wwm_gotData = true;
+      wwm_setStatus('传感器已就绪：摇一摇手机试试。', 'ok');
+      wwm_sub.textContent = '把手机左右晃几下';
+    }
+
+    var wwm_mag = Math.hypot(wwm_a.x || 0, wwm_a.y || 0, wwm_a.z || 0);
+    var wwm_now = Date.now();
+
+    if (wwm_mag > wwm_THRESHOLD && wwm_now - wwm_lastShake > wwm_COOLDOWN) {
+      wwm_lastShake = wwm_now;                            // 进入冷却
+      wwm_draw();
+    }
+  }
+
+  /* ---------- 开始监听 ---------- */
+  function wwm_listen() {
+    wwm_permitBtn.classList.add('wwm_status--off');
+    window.addEventListener('devicemotion', wwm_onMotion);
+
+    // 看门狗：1.2 秒内没收到数据 → 判定不可用
+    setTimeout(function () {
+      if (!wwm_gotData) { wwm_fallback('没有收到传感器数据'); }
+    }, 1200);
+  }
+
+  /* ---------- 启动：能力检测 + iOS 授权 ---------- */
+  function wwm_boot() {
+    if (!('DeviceMotionEvent' in window)) {
+      wwm_fallback('当前设备不支持 devicemotion');
+      return;
+    }
+
+    // iOS 13+ 必须由用户点击触发授权
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      wwm_setStatus('iOS 需要先授权才能读取加速度传感器。', 'warn');
+      wwm_sub.textContent = '请先点击下方「允许使用传感器」';
+      wwm_permitBtn.classList.remove('wwm_status--off');
+      wwm_permitBtn.addEventListener('click', function () {
+        DeviceMotionEvent.requestPermission().then(function (wwm_state) {
+          if (wwm_state === 'granted') {
+            wwm_setStatus('授权成功，正在等待传感器数据…', 'ok');
+            wwm_listen();
+          } else {
+            wwm_fallback('未获得传感器权限');
+          }
+        }).catch(function () {
+          wwm_fallback('权限申请失败');
+        });
+      });
+    } else {
+      wwm_listen();
+    }
+  }
+
+  /* ---------- 降级按钮：不依赖传感器 ---------- */
+  wwm_drawBtn.addEventListener('click', wwm_draw);
+
+  wwm_boot();
+})();
+</script>
+</body>
+</html>

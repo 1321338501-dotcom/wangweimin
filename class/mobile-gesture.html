@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!-- 姓名：王伟民　学号：617　任务二：手势卡片（左右滑动切换内容） -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手势卡片 · 左右滑动切换</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: #f5f7fa;
+    color: #1f2937;
+    line-height: 1.7;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wwm_wrap { max-width: 720px; margin: 0 auto; padding: 18px 16px 56px; }
+
+  .wwm_head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .wwm_head h1 { margin: 0; font-size: 20px; }
+  .wwm_head p { margin: 2px 0 0; font-size: 12.5px; color: #6b7280; }
+  .wwm_back { font-size: 13px; color: #6d28d9; text-decoration: none; white-space: nowrap; }
+  .wwm_back:hover { text-decoration: underline; }
+
+  /* ===== 卡片舞台：只接管横向，纵向仍可滚动页面 ===== */
+  .wwm_stage {
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    overflow: hidden;
+    border-radius: 20px;
+    box-shadow: 0 14px 30px rgba(21, 16, 34, .18);
+    background: #fff;
+    position: relative;
+  }
+  .wwm_track {
+    display: flex;
+    transition: transform .3s cubic-bezier(.25, .8, .3, 1);   /* 0.3s 过渡动画 */
+    will-change: transform;
+  }
+  .wwm_slide {
+    flex: 0 0 100%;
+    min-height: 300px;
+    padding: 26px 22px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+  }
+  .wwm_slide__no {
+    position: absolute; top: 18px; left: 22px;
+    font-size: 12.5px; letter-spacing: 2px;
+    background: rgba(255, 255, 255, .22);
+    padding: 4px 11px; border-radius: 999px;
+    backdrop-filter: blur(4px);
+  }
+  .wwm_slide h2 { margin: 0 0 8px; font-size: 27px; letter-spacing: 1px; }
+  .wwm_slide p { margin: 0; font-size: 14px; color: rgba(255, 255, 255, .92); }
+  .wwm_slide__tag {
+    display: inline-block; margin-top: 14px; align-self: flex-start;
+    font-size: 12px; background: rgba(255, 255, 255, .2);
+    padding: 5px 12px; border-radius: 999px;
+  }
+
+  .wwm_s1 { background: linear-gradient(135deg, #7c2d12 0%, #ea580c 60%, #f59e0b 100%); }
+  .wwm_s2 { background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 55%, #f97316 100%); }
+  .wwm_s3 { background: linear-gradient(135deg, #713f12 0%, #ca8a04 55%, #facc15 100%); }
+  .wwm_s4 { background: linear-gradient(135deg, #14532d 0%, #16a34a 55%, #4ade80 100%); }
+
+  /* ===== 控制条 ===== */
+  .wwm_bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-top: 14px;
+  }
+  .wwm_nav {
+    width: 44px; height: 44px; border: 1px solid #e5e7eb; border-radius: 12px;
+    background: #fff; color: #4c1d95; font-size: 19px; line-height: 1;
+    cursor: pointer; transition: background .2s, transform .1s;
+  }
+  .wwm_nav:active { transform: scale(.94); background: #f3f4f6; }
+  .wwm_nav:disabled { opacity: .35; cursor: not-allowed; }
+  .wwm_count { font-size: 14px; font-weight: 700; color: #4b5563; }
+  .wwm_count b { color: #6d28d9; font-size: 17px; }
+
+  .wwm_dots { display: flex; gap: 7px; justify-content: center; margin-top: 14px; }
+  .wwm_dot { width: 8px; height: 8px; border-radius: 50%; background: #d1d5db; transition: all .2s; }
+  .wwm_dot.wwm_dot--on { width: 22px; border-radius: 999px; background: #6d28d9; }
+
+  /* ===== 边界提示 ===== */
+  .wwm_toast {
+    position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%) translateY(20px);
+    background: rgba(21, 16, 34, .92); color: #fff;
+    padding: 10px 18px; border-radius: 999px; font-size: 13.5px;
+    opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
+    white-space: nowrap; z-index: 99;
+  }
+  .wwm_toast.wwm_toast--show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ===== 说明区 ===== */
+  .wwm_sec { background: #fff; border-radius: 16px; padding: 20px 18px; margin-top: 18px; box-shadow: 0 3px 14px rgba(31,41,55,.06); }
+  .wwm_sec h3 { margin: 0 0 10px; font-size: 16.5px; padding-left: 10px; border-left: 4px solid #6d28d9; }
+  .wwm_sec ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  .wwm_sec li { margin: 6px 0; }
+  code { background: #f3f4f6; color: #be185d; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  pre { background: #151022; color: #e5e7eb; padding: 14px; border-radius: 10px; overflow-x: auto; font-size: 12.5px; line-height: 1.65; }
+  .wwm_note { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 10px 14px; border-radius: 8px; font-size: 13.5px; color: #78350f; }
+  .wwm_footer { text-align: center; font-size: 12.5px; color: #9ca3af; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wwm_wrap">
+
+  <div class="wwm_head">
+    <div>
+      <h1>手势卡片</h1>
+      <p>任务二 · 左右滑动切换中华美食</p>
+    </div>
+    <a class="wwm_back" href="mobile-events.html">← 返回课程</a>
+  </div>
+
+  <!-- ===== 卡片 ===== -->
+  <div class="wwm_stage" id="wwmStage">
+    <div class="wwm_track" id="wwmTrack">
+      <div class="wwm_slide wwm_s1">
+        <span class="wwm_slide__no">01 / 北京</span>
+        <h2>北京烤鸭</h2>
+        <p>皮脆肉嫩，片成薄片配荷叶饼、甜面酱和葱丝，卷起来一口下去。</p>
+        <span class="wwm_slide__tag">挂炉果木烤制</span>
+      </div>
+      <div class="wwm_slide wwm_s2">
+        <span class="wwm_slide__no">02 / 四川</span>
+        <h2>麻婆豆腐</h2>
+        <p>麻辣鲜香烫，豆腐嫩滑不碎，一勺盖在米饭上能多吃两碗。</p>
+        <span class="wwm_slide__tag">麻 · 辣 · 烫 · 香</span>
+      </div>
+      <div class="wwm_slide wwm_s3">
+        <span class="wwm_slide__no">03 / 广东</span>
+        <h2>白切鸡</h2>
+        <p>皮爽肉滑骨带香，讲究原汁原味，蘸姜葱豉油才是正宗吃法。</p>
+        <span class="wwm_slide__tag">清而不淡</span>
+      </div>
+      <div class="wwm_slide wwm_s4">
+        <span class="wwm_slide__no">04 / 兰州</span>
+        <h2>兰州牛肉面</h2>
+        <p>一清二白三红四绿五黄，汤清萝卜白，辣油红亮，香菜蒜苗翠绿。</p>
+        <span class="wwm_slide__tag">一清二白三红四绿</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wwm_bar">
+    <button class="wwm_nav" id="wwmPrev" type="button" aria-label="上一道">‹</button>
+    <div class="wwm_count">第 <b id="wwmIndex">1</b> / 4 张</div>
+    <button class="wwm_nav" id="wwmNext" type="button" aria-label="下一道">›</button>
+  </div>
+
+  <div class="wwm_dots" id="wwmDots">
+    <span class="wwm_dot wwm_dot--on"></span>
+    <span class="wwm_dot"></span>
+    <span class="wwm_dot"></span>
+    <span class="wwm_dot"></span>
+  </div>
+
+  <div class="wwm_toast" id="wwmToast"></div>
+
+  <!-- ===== 说明 ===== -->
+  <section class="wwm_sec">
+    <h3>实现要点</h3>
+    <ul>
+      <li><code>touchstart</code> 记下起点横坐标，<code>touchend</code> 用 <code>changedTouches[0]</code> 算横向位移。</li>
+      <li>阈值 <strong>40px</strong>：短距离误触不切换；纵向位移大于横向时视为滚动，也不切换。</li>
+      <li>冷却 <strong>300ms</strong>：快速连滑只响应一次，不会一次跳两张。</li>
+      <li>容器用 <code>touch-action: pan-y</code>：横向手势归代码，纵向仍交给浏览器滚动页面。</li>
+      <li>切换用 <code>transform: translateX</code> + <code>transition: .3s</code>，滑到边界弹提示。</li>
+    </ul>
+    <pre>wwm_stage.addEventListener('touchstart', function (e) {
+  if (wwm_locked) return;                       // 冷却中
+  wwm_startX = e.touches[0].clientX;
+  wwm_startY = e.touches[0].clientY;
+}, { passive: true });
+
+wwm_stage.addEventListener('touchend', function (e) {
+  var wwm_t = e.changedTouches[0];              // 抬手必须用它
+  var wwm_dx = wwm_t.clientX - wwm_startX;
+  var wwm_dy = wwm_t.clientY - wwm_startY;
+
+  if (Math.abs(wwm_dx) &lt; 40) return;            // 算点击，不切换
+  if (Math.abs(wwm_dy) &gt; Math.abs(wwm_dx)) return; // 纵向滚动，不切换
+
+  wwm_locked = true;                            // 加锁，300ms 后释放
+  setTimeout(function () { wwm_locked = false; }, 300);
+
+  wwm_go(wwm_dx &lt; 0 ? 1 : -1);                  // 左滑下一张，右滑上一张
+}, { passive: true });</pre>
+  </section>
+
+  <section class="wwm_sec">
+    <h3>验收自查</h3>
+    <ul>
+      <li>① 短距离误触（小于 40px）不会切换 —— 已用阈值拦截。</li>
+      <li>② 快速连续滑动不会跳两张 —— 已用 300ms 冷却加锁。</li>
+      <li>③ 手机上拖动时页面不会跟着上下滚动 —— 容器已设 <code>touch-action: pan-y</code>。</li>
+    </ul>
+    <div class="wwm_note">手机上左右滑动卡片即可切换；电脑上可用下方箭头按钮或设备模式模拟触摸。</div>
+  </section>
+
+  <p class="wwm_footer">姓名：王伟民　学号：617　高级网页设计 · 移动端触摸交互</p>
+</div>
+
+<script>
+(function () {
+  var wwm_stage = document.getElementById('wwmStage');
+  var wwm_track = document.getElementById('wwmTrack');
+  var wwm_indexEl = document.getElementById('wwmIndex');
+  var wwm_prevBtn = document.getElementById('wwmPrev');
+  var wwm_nextBtn = document.getElementById('wwmNext');
+  var wwm_dots = document.querySelectorAll('#wwmDots .wwm_dot');
+  var wwm_toast = document.getElementById('wwmToast');
+
+  var wwm_TOTAL = 4;          // 共 4 道菜
+  var wwm_THRESHOLD = 40;     // 滑动阈值 40px，小于它算点击
+  var wwm_COOLDOWN = 300;     // 冷却 300ms，防止一次滑动跳两张
+
+  var wwm_index = 0;
+  var wwm_startX = 0;
+  var wwm_startY = 0;
+  var wwm_locked = false;     // 冷却锁
+  var wwm_toastTimer = null;
+
+  // 渲染：位移轨道 + 更新计数/圆点/按钮状态
+  function wwm_render() {
+    wwm_track.style.transform = 'translateX(' + (-wwm_index * 100) + '%)';
+    wwm_indexEl.textContent = wwm_index + 1;
+    for (var i = 0; i < wwm_dots.length; i++) {
+      wwm_dots[i].classList.toggle('wwm_dot--on', i === wwm_index);
+    }
+    wwm_prevBtn.disabled = (wwm_index === 0);
+    wwm_nextBtn.disabled = (wwm_index === wwm_TOTAL - 1);
+  }
+
+  function wwm_showToast(wwm_text) {
+    wwm_toast.textContent = wwm_text;
+    wwm_toast.classList.add('wwm_toast--show');
+    clearTimeout(wwm_toastTimer);
+    wwm_toastTimer = setTimeout(function () {
+      wwm_toast.classList.remove('wwm_toast--show');
+    }, 1400);
+  }
+
+  // dir = 1 下一张，-1 上一张
+  function wwm_go(wwm_dir) {
+    var wwm_target = wwm_index + wwm_dir;
+
+    if (wwm_target < 0) {
+      wwm_showToast('已经是第一张了');
+      return;
+    }
+    if (wwm_target > wwm_TOTAL - 1) {
+      wwm_showToast('已经是最后一张了');
+      return;
+    }
+    wwm_index = wwm_target;
+    wwm_render();
+  }
+
+  /* ---------- 触摸手势 ---------- */
+  wwm_stage.addEventListener('touchstart', function (e) {
+    if (wwm_locked) return;                     // 冷却中不记录新起点
+    if (e.touches.length > 1) return;           // 多指不处理
+    wwm_startX = e.touches[0].clientX;
+    wwm_startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  wwm_stage.addEventListener('touchend', function (e) {
+    if (wwm_locked) return;
+    if (!e.changedTouches || e.changedTouches.length === 0) return;
+
+    var wwm_t = e.changedTouches[0];            // 抬手时 touches 已移除该指
+    var wwm_dx = wwm_t.clientX - wwm_startX;    // 横向位移
+    var wwm_dy = wwm_t.clientY - wwm_startY;    // 纵向位移
+
+    if (Math.abs(wwm_dx) < wwm_THRESHOLD) return;              // 误触，算点击
+    if (Math.abs(wwm_dy) > Math.abs(wwm_dx)) return;           // 纵向为主，交给页面滚动
+
+    wwm_locked = true;                                          // 上锁
+    setTimeout(function () { wwm_locked = false; }, wwm_COOLDOWN);
+
+    wwm_go(wwm_dx < 0 ? 1 : -1);                                // 左滑下一张
+  }, { passive: true });
+
+  /* ---------- 桌面/无障碍备用按钮 ---------- */
+  wwm_prevBtn.addEventListener('click', function () { wwm_go(-1); });
+  wwm_nextBtn.addEventListener('click', function () { wwm_go(1); });
+
+  wwm_render();
+})();
+</script>
+</body>
+</html>
