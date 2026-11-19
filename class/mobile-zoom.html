@@ -6,95 +6,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>图片查看器 · 双指缩放 / 双击放大 / 拖动</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; }
-  html, body { -webkit-tap-highlight-color: transparent; }
-  body {
-    margin: 0;
-    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-    background: #0f0a1a;
-    color: #e5e7eb;
-    line-height: 1.7;
-    -webkit-text-size-adjust: 100%;
-    overflow-x: hidden;
-  }
-  .wwm_wrap { max-width: 760px; margin: 0 auto; padding: 16px 14px 40px; }
+/* ===== 首页风格主题：米黄纸感 + 衬线体 + 硬边框 ===== */
+:root{--blue:#1455d9;--blue-dark:#10254a;--lime:#d8f06b;--coral:#f06b4f;--ink:#10203a;--paper:#f4f1e9;--muted:#647084}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,"Times New Roman","Noto Serif SC",serif;line-height:1.7;-webkit-text-size-adjust:100%;overflow-x:hidden}
+a{color:inherit}
+code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Courier New",monospace;font-size:12.5px}
+pre{margin:14px 0;padding:14px;background:var(--blue-dark);border:2px solid var(--ink);border-radius:0;color:#e1e8f4;overflow-x:auto;font:12px/1.6 Consolas,"Courier New",monospace}
 
-  .wwm_head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-  .wwm_head h1 { margin: 0; font-size: 18px; color: #fff; }
-  .wwm_head p { margin: 2px 0 0; font-size: 12px; color: #9ca3af; }
-  .wwm_back { font-size: 13px; color: #c4b5fd; text-decoration: none; white-space: nowrap; }
-  .wwm_back:hover { text-decoration: underline; }
+.wwm_wrap{width:min(760px,calc(100% - 36px));margin:auto;padding:22px 0 40px}
 
-  /* ===== 提示 ===== */
-  .wwm_hint {
-    background: rgba(109, 40, 217, .22);
-    border: 1px solid rgba(167, 139, 250, .35);
-    color: #ddd6fe;
-    font-size: 13px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    margin-bottom: 12px;
-  }
+/* 页头 */
+.wwm_head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:14px;border-bottom:2px solid var(--ink)}
+.wwm_head h1{margin:0;font-size:clamp(1.6rem,4vw,2.1rem);font-weight:normal}
+.wwm_head p{margin:4px 0 0;color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
+.wwm_back{padding-top:6px;color:var(--blue);font:bold 13px "Trebuchet MS",sans-serif;text-decoration:none;white-space:nowrap}
+.wwm_back:hover{color:var(--coral);text-decoration:underline}
 
-  /* ===== 查看器容器 ===== */
-  .wwm_viewer {
-    position: relative;
-    height: 62vh;
-    min-height: 300px;
-    background: #000;
-    border-radius: 14px;
-    overflow: hidden;              /* 放大后超出部分裁掉 */
-    touch-action: none;            /* 手势完全由脚本接管 */
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-  }
-  /* 图片：居中显示，变换由 JS 写入 transform */
-  .wwm_img {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    max-width: 100%;
-    max-height: 100%;
-    transform: translate(-50%, -50%);   /* 基础居中，缩放/拖动叠加在 JS 里 */
-    transform-origin: center center;
-    will-change: transform;
-    pointer-events: none;
-    display: block;
-  }
-  /* 双击 / 重置时开启过渡，捏合与拖动时关闭，保证跟手 */
-  .wwm_img.wwm_anim { transition: transform .25s ease-out; }
+/* 提示条 */
+.wwm_hint{margin-bottom:14px;padding:11px 14px;background:#fffdf8;border:2px solid var(--ink);border-left:12px solid var(--lime);border-radius:0;color:var(--muted);font:13.5px "Trebuchet MS",sans-serif}
 
-  .wwm_scale {
-    position: absolute; right: 12px; top: 12px;
-    background: rgba(0, 0, 0, .55);
-    color: #fff; font-size: 12px; font-weight: 700;
-    padding: 4px 11px; border-radius: 999px;
-    backdrop-filter: blur(4px);
-  }
-  .wwm_tools {
-    position: absolute; left: 12px; bottom: 12px;
-    display: flex; gap: 8px;
-  }
-  .wwm_btn {
-    border: 1px solid rgba(255, 255, 255, .28);
-    background: rgba(0, 0, 0, .5);
-    color: #fff; font-size: 12.5px;
-    padding: 7px 14px; border-radius: 999px;
-    cursor: pointer;
-  }
-  .wwm_btn:active { background: rgba(109, 40, 217, .7); }
+/* 查看器 */
+.wwm_viewer{position:relative;height:62vh;min-height:300px;background:var(--blue-dark);border:2px solid var(--ink);border-radius:0;box-shadow:12px 12px 0 var(--lime);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.wwm_img{position:absolute;left:50%;top:50%;max-width:100%;max-height:100%;display:block;transform:translate(-50%,-50%);transform-origin:center center;will-change:transform;pointer-events:none}
+.wwm_img.wwm_anim{transition:transform .25s ease-out}
+.wwm_scale{position:absolute;right:12px;top:12px;padding:4px 11px;background:var(--lime);border:2px solid var(--ink);border-radius:0;color:var(--ink);font:bold 12px "Trebuchet MS",sans-serif}
+.wwm_tools{position:absolute;left:12px;bottom:12px;display:flex;gap:8px}
+.wwm_btn{padding:8px 14px;background:var(--blue);border:2px solid var(--ink);border-radius:0;color:#fff;font:bold 12.5px "Trebuchet MS",sans-serif;cursor:pointer;transition:background .2s,color .2s}
+.wwm_btn:active{background:var(--lime);color:var(--ink)}
 
-  /* ===== 说明 ===== */
-  .wwm_sec { background: #1a1229; border-radius: 14px; padding: 18px 16px; margin-top: 16px; border: 1px solid #2b1a4d; }
-  .wwm_sec h3 { margin: 0 0 10px; font-size: 15.5px; color: #fff; padding-left: 10px; border-left: 4px solid #a855f7; }
-  .wwm_sec p, .wwm_sec li { font-size: 13.5px; color: #cbd5e1; }
-  .wwm_sec ul { margin: 0; padding-left: 20px; }
-  .wwm_sec li { margin: 6px 0; }
-  code { background: rgba(168, 85, 247, .18); color: #f0abfc; padding: 2px 6px; border-radius: 4px; font-size: 12.5px; }
-  pre { background: #0a0612; color: #d1d5db; padding: 13px; border-radius: 10px; overflow-x: auto; font-size: 12px; line-height: 1.6; border: 1px solid #2b1a4d; }
-  .wwm_footer { text-align: center; font-size: 12px; color: #6b7280; margin-top: 22px; }
-</style>
+/* 说明区 */
+.wwm_sec{margin-top:22px;padding:24px 22px;background:#fffdf8;border:2px solid var(--ink);border-radius:0}
+.wwm_sec h3{margin:0 0 12px;padding:0 0 8px;border-bottom:2px solid var(--ink);font-size:1.2rem;font-weight:normal;color:var(--ink)}
+.wwm_sec p,.wwm_sec li{margin:6px 0;color:#3b475c;font-size:.96rem}
+.wwm_sec ul{margin:0;padding-left:20px}
+.wwm_footer{margin-top:22px;color:var(--muted);font:13px "Trebuchet MS",sans-serif;text-align:center}
+    </style>
 </head>
 <body>
 <div class="wwm_wrap">

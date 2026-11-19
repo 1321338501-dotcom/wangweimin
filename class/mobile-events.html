@@ -6,165 +6,91 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>移动端触摸交互 · 按下 / 滑动 / 缩放</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; }
-  html, body { -webkit-tap-highlight-color: transparent; }
-  body {
-    margin: 0;
-    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-    background: #f5f7fa;
-    color: #1f2937;
-    line-height: 1.7;
-    -webkit-text-size-adjust: 100%;
-  }
-  .wwm_wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 64px; }
+/* ===== 首页风格主题：米黄纸感 + 衬线体 + 硬边框 ===== */
+:root{--blue:#1455d9;--blue-dark:#10254a;--lime:#d8f06b;--coral:#f06b4f;--ink:#10203a;--paper:#f4f1e9;--muted:#647084}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,"Times New Roman","Noto Serif SC",serif;line-height:1.7;-webkit-text-size-adjust:100%}
+a{color:inherit}
+code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Courier New",monospace;font-size:13px}
+pre{margin:14px 0;padding:15px;background:var(--blue-dark);border:2px solid var(--ink);border-radius:0;color:#e1e8f4;overflow-x:auto;font:12.5px/1.65 Consolas,"Courier New",monospace}
 
-  /* 页头 */
-  .wwm_hero {
-    background: linear-gradient(135deg, #151022 0%, #2b1a4d 55%, #3d2a6b 100%);
-    border-radius: 18px;
-    padding: 28px 22px;
-    color: #fff;
-    box-shadow: 0 10px 28px rgba(21, 16, 34, .3);
-  }
-  .wwm_hero__kicker { margin: 0 0 6px; font-size: 12px; letter-spacing: 3px; color: #c4b5fd; }
-  .wwm_hero h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: 1px; }
-  .wwm_hero p { margin: 0; font-size: 14px; color: #ddd6fe; }
-  .wwm_hero__tip { margin-top: 14px; font-size: 13px; background: rgba(255,255,255,.12); padding: 9px 14px; border-radius: 10px; }
-  .wwm_hero__img {
-    display: block; width: 100%; height: 220px; object-fit: cover;
-    margin-top: 16px; border-radius: 12px;
-    border: 1px solid rgba(196, 181, 253, .35);
-  }
-  .wwm_figure { margin: 14px 0 0; }
-  .wwm_figure img {
-    display: block; width: 100%; border-radius: 12px;
-    border: 1px solid #ede9fe; background: #faf5ff;
-  }
-  .wwm_figure figcaption { margin-top: 7px; font-size: 12px; color: #9ca3af; text-align: center; }
-  .wwm_task__thumb {
-    display: block; width: 100%; height: 140px; object-fit: cover;
-    border-radius: 10px; margin-bottom: 12px;
-  }
-  .wwm_back { display: inline-block; margin-top: 14px; color: #c4b5fd; font-size: 13px; text-decoration: none; }
-  .wwm_back:hover { text-decoration: underline; }
+.wwm_wrap{width:min(1000px,calc(100% - 36px));margin:auto;padding:22px 0 56px}
 
-  /* 区块 */
-  .wwm_sec { background: #fff; border-radius: 16px; padding: 22px 18px; margin-top: 18px; box-shadow: 0 3px 14px rgba(31,41,55,.06); }
-  .wwm_sec h2 { margin: 0 0 4px; font-size: 19px; padding-left: 11px; border-left: 5px solid #6d28d9; }
-  .wwm_sec__sub { margin: 0 0 14px; font-size: 13px; color: #6b7280; }
-  .wwm_sec p { margin: 10px 0; font-size: 14.5px; }
-  code { background: #f3f4f6; color: #be185d; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+/* 页头 */
+.wwm_hero{position:relative;overflow:hidden;padding:34px 26px 30px;background:var(--blue-dark);border:2px solid var(--ink);border-radius:0;box-shadow:12px 12px 0 var(--coral);color:#fff}
+.wwm_hero::before{position:absolute;top:24px;right:8%;width:92px;height:92px;border:2px solid var(--lime);border-radius:50%;content:""}
+.wwm_hero::after{position:absolute;right:11%;bottom:-72px;width:180px;height:180px;border:2px solid #ffffff35;border-radius:50%;content:""}
+.wwm_hero>*{position:relative;z-index:1}
+.wwm_hero__kicker{margin:0 0 10px;color:var(--lime);font:bold 12px "Trebuchet MS",sans-serif;letter-spacing:.14em;text-transform:uppercase}
+.wwm_hero h1{margin:0 0 12px;font-size:clamp(1.9rem,5vw,3rem);font-weight:normal;line-height:1.12;letter-spacing:.02em}
+.wwm_hero p{max-width:640px;margin:0;color:#e1e8f4;font-size:1rem}
+.wwm_hero__img{display:block;width:100%;height:225px;object-fit:cover;margin-top:18px;border:2px solid var(--lime);border-radius:0}
+.wwm_hero__tip{margin-top:14px;padding:10px 14px;background:rgba(255,255,255,.1);border-left:6px solid var(--lime);border-radius:0;color:#e1e8f4;font:13.5px "Trebuchet MS",sans-serif}
+.wwm_hero__tip code{background:rgba(216,240,107,.16);color:var(--lime)}
+.wwm_back{display:inline-block;margin-top:16px;color:var(--lime);font:bold 13px "Trebuchet MS",sans-serif;text-decoration:none}
+.wwm_back:hover{color:#fff;text-decoration:underline}
 
-  /* 表格：手机上横向滚动 */
-  .wwm_tblbox { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 12px 0; }
-  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 560px; }
-  th, td { border: 1px solid #e5e7eb; padding: 9px 11px; text-align: left; vertical-align: top; }
-  th { background: #f9fafb; font-weight: 700; white-space: nowrap; }
-  tbody tr:nth-child(even) td { background: #fcfcfd; }
+/* 区块 */
+.wwm_sec{margin-top:26px;padding:26px 22px;background:#fffdf8;border:2px solid var(--ink);border-radius:0;box-shadow:none}
+.wwm_sec h2{margin:0 0 4px;padding:0 0 12px;border:0;border-bottom:2px solid var(--ink);font-size:clamp(1.45rem,3.4vw,2.05rem);font-weight:normal;line-height:1.25}
+.wwm_sec__sub{margin:10px 0 14px;color:var(--muted);font:13px "Trebuchet MS",sans-serif}
+.wwm_sec p{margin:10px 0;font-size:1rem}
+.wwm_sec h3{margin:20px 0 8px;padding:0 0 6px;border-bottom:1px solid #d8d0bd;font-size:1.12rem;font-weight:normal;color:var(--ink)}
 
-  /* 代码块 */
-  pre {
-    background: #151022; color: #e5e7eb; padding: 14px;
-    border-radius: 10px; overflow-x: auto; font-size: 12.5px; line-height: 1.65;
-    margin: 12px 0;
-  }
+/* 表格 */
+.wwm_tblbox{margin:14px 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;min-width:560px;border-collapse:collapse;background:#fff;font:13.5px "Trebuchet MS",sans-serif}
+th,td{padding:9px 11px;border:1px solid var(--ink);text-align:left;vertical-align:top}
+th{background:var(--lime);color:var(--ink);font-weight:bold;white-space:nowrap}
+tbody tr:nth-child(even) td{background:#faf6ec}
 
-  /* 演示区通用 */
-  .wwm_demo {
-    border: 1px solid #ede9fe; background: #faf5ff;
-    border-radius: 14px; padding: 14px; margin-top: 14px;
-  }
-  .wwm_demo__hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-  .wwm_demo__title { font-weight: 700; font-size: 14.5px; color: #4c1d95; }
-  .wwm_badge { font-size: 11.5px; background: #ede9fe; color: #6d28d9; padding: 3px 9px; border-radius: 999px; font-weight: 700; }
+/* 演示区 */
+.wwm_demo{margin-top:16px;padding:16px;background:#fff;border:2px solid var(--ink);border-radius:0}
+.wwm_demo__hd{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.wwm_demo__title{color:var(--ink);font:bold 14px "Trebuchet MS",sans-serif}
+.wwm_badge{padding:3px 9px;background:var(--lime);border:1px solid var(--ink);border-radius:0;color:var(--ink);font:bold 11.5px "Trebuchet MS",sans-serif}
 
-  /* 触摸板 */
-  .wwm_pad {
-    height: 170px;
-    border-radius: 12px;
-    background: #151022;
-    color: #a78bfa;
-    display: flex; align-items: center; justify-content: center;
-    text-align: center; font-size: 14px; padding: 12px;
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-    cursor: pointer;
-  }
-  .wwm_pad.wwm_pad--active { background: #241a3d; color: #ddd6fe; }
+/* 触摸板 */
+.wwm_pad{display:flex;align-items:center;justify-content:center;height:170px;padding:12px;background:var(--blue-dark);border:2px solid var(--ink);border-radius:0;color:var(--lime);font:14px "Trebuchet MS",sans-serif;text-align:center;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:pointer}
+.wwm_pad.wwm_pad--active{background:var(--blue);color:#fff}
 
-  /* 日志 */
-  .wwm_log {
-    margin-top: 10px; height: 150px; overflow-y: auto;
-    background: #0f0a1a; color: #d1d5db; border-radius: 10px;
-    padding: 10px 12px; font-family: Consolas, "Courier New", monospace;
-    font-size: 12px; line-height: 1.75;
-  }
-  .wwm_log__row { white-space: pre-wrap; word-break: break-all; }
-  .wwm_log__row b { color: #fbbf24; }
-  .wwm_log__row i { color: #6ee7b7; font-style: normal; }
+/* 事件日志 */
+.wwm_log{height:150px;margin-top:10px;padding:10px 12px;overflow-y:auto;background:var(--ink);border:2px solid var(--ink);border-radius:0;color:#e1e8f4;font:12px/1.75 Consolas,"Courier New",monospace}
+.wwm_log__row{white-space:pre-wrap;word-break:break-all}
+.wwm_log__row b{color:var(--lime)}
+.wwm_log__row i{color:#9fc4ff;font-style:normal}
 
-  /* 结果大字 */
-  .wwm_result {
-    margin-top: 10px; background: #fff; border: 1px dashed #d8cff5;
-    border-radius: 10px; padding: 12px 14px; font-size: 14px; color: #374151;
-  }
-  .wwm_result b { color: #6d28d9; }
+/* 结果 / 长按 / 缩放演示 */
+.wwm_result{margin-top:10px;padding:12px 14px;background:#fff;border:2px dashed var(--ink);border-radius:0;color:var(--ink);font:13.5px "Trebuchet MS",sans-serif}
+.wwm_result b{color:var(--blue)}
+.wwm_tap{display:flex;align-items:center;justify-content:center;height:120px;padding:12px;background:var(--coral);border:2px solid var(--ink);border-radius:0;color:#fff;font:15px Georgia,serif;text-align:center;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:pointer}
+.wwm_tap.wwm_tap--long{background:var(--blue)}
+.wwm_zoombox{display:flex;align-items:center;justify-content:center;height:200px;background:#eae4d3;border:2px solid var(--ink);border-radius:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.wwm_zoombox__item{display:flex;align-items:center;justify-content:center;width:92px;height:92px;padding:8px;background:var(--blue);border:2px solid var(--ink);border-radius:0;color:#fff;font:bold 13px "Trebuchet MS",sans-serif;text-align:center;will-change:transform}
 
-  /* 长按测试块 */
-  .wwm_tap {
-    height: 120px; border-radius: 12px;
-    background: linear-gradient(135deg, #6d28d9, #a855f7);
-    color: #fff; display: flex; align-items: center; justify-content: center;
-    text-align: center; font-size: 15px; font-weight: 700; padding: 12px;
-    touch-action: manipulation;
-    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
-    cursor: pointer;
-  }
-  .wwm_tap.wwm_tap--long { background: linear-gradient(135deg, #b91c1c, #f97316); }
+/* 配图 */
+.wwm_figure{margin:16px 0 0}
+.wwm_figure img{display:block;width:100%;background:#fff;border:2px solid var(--ink);border-radius:0}
+.wwm_figure figcaption{margin-top:7px;color:var(--muted);font:12px "Trebuchet MS",sans-serif;text-align:center}
 
-  /* 缩放演示 */
-  .wwm_zoombox {
-    height: 200px; border-radius: 12px; background: #ede9fe;
-    overflow: hidden; display: flex; align-items: center; justify-content: center;
-    touch-action: none; user-select: none; -webkit-user-select: none;
-  }
-  .wwm_zoombox__item {
-    width: 92px; height: 92px; border-radius: 18px;
-    background: linear-gradient(135deg, #6d28d9, #22d3ee);
-    color: #fff; font-size: 13px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center; text-align: center;
-    padding: 8px; will-change: transform;
-  }
+/* 任务卡片 */
+.wwm_tasks{display:grid;gap:18px;margin-top:16px}
+.wwm_task{display:block;padding:16px;background:#fffdf8;border:2px solid var(--ink);border-radius:0;color:inherit;text-decoration:none;transition:transform .22s ease,box-shadow .22s ease}
+.wwm_task:hover,.wwm_task:active{transform:translate(-4px,-5px);box-shadow:8px 8px 0 var(--lime)}
+.wwm_task__thumb{display:block;width:100%;height:140px;object-fit:cover;margin-bottom:12px;border:2px solid var(--ink);border-radius:0}
+.wwm_task__star{color:var(--blue);font:bold 11px "Trebuchet MS",sans-serif;letter-spacing:.1em}
+.wwm_task h3{margin:8px 0 6px;padding:0;border:0;font-size:1.28rem}
+.wwm_task p{margin:0;color:var(--muted);font:13.5px "Trebuchet MS",sans-serif}
+.wwm_task__go{display:inline-block;margin-top:10px;color:var(--blue);font:bold 13px "Trebuchet MS",sans-serif}
 
-  /* 任务入口 */
-  .wwm_tasks { display: grid; gap: 14px; margin-top: 14px; }
-  .wwm_task {
-    display: block; text-decoration: none; color: inherit;
-    border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px;
-    background: #fff; transition: transform .2s, box-shadow .2s, border-color .2s;
-  }
-  .wwm_task:hover, .wwm_task:active { transform: translateY(-3px); border-color: #c4b5fd; box-shadow: 0 10px 22px rgba(109,40,217,.12); }
-  .wwm_task__star { font-size: 12px; color: #b45309; font-weight: 700; }
-  .wwm_task h3 { margin: 4px 0 6px; font-size: 16.5px; color: #111827; }
-  .wwm_task p { margin: 0; font-size: 13.5px; color: #4b5563; }
-  .wwm_task__go { display: inline-block; margin-top: 10px; font-size: 13px; color: #6d28d9; font-weight: 700; }
-
-  /* 提示条 */
-  .wwm_note {
-    background: #fffbeb; border-left: 4px solid #f59e0b;
-    padding: 10px 14px; border-radius: 8px; font-size: 13.5px; color: #78350f; margin: 12px 0;
-  }
-  .wwm_note--danger { background: #fef2f2; border-left-color: #dc2626; color: #991b1b; }
-
-  .wwm_footer { text-align: center; font-size: 12.5px; color: #9ca3af; margin-top: 26px; }
-
-  @media (min-width: 720px) {
-    .wwm_hero h1 { font-size: 30px; }
-    .wwm_tasks { grid-template-columns: 1fr 1fr; }
-  }
-</style>
+/* 提示条 */
+.wwm_note{margin:14px 0;padding:11px 14px;background:#fffdf8;border:2px solid var(--ink);border-left:12px solid var(--lime);border-radius:0;color:var(--muted);font:13.5px "Trebuchet MS",sans-serif}
+.wwm_note strong{color:var(--ink)}
+.wwm_note--danger{border-left-color:var(--coral);color:#8a2b12}
+.wwm_footer{margin-top:26px;color:var(--muted);font:13px "Trebuchet MS",sans-serif;text-align:center}
+@media (min-width:720px){.wwm_tasks{grid-template-columns:1fr 1fr}}
+    </style>
 </head>
 <body>
 <div class="wwm_wrap">
