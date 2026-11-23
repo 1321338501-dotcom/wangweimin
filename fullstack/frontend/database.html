@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- 姓名：王伟民 | 学号：24001010617 | 时间：2026-11-19 | 大模型：DeepSeek-V4.1-Flash -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据库连接测试 · 王伟民</title>
+<link rel="stylesheet" href="css/wwm_style.css">
+</head>
+<body>
+<div class="wwm_page">
+  <header class="wwm_header">
+    <a class="wwm_brand" href="index.html"><span class="wwm_brand__badge">WWM</span>王伟民的全栈实践</a>
+    <div class="wwm_header__meta">学号 24001010617 · 后端端口 8617</div>
+  </header>
+
+  <section class="wwm_panel">
+    <h2>数据库连接测试</h2>
+    <p class="wwm_panel__sub">输入用户名与密码，后端用 mysql2 尝试连接 MySQL，成功与失败都会给出提示。</p>
+
+    <div class="wwm_api">
+      接口地址：<a id="wwmDbApi" href="/api/db-test" target="_blank">/api/db-test</a>（POST）
+    </div>
+
+    <form class="wwm_form" id="wwmDbForm" autocomplete="off">
+      <div class="wwm_field">
+        <label for="wwmUser">用户名</label>
+        <input id="wwmUser" name="username" type="text" value="root" placeholder="root">
+      </div>
+      <div class="wwm_field">
+        <label for="wwmPass">密码</label>
+        <input id="wwmPass" name="password" type="password" value="wwm123" placeholder="root 密码（见 backend/.env）">
+      </div>
+      <div class="wwm_field">
+        <label>&nbsp;</label>
+        <button class="wwm_btn" id="wwmDbBtn" type="submit">测试连接</button>
+      </div>
+    </form>
+
+    <div class="wwm_result" id="wwmDbResult"></div>
+  </section>
+
+  <p><a class="wwm_back" href="index.html">← 返回首页</a></p>
+
+  <footer class="wwm_footer">
+    <span>姓名：王伟民　学号：24001010617</span>
+    <span>凭据从 backend/.env 读取，不写死在前端</span>
+  </footer>
+</div>
+
+<script src="js/wwm_common.js"></script>
+<script src="js/wwm_database.js"></script>
+</body>
+</html>

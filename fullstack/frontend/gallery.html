@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!-- 姓名：王伟民 | 学号：24001010617 | 时间：2026-11-19 | 大模型：DeepSeek-V4.1-Flash -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图文列表 · 王伟民</title>
+<link rel="stylesheet" href="css/wwm_style.css">
+</head>
+<body>
+<div class="wwm_page">
+  <header class="wwm_header">
+    <a class="wwm_brand" href="index.html"><span class="wwm_brand__badge">WWM</span>王伟民的全栈实践</a>
+    <div class="wwm_header__meta">学号 24001010617 · 后端端口 8617</div>
+  </header>
+
+  <section class="wwm_panel">
+    <h2>图文列表</h2>
+    <p class="wwm_panel__sub">数据来自 MySQL 表 <code>wwm_gallery</code>，上图下文卡片布局，手机宽度自适应。</p>
+
+    <div class="wwm_api">
+      接口地址：<a id="wwmGalleryApi" href="/api/gallery" target="_blank">/api/gallery</a>
+    </div>
+
+    <div id="wwmGalleryCount" class="wwm_empty">正在加载图文数据…</div>
+    <div class="wwm_gallery" id="wwmGallery"></div>
+  </section>
+
+  <p><a class="wwm_back" href="index.html">← 返回首页</a></p>
+
+  <footer class="wwm_footer">
+    <span>姓名：王伟民　学号：24001010617</span>
+    <span>图片加载失败自动显示渐变占位</span>
+  </footer>
+</div>
+
+<script src="js/wwm_common.js"></script>
+<script src="js/wwm_gallery.js"></script>
+</body>
+</html>

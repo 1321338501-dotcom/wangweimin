@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!-- 姓名：王伟民 | 学号：24001010617 | 时间：2026-11-23 | 大模型：DeepSeek-V4.1-Flash -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图像识别 · 王伟民</title>
+<link rel="stylesheet" href="css/wwm_style.css">
+</head>
+<body>
+<div class="wwm_page">
+  <header class="wwm_header">
+    <a class="wwm_brand" href="index.html"><span class="wwm_brand__badge">WWM</span>王伟民的全栈实践</a>
+    <div class="wwm_header__meta">学号 24001010617 · 图像识别</div>
+  </header>
+
+  <section class="wwm_panel">
+    <h2>图像识别</h2>
+    <p class="wwm_panel__sub">上传一张图片，由视觉模型返回中文描述；图片只在请求时上传，服务端不留存。</p>
+
+    <div class="wwm_api">接口地址：<a id="wwmVisionApi" href="/api/vision" target="_blank">/api/vision</a></div>
+
+    <div class="wwm_file_row">
+      <input type="file" id="wwmVisionFile" accept="image/*">
+      <button class="wwm_btn" id="wwmVisionBtn" type="button">开始识别</button>
+    </div>
+    <p class="wwm_hint">支持 png / jpg / jpeg / webp / gif，建议单张不超过 5MB。</p>
+
+    <div id="wwmVisionStatus" class="wwm_chat__status"></div>
+    <div class="wwm_preview" id="wwmVisionPreview" style="display:none;">
+      <img id="wwmVisionImg" alt="待识别图片">
+    </div>
+
+    <div id="wwmVisionAnswer" class="wwm_answer" style="display:none;"></div>
+  </section>
+
+  <p><a class="wwm_back" href="index.html">← 返回首页</a></p>
+
+  <footer class="wwm_footer">
+    <span>姓名：王伟民　学号：24001010617</span>
+    <span>图片 → base64 → 视觉模型 → 文字描述</span>
+  </footer>
+</div>
+
+<script src="js/wwm_common.js"></script>
+<script src="js/wwm_vision.js"></script>
+</body>
+</html>

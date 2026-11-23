@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!-- 姓名：王伟民 | 学号：24001010617 | 时间：2026-11-23 | 大模型：DeepSeek-V4.1-Flash -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>在线客服 · 中华美食街 · 王伟民</title>
+<link rel="stylesheet" href="css/wwm_style.css">
+</head>
+<body>
+<div class="wwm_page">
+  <header class="wwm_header">
+    <a class="wwm_brand" href="index.html"><span class="wwm_brand__badge">WWM</span>王伟民的全栈实践</a>
+    <div class="wwm_header__meta">学号 24001010617 · 大模型应用</div>
+  </header>
+
+  <section class="wwm_panel">
+    <h2>中华美食街 · 在线客服</h2>
+    <p class="wwm_panel__sub">和「AI 聊天」用的是同一个接口，只把 system 人设换成了客服。</p>
+
+    <div class="wwm_api">接口地址：<a id="wwmChatApi" href="/api/chat" target="_blank">/api/chat</a></div>
+
+    <div class="wwm_chat" id="wwmChat" data-system="你是「中华美食街」的在线客服小美。你只能回答三类问题：营业时间、招牌菜、配送范围。回答要简短亲切，不超过 80 字。你必须严格依据以下真实信息回答，不得编造：营业时间：每天 10:00-22:00，节假日不休；招牌菜：麻辣香锅、水煮鱼、糖醋里脊；配送范围：三环以内，满 30 元起送，配送费 5 元。回答这三类问题时直接给出答案即可，绝对不要在结尾附加任何拒绝话术或引导留言的话。只有当问题不属于这三类时，才礼貌说明你只负责这三类问题，并引导用户说：您可以留下联系方式，我们会尽快联系您。">
+      <div class="wwm_chat__bar">
+        <label>模型平台
+          <select id="wwmChatProvider"></select>
+        </label>
+        <button class="wwm_btn wwm_btn--ghost" id="wwmChatReset" type="button">清空对话</button>
+      </div>
+
+      <div class="wwm_chat__list" id="wwmChatList"></div>
+
+      <div class="wwm_chat__input">
+        <textarea id="wwmChatInput" rows="2" placeholder="例如：你们几点开门？招牌菜有什么？送到哪里？"></textarea>
+        <button class="wwm_btn" id="wwmChatSend" type="button">发送</button>
+      </div>
+
+      <div class="wwm_chat__status" id="wwmChatStatus"></div>
+    </div>
+  </section>
+
+  <p><a class="wwm_back" href="index.html">← 返回首页</a></p>
+
+  <footer class="wwm_footer">
+    <span>姓名：王伟民　学号：24001010617</span>
+    <span>同一接口，换个 system 人设就是客服</span>
+  </footer>
+</div>
+
+<script src="js/wwm_common.js"></script>
+<script src="js/wwm_chat.js"></script>
+</body>
+</html>

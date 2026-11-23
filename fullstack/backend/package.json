@@ -1,0 +1,24 @@
+{
+  "_comment": "姓名：王伟民 | 学号：24001010617 | 时间：2026-11-19 | 大模型：DeepSeek-V4.1-Flash",
+  "name": "wwm-fullstack-project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "全栈项目初始化实践 · 王伟民 24001010617",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js",
+    "init-db": "node scripts/init-db.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mammoth": "^1.13.0",
+    "multer": "^2.5.0",
+    "mysql2": "^3.12.0",
+    "pdf-parse": "^1.1.1",
+    "word-extractor": "^1.0.4"
+  }
+}
