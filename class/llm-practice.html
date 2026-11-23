@@ -90,6 +90,15 @@ textarea.wwm_input{resize:vertical;min-height:64px;line-height:1.6}
 .wwm_trace time{color:var(--blue);font-weight:bold;margin-right:6px}
 .wwm_trace b{color:var(--ink)}
 
+/* 截图存档 */
+.wwm_shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;margin-top:14px}
+.wwm_shot{margin:0;padding:10px;background:#fff;border:2px solid var(--ink)}
+.wwm_shot a{display:block}
+.wwm_shot img{display:block;width:100%;height:auto;border:1px solid #d8d0bd}
+.wwm_shot figcaption{margin-top:8px;color:#3b475c;font:12.5px "Trebuchet MS",sans-serif;line-height:1.55}
+.wwm_shot b{display:block;margin-bottom:3px;color:var(--ink);font-size:13px}
+.wwm_shot--wide{grid-column:1/-1}
+
 /* 底部 */
 .wwm_foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:28px;padding-top:14px;border-top:2px solid var(--ink);color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
 </style>
@@ -193,6 +202,63 @@ textarea.wwm_input{resize:vertical;min-height:64px;line-height:1.6}
         <h2>5 · 操作痕迹（实时记录）</h2>
         <p class="wwm_sec__sub">每次请求的时间、动作、参数摘要与返回摘要都会记录在这里，可直接作为实践过程证据。</p>
         <ol class="wwm_trace" id="wwmTrace"></ol>
+    </section>
+
+    <!-- 截图存档 -->
+    <section class="wwm_sec">
+        <h2>6 · 实践截图存档</h2>
+        <p class="wwm_sec__sub">以下截图取自真实操作过程（本地后端 + 真实模型调用），点击图片可查看大图。</p>
+        <div class="wwm_shots">
+
+            <figure class="wwm_shot">
+                <a href="llm-shots/02-ai-siliconflow.png" target="_blank" rel="noopener">
+                    <img src="llm-shots/02-ai-siliconflow.png" alt="硅基流动平台 AI 客服对话" loading="lazy">
+                </a>
+                <figcaption><b>① AI 客服 · 硅基流动</b>
+                    下拉框选中「硅基流动」，问「你们几点开门？」，回复「每天10:00开门，营业至22:00，节假日不休哦！」</figcaption>
+            </figure>
+
+            <figure class="wwm_shot">
+                <a href="llm-shots/01-ai-qiniu.png" target="_blank" rel="noopener">
+                    <img src="llm-shots/01-ai-qiniu.png" alt="七牛云平台 AI 客服对话" loading="lazy">
+                </a>
+                <figcaption><b>② AI 客服 · 七牛云</b>
+                    同一页面把下拉框切到「七牛云」，继续提问照常回答，验证平台热切换无需改代码。</figcaption>
+            </figure>
+
+            <figure class="wwm_shot">
+                <a href="llm-shots/03-kb-and-vision-upload.png" target="_blank" rel="noopener">
+                    <img src="llm-shots/03-kb-and-vision-upload.png" alt="知识库文档列表与图像识别上传" loading="lazy">
+                </a>
+                <figcaption><b>③ 知识库与图像上传</b>
+                    上传《项目开发报告.docx》（5159 字 → 12 个分块）后进入知识库列表；图像识别区已选中一张命令行截图。</figcaption>
+            </figure>
+
+            <figure class="wwm_shot">
+                <a href="llm-shots/04-vision-result.png" target="_blank" rel="noopener">
+                    <img src="llm-shots/04-vision-result.png" alt="图像识别返回的中文描述" loading="lazy">
+                </a>
+                <figcaption><b>④ 图像识别结果 · Qwen/Qwen3-VL-32B-Instruct</b>
+                    模型识别出这是 Windows 命令行窗口，并逐条说明 ping、ipconfig 的输出内容与配色。</figcaption>
+            </figure>
+
+            <figure class="wwm_shot wwm_shot--wide">
+                <a href="llm-shots/05-asr-result.png" target="_blank" rel="noopener">
+                    <img src="llm-shots/05-asr-result.png" alt="语音识别返回的文字稿" loading="lazy">
+                </a>
+                <figcaption><b>⑤ 语音识别 · qwen-audio-3.0-asr-flash</b>
+                    上传 3 分 11 秒的检查录音.m4a，模型输出完整中文文字稿（约 992 字），包含页面布局、Token 存储等内容。</figcaption>
+            </figure>
+
+            <figure class="wwm_shot wwm_shot--wide">
+                <a href="llm-shots/06-trace-log.png" target="_blank" rel="noopener">
+                    <img src="llm-shots/06-trace-log.png" alt="操作痕迹记录列表" loading="lazy">
+                </a>
+                <figcaption><b>⑥ 操作痕迹实时记录</b>
+                    共 16 条记录：AI 回答、知识库上传与入库、图像识别、语音识别、平台切换，每条都带时间与参数摘要。</figcaption>
+            </figure>
+
+        </div>
     </section>
 
     <footer class="wwm_foot">
