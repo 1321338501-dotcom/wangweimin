@@ -36,4 +36,10 @@ wwm_app.use(function (wwm_err, wwm_req, wwm_res, wwm_next) {
 wwm_app.listen(wwm_PORT, function () {
   console.log('Server running at http://localhost:' + wwm_PORT);
   console.log('健康检查：http://localhost:' + wwm_PORT + '/api/health');
+
+  // 启动自检：建表 + 空表补数据，部署环境无需手工跑脚本
+  const { wwm_ensureSchema } = require('./utils/wwm_schema');
+  wwm_ensureSchema().catch(function (wwm_err) {
+    console.error('[schema] 初始化失败：' + wwm_err.message);
+  });
 });
