@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!--
+  作者：王伟民
+  学号：24001010617
+  建立时间：2026-11-23 15:10
+  使用模型：DeepSeek-V4.1-Flash
+  功能名称及简介：LLM 实践操作痕迹展示页 —— 集成 AI 客服（硅基流动/七牛切换）、
+                  RAG 知识库上传与提问、图像识别、语音识别四项实践，并实时记录每一步操作痕迹
+-->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="王伟民 · LLM 实践操作痕迹展示">
+<title>LLM 实践操作痕迹 · 王伟民</title>
+<style>
+:root{--blue:#1455d9;--blue-dark:#10254a;--lime:#d8f06b;--coral:#f06b4f;--ink:#10203a;--paper:#f4f1e9;--muted:#647084}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,"Times New Roman","Noto Serif SC",serif;line-height:1.7}
+a{color:inherit}
+code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Courier New",monospace;font-size:12.5px}
+
+.wwm_wrap{width:min(1000px,calc(100% - 32px));margin:auto;padding:18px 0 56px}
+
+/* 顶部 */
+.wwm_top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:2px solid var(--ink);flex-wrap:wrap}
+.wwm_brand{display:inline-flex;align-items:center;font-weight:bold;text-decoration:none;letter-spacing:.06em}
+.wwm_brand span{display:inline-grid;width:34px;height:34px;margin-right:9px;place-items:center;background:var(--lime);border:2px solid var(--ink);font:11px "Trebuchet MS",sans-serif;letter-spacing:0}
+.wwm_home_link{padding:7px 14px;background:var(--blue);color:#fff;font:13px "Trebuchet MS",sans-serif;text-decoration:none}
+.wwm_home_link:hover{background:var(--lime);color:var(--ink)}
+
+/* 头图 */
+.wwm_hero{position:relative;overflow:hidden;margin-top:22px;padding:30px 26px 26px;background:var(--blue-dark);border:2px solid var(--ink);box-shadow:12px 12px 0 var(--coral);color:#fff}
+.wwm_hero::before{position:absolute;top:20px;right:8%;width:84px;height:84px;border:2px solid var(--lime);border-radius:50%;content:""}
+.wwm_hero::after{position:absolute;right:11%;bottom:-64px;width:160px;height:160px;border:2px solid #ffffff35;border-radius:50%;content:""}
+.wwm_hero>*{position:relative;z-index:1}
+.wwm_hero__kicker{margin:0 0 8px;color:var(--lime);font:bold 12px "Trebuchet MS",sans-serif;letter-spacing:.14em;text-transform:uppercase}
+.wwm_hero h1{margin:0 0 8px;font-size:clamp(1.8rem,4.6vw,2.7rem);font-weight:normal;line-height:1.14}
+.wwm_hero p{margin:0;color:#e1e8f4;font-size:.96rem}
+
+/* 区块 */
+.wwm_sec{margin-top:24px;padding:24px 20px;background:#fffdf8;border:2px solid var(--ink)}
+.wwm_sec h2{margin:0 0 4px;padding:0 0 10px;border-bottom:2px solid var(--ink);font-size:clamp(1.3rem,3vw,1.7rem);font-weight:normal}
+.wwm_sec__sub{margin:10px 0 14px;color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
+.wwm_sec h3{margin:18px 0 8px;padding:0 0 6px;border-bottom:1px solid #d8d0bd;font-size:1.05rem;font-weight:normal}
+
+/* 表单控件 */
+.wwm_row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.wwm_input{flex:1;min-width:220px;padding:10px 12px;background:#fff;border:2px solid var(--ink);color:var(--ink);font:13.5px "Trebuchet MS",sans-serif}
+.wwm_input:focus{outline:none;border-color:var(--blue)}
+textarea.wwm_input{resize:vertical;min-height:64px;line-height:1.6}
+.wwm_file{flex:1;min-width:220px;padding:9px 10px;background:#fff;border:2px dashed var(--muted);color:var(--muted);font:13px "Trebuchet MS",sans-serif;cursor:pointer}
+.wwm_btn{padding:10px 18px;background:var(--blue);border:2px solid var(--ink);color:#fff;font:bold 13px "Trebuchet MS",sans-serif;cursor:pointer;transition:background .2s,color .2s}
+.wwm_btn:hover{background:var(--lime);color:var(--ink)}
+.wwm_btn:disabled{opacity:.55;cursor:not-allowed}
+.wwm_btn--ghost{background:#fff;color:var(--ink)}
+.wwm_btn--ghost:hover{background:var(--ink);color:#fff}
+.wwm_btn--mini{padding:5px 11px;font-size:12px;background:#fff;color:#b3261e}
+.wwm_btn--mini:hover{background:#b3261e;color:#fff}
+
+/* 状态 */
+.wwm_status{min-height:20px;margin:8px 0;color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
+.wwm_status.is-loading{color:var(--blue);font-weight:bold}
+
+/* 对话 */
+.wwm_chat{display:flex;flex-direction:column;gap:10px;max-height:340px;overflow-y:auto;margin:12px 0;padding:12px;background:#f7f2e6;border:2px solid var(--ink)}
+.wwm_msg{max-width:86%;padding:9px 13px;border:2px solid var(--ink);font:13.5px "Trebuchet MS",sans-serif;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.wwm_msg--me{align-self:flex-end;background:var(--blue);color:#fff}
+.wwm_msg--ai{align-self:flex-start;background:#fff}
+.wwm_msg__who{display:block;margin-bottom:3px;font-size:11px;opacity:.75;letter-spacing:.06em}
+.wwm_empty{color:var(--muted);font:13px "Trebuchet MS",sans-serif;text-align:center;padding:16px 0}
+
+/* 卡片 / 列表 */
+.wwm_item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 12px;background:#fff;border:1px solid var(--ink);margin-top:8px;font:13px "Trebuchet MS",sans-serif}
+.wwm_item__name{font-weight:bold;word-break:break-all}
+.wwm_item__meta{color:var(--muted);font-size:12px}
+
+/* 结果块 */
+.wwm_out{margin-top:12px;padding:13px 15px;background:#fff;border:2px solid var(--ink);border-left:10px solid var(--blue);font:13.5px "Trebuchet MS",sans-serif;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+.wwm_out--kb{border-left-color:var(--lime)}
+.wwm_src{margin:10px 0 0;padding:0;list-style:none}
+.wwm_src li{margin-top:7px;padding:8px 11px;background:#f7f2e6;border-left:4px solid var(--blue);color:#3b475c;font:12.5px "Trebuchet MS",sans-serif}
+.wwm_preview{margin-top:12px;padding:9px;background:#f7f2e6;border:2px solid var(--ink);text-align:center}
+.wwm_preview img{display:block;max-width:100%;max-height:300px;margin:auto;border:2px solid var(--ink)}
+.wwm_audio{width:100%;margin-top:10px}
+
+/* 操作痕迹 */
+.wwm_trace{margin:10px 0 0;padding:0 0 0 18px;max-height:300px;overflow-y:auto;font:12.5px "Trebuchet MS",sans-serif}
+.wwm_trace li{margin:6px 0;color:#3b475c;word-break:break-word}
+.wwm_trace time{color:var(--blue);font-weight:bold;margin-right:6px}
+.wwm_trace b{color:var(--ink)}
+
+/* 底部 */
+.wwm_foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:28px;padding-top:14px;border-top:2px solid var(--ink);color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
+</style>
+</head>
+<body>
+<div class="wwm_wrap">
+
+    <header class="wwm_top">
+        <a class="wwm_brand" href="index.html"><span>WWM</span>王伟民 · 高级网页设计</a>
+        <a class="wwm_home_link" href="index.html">← 返回课堂目录</a>
+    </header>
+
+    <section class="wwm_hero">
+        <p class="wwm_hero__kicker">LLM Practice Trace</p>
+        <h1>LLM 实践操作痕迹展示</h1>
+        <p>AI 客服平台热切换 · RAG 知识库 · 图像识别 · 语音识别 —— 每一项操作都会实时写入下方「操作痕迹」。</p>
+    </section>
+
+    <!-- 后端地址 -->
+    <section class="wwm_sec">
+        <h2>0 · 后端服务地址</h2>
+        <p class="wwm_sec__sub">页面是静态的，所有 AI 能力都由后端代发请求（Key 保存在后端，不进前端代码）。</p>
+        <div class="wwm_row">
+            <input class="wwm_input" id="wwmApiBase" type="text" placeholder="http://localhost:8617">
+            <button class="wwm_btn" id="wwmApiSave" type="button">保存并检测</button>
+        </div>
+        <div class="wwm_status" id="wwmApiStatus"></div>
+    </section>
+
+    <!-- 任务一 -->
+    <section class="wwm_sec">
+        <h2>1 · AI 客服 · 平台热切换</h2>
+        <p class="wwm_sec__sub">后端读取配置决定调用哪个平台，前端只切换下拉框；切换后照常对话。</p>
+        <div class="wwm_row">
+            <select class="wwm_input" id="wwmProvider" style="max-width:220px;flex:0 0 auto;">
+                <option value="siliconflow">硅基流动</option>
+                <option value="qiniu">七牛云</option>
+            </select>
+            <span class="wwm_status" id="wwmProviderInfo" style="margin:0;"></span>
+        </div>
+        <div class="wwm_chat" id="wwmChat">
+            <div class="wwm_empty">先问一句试试，例如「你们店几点开门？」</div>
+        </div>
+        <div class="wwm_row">
+            <textarea class="wwm_input" id="wwmChatInput" rows="2" placeholder="输入问题，Enter 发送，Shift+Enter 换行"></textarea>
+            <button class="wwm_btn" id="wwmChatSend" type="button">发送</button>
+            <button class="wwm_btn wwm_btn--ghost" id="wwmChatClear" type="button">清空</button>
+        </div>
+        <div class="wwm_status" id="wwmChatStatus"></div>
+    </section>
+
+    <!-- 任务二 -->
+    <section class="wwm_sec">
+        <h2>2 · RAG 知识库</h2>
+        <p class="wwm_sec__sub">上传文件 → 自动解析分块并向量化 → 提问时先检索再作答，并给出出处。</p>
+        <div class="wwm_row">
+            <input class="wwm_file" id="wwmKbFile" type="file" accept=".txt,.md,.csv,.json,.pdf,.doc,.docx,.ppt,.pptx">
+            <button class="wwm_btn" id="wwmKbUpload" type="button">上传并解析</button>
+        </div>
+        <div class="wwm_status" id="wwmKbStatus"></div>
+        <div id="wwmKbList"><div class="wwm_empty">正在读取知识库…</div></div>
+        <div class="wwm_row" style="margin-top:14px;">
+            <input class="wwm_input" id="wwmKbQuestion" type="text" placeholder="例如：配送费怎么算？">
+            <button class="wwm_btn" id="wwmKbAsk" type="button">提问</button>
+        </div>
+        <div class="wwm_out wwm_out--kb" id="wwmKbAnswer" style="display:none;"></div>
+        <ul class="wwm_src" id="wwmKbSrc"></ul>
+    </section>
+
+    <!-- 任务三 -->
+    <section class="wwm_sec">
+        <h2>3 · 图像识别</h2>
+        <p class="wwm_sec__sub">上传图片，由视觉模型返回中文描述。</p>
+        <div class="wwm_row">
+            <input class="wwm_file" id="wwmVisionFile" type="file" accept="image/*">
+            <button class="wwm_btn" id="wwmVisionBtn" type="button">开始识别</button>
+        </div>
+        <div class="wwm_status" id="wwmVisionStatus"></div>
+        <div class="wwm_preview" id="wwmVisionPreview" style="display:none;">
+            <img id="wwmVisionImg" alt="待识别图片">
+        </div>
+        <div class="wwm_out" id="wwmVisionOut" style="display:none;"></div>
+    </section>
+
+    <!-- 任务四 -->
+    <section class="wwm_sec">
+        <h2>4 · 语音识别</h2>
+        <p class="wwm_sec__sub">上传音频或现场录音，由七牛 ASR 模型输出文字。</p>
+        <div class="wwm_row">
+            <input class="wwm_file" id="wwmAsrFile" type="file" accept="audio/*">
+            <button class="wwm_btn" id="wwmAsrBtn" type="button">识别音频</button>
+            <button class="wwm_btn wwm_btn--ghost" id="wwmAsrRec" type="button">开始录音</button>
+        </div>
+        <div class="wwm_status" id="wwmAsrStatus"></div>
+        <audio class="wwm_audio" id="wwmAsrAudio" controls style="display:none;"></audio>
+        <div class="wwm_out" id="wwmAsrOut" style="display:none;"></div>
+    </section>
+
+    <!-- 痕迹 -->
+    <section class="wwm_sec">
+        <h2>5 · 操作痕迹（实时记录）</h2>
+        <p class="wwm_sec__sub">每次请求的时间、动作、参数摘要与返回摘要都会记录在这里，可直接作为实践过程证据。</p>
+        <ol class="wwm_trace" id="wwmTrace"></ol>
+    </section>
+
+    <footer class="wwm_foot">
+        <span>姓名：王伟民　学号：24001010617</span>
+        <span>Express + MySQL + 大模型 API · 原生 HTML/CSS/JavaScript</span>
+    </footer>
+</div>
+
+<script>
+/* 作者：王伟民 | 建立时间：2026-11-23 15:10 | 使用模型：DeepSeek-V4.1-Flash
+   功能：LLM 实践操作痕迹展示页的全部交互逻辑 */
+(function () {
+    'use strict';
+
+    /* ---------- 通用工具 ---------- */
+
+    // 功能：读取后端地址（优先 localStorage，其次 localhost）
+    function wwm_base() {
+        return (localStorage.getItem('wwm_api_base') || 'http://localhost:8617').replace(/\/+$/, '');
+    }
+
+    // 功能：写入一条操作痕迹
+    function wwm_trace(wwm_action, wwm_detail) {
+        var wwm_box = document.getElementById('wwmTrace');
+        var wwm_li = document.createElement('li');
+        var wwm_now = new Date();
+        var wwm_t = [wwm_now.getHours(), wwm_now.getMinutes(), wwm_now.getSeconds()].map(function (wwm_n) {
+            return wwm_n < 10 ? '0' + wwm_n : '' + wwm_n;
+        }).join(':');
+        wwm_li.innerHTML = '<time>' + wwm_t + '</time><b>' + wwm_action + '</b>' +
+            (wwm_detail ? '　' + wwm_detail : '');
+        wwm_box.appendChild(wwm_li);
+        wwm_box.scrollTop = wwm_box.scrollHeight;
+    }
+
+    // 功能：设置状态文字
+    function wwm_setStatus(wwm_id, wwm_text, wwm_loading) {
+        var wwm_el = document.getElementById(wwm_id);
+        if (!wwm_el) { return; }
+        wwm_el.textContent = wwm_text || '';
+        wwm_el.className = 'wwm_status' + (wwm_loading ? ' is-loading' : '');
+    }
+
+    // 功能：统一发请求，失败时抛出带中文提示的错误
+    function wwm_request(wwm_path, wwm_options) {
+        return fetch(wwm_base() + wwm_path, wwm_options || {}).then(function (wwm_resp) {
+            return wwm_resp.text().then(function (wwm_text) {
+                var wwm_json = null;
+                try { wwm_json = JSON.parse(wwm_text); } catch (wwm_e) { wwm_json = null; }
+                if (!wwm_resp.ok || !wwm_json) {
+                    throw new Error('HTTP ' + wwm_resp.status + ' ' + (wwm_text || '').slice(0, 120));
+                }
+                if (wwm_json.code !== 0) { throw new Error(wwm_json.msg || '接口返回失败'); }
+                return wwm_json.data;
+            });
+        }).catch(function (wwm_err) {
+            if (wwm_err instanceof TypeError) {
+                throw new Error('无法连接后端 ' + wwm_base() + '，请先启动后端或修改上方地址');
+            }
+            throw wwm_err;
+        });
+    }
+
+    /* ---------- 0. 后端地址 ---------- */
+
+    var wwm_apiInput = document.getElementById('wwmApiBase');
+    wwm_apiInput.value = wwm_base();
+
+    // 功能：保存后端地址并调用 health 检测
+    function wwm_checkApi() {
+        var wwm_v = wwm_apiInput.value.trim().replace(/\/+$/, '');
+        if (!wwm_v) { wwm_setStatus('wwmApiStatus', '请填写后端地址', false); return; }
+        localStorage.setItem('wwm_api_base', wwm_v);
+        wwm_setStatus('wwmApiStatus', '正在检测 ' + wwm_v + ' …', true);
+        wwm_trace('检测后端', wwm_v);
+
+        wwm_request('/api/health').then(function (wwm_d) {
+            wwm_setStatus('wwmApiStatus',
+                '连接成功 · 学号 ' + wwm_d.wwm_student_id + ' · 数据库 ' + wwm_d.wwm_database, false);
+            wwm_trace('后端健康', '数据库=' + wwm_d.wwm_database + '，Node=' + wwm_d.wwm_node);
+            wwm_loadConfig();
+            wwm_loadKb();
+        }).catch(function (wwm_err) {
+            wwm_setStatus('wwmApiStatus', '连接失败：' + wwm_err.message, false);
+            wwm_trace('后端连接失败', wwm_err.message);
+        });
+    }
+
+    document.getElementById('wwmApiSave').addEventListener('click', wwm_checkApi);
+
+    /* ---------- 1. AI 客服 ---------- */
+
+    var wwm_provider = document.getElementById('wwmProvider');
+    var wwm_chatBox = document.getElementById('wwmChat');
+    var wwm_chatInput = document.getElementById('wwmChatInput');
+    var wwm_chatSend = document.getElementById('wwmChatSend');
+    var wwm_chatClear = document.getElementById('wwmChatClear');
+    var wwm_messages = [];
+
+    var wwm_systemPrompt = '你是「中华美食街」的在线客服小美。你只能回答三类问题：营业时间、招牌菜、配送范围。' +
+        '回答简短亲切，不超过 80 字。必须依据以下真实信息，不得编造：营业时间每天 10:00-22:00，节假日不休；' +
+        '招牌菜为麻辣香锅、水煮鱼、糖醋里脊；配送范围三环以内，满 30 元起送，配送费 5 元，满 88 元免配送费。' +
+        '回答这三类问题时直接给答案，不要附加拒绝话术；只有越界问题才礼貌拒绝并引导留言。';
+
+    // 功能：把一条消息画到对话区
+    function wwm_appendMsg(wwm_role, wwm_text) {
+        var wwm_emptyEl = wwm_chatBox.querySelector('.wwm_empty');
+        if (wwm_emptyEl) { wwm_emptyEl.remove(); }
+        var wwm_div = document.createElement('div');
+        wwm_div.className = 'wwm_msg ' + (wwm_role === 'user' ? 'wwm_msg--me' : 'wwm_msg--ai');
+        var wwm_who = wwm_role === 'user'
+            ? '我'
+            : 'AI · ' + (wwm_provider.options[wwm_provider.selectedIndex].text);
+        wwm_div.innerHTML = '<span class="wwm_msg__who">' + wwm_who + '</span>';
+        wwm_div.appendChild(document.createTextNode(wwm_text));
+        wwm_chatBox.appendChild(wwm_div);
+        wwm_chatBox.scrollTop = wwm_chatBox.scrollHeight;
+    }
+
+    // 功能：拉取平台列表，显示哪个平台可用
+    function wwm_loadConfig() {
+        wwm_request('/api/chat/config').then(function (wwm_d) {
+            var wwm_list = wwm_d.wwm_list || [];
+            var wwm_txt = wwm_list.map(function (wwm_p) {
+                return wwm_p.wwm_label + (wwm_p.wwm_available ? ' ✔' : ' ✘');
+            }).join('　');
+            document.getElementById('wwmProviderInfo').textContent = '可用平台：' + wwm_txt;
+            wwm_trace('读取平台配置', wwm_txt);
+        }).catch(function (wwm_err) {
+            wwm_trace('读取平台配置失败', wwm_err.message);
+        });
+    }
+
+    // 功能：发送一条消息，多轮对话把历史全部带给后端
+    function wwm_sendChat() {
+        var wwm_q = wwm_chatInput.value.trim();
+        if (!wwm_q) { return; }
+        wwm_appendMsg('user', wwm_q);
+        wwm_messages.push({ role: 'user', content: wwm_q });
+        wwm_chatInput.value = '';
+        wwm_chatSend.disabled = true;
+        wwm_setStatus('wwmChatStatus', '正在思考…', true);
+        wwm_trace('AI 客服提问',
+            '平台=' + wwm_provider.value + '，内容=' + wwm_q.slice(0, 30) + '，历史消息 ' + wwm_messages.length + ' 条');
+
+        wwm_request('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                provider: wwm_provider.value,
+                system: wwm_systemPrompt,
+                messages: wwm_messages
+            })
+        }).then(function (wwm_d) {
+            wwm_appendMsg('assistant', wwm_d.wwm_reply);
+            wwm_messages.push({ role: 'assistant', content: wwm_d.wwm_reply });
+            wwm_setStatus('wwmChatStatus', '回答完成 · ' + wwm_d.wwm_provider + ' · ' + wwm_d.wwm_model, false);
+            wwm_trace('AI 客服回答',
+                '平台=' + wwm_d.wwm_provider + '，模型=' + wwm_d.wwm_model + '，长度 ' + wwm_d.wwm_reply.length + ' 字');
+        }).catch(function (wwm_err) {
+            wwm_appendMsg('assistant', '（请求失败）' + wwm_err.message);
+            wwm_setStatus('wwmChatStatus', '请求失败：' + wwm_err.message, false);
+            wwm_trace('AI 客服失败', wwm_err.message);
+        }).then(function () {
+            wwm_chatSend.disabled = false;
+            wwm_chatInput.focus();
+        });
+    }
+
+    wwm_chatSend.addEventListener('click', wwm_sendChat);
+    wwm_chatInput.addEventListener('keydown', function (wwm_e) {
+        if (wwm_e.key === 'Enter' && !wwm_e.shiftKey) {
+            wwm_e.preventDefault();
+            wwm_sendChat();
+        }
+    });
+    wwm_chatClear.addEventListener('click', function () {
+        wwm_messages = [];
+        wwm_chatBox.innerHTML = '<div class="wwm_empty">对话已清空，重新问一句吧</div>';
+        wwm_setStatus('wwmChatStatus', '', false);
+        wwm_trace('清空对话', '历史消息归零');
+    });
+    wwm_provider.addEventListener('change', function () {
+        wwm_setStatus('wwmChatStatus', '已切换平台：' + wwm_provider.options[wwm_provider.selectedIndex].text + '，继续对话即可', false);
+        wwm_trace('切换平台', wwm_provider.value);
+    });
+
+    /* ---------- 2. 知识库 ---------- */
+
+    // 功能：读取知识库文档列表
+    function wwm_loadKb() {
+        wwm_request('/api/kb/docs').then(function (wwm_d) {
+            var wwm_list = wwm_d.wwm_list || [];
+            var wwm_box = document.getElementById('wwmKbList');
+            if (!wwm_list.length) {
+                wwm_box.innerHTML = '<div class="wwm_empty">知识库为空，先上传一个文件</div>';
+                return;
+            }
+            wwm_box.innerHTML = wwm_list.map(function (wwm_doc) {
+                return '<div class="wwm_item"><span class="wwm_item__name">' + wwm_doc.filename + '</span>' +
+                    '<span class="wwm_item__meta">' + wwm_doc.filetype + ' · ' + wwm_doc.chunk_count + ' 块 · ' +
+                    String(wwm_doc.create_time).slice(0, 10) + '　<button class="wwm_btn wwm_btn--mini" data-id="' +
+                    wwm_doc.id + '" type="button">删除</button></span></div>';
+            }).join('');
+            wwm_trace('读取知识库', '共 ' + wwm_list.length + ' 个文档');
+        }).catch(function (wwm_err) {
+            document.getElementById('wwmKbList').innerHTML = '<div class="wwm_empty">读取失败：' + wwm_err.message + '</div>';
+        });
+    }
+
+    // 功能：上传知识库文件并解析入库
+    document.getElementById('wwmKbUpload').addEventListener('click', function () {
+        var wwm_input = document.getElementById('wwmKbFile');
+        var wwm_file = wwm_input.files[0];
+        if (!wwm_file) { wwm_setStatus('wwmKbStatus', '请先选择文件', false); return; }
+        var wwm_form = new FormData();
+        wwm_form.append('file', wwm_file);
+        wwm_setStatus('wwmKbStatus', '正在解析并向量化「' + wwm_file.name + '」…', true);
+        wwm_trace('上传知识库文件', wwm_file.name + '（' + Math.round(wwm_file.size / 1024) + ' KB）');
+
+        wwm_request('/api/kb/upload', { method: 'POST', body: wwm_form }).then(function (wwm_d) {
+            wwm_setStatus('wwmKbStatus',
+                '上传成功：' + wwm_d.wwm_filename + '，' + wwm_d.wwm_chars + ' 字 → ' + wwm_d.wwm_chunks + ' 个分块', false);
+            wwm_trace('知识库入库', wwm_d.wwm_filename + ' → ' + wwm_d.wwm_chunks + ' 块');
+            wwm_input.value = '';
+            wwm_loadKb();
+        }).catch(function (wwm_err) {
+            wwm_setStatus('wwmKbStatus', '上传失败：' + wwm_err.message, false);
+            wwm_trace('知识库上传失败', wwm_err.message);
+        });
+    });
+
+    // 功能：删除知识库文档
+    document.getElementById('wwmKbList').addEventListener('click', function (wwm_e) {
+        var wwm_t = wwm_e.target;
+        if (!wwm_t.classList.contains('wwm_btn--mini')) { return; }
+        var wwm_id = wwm_t.getAttribute('data-id');
+        if (!window.confirm('删除该文档及其全部分块？')) { return; }
+        wwm_request('/api/kb/docs/' + wwm_id, { method: 'DELETE' }).then(function () {
+            wwm_trace('删除知识库文档', 'id=' + wwm_id);
+            wwm_loadKb();
+        }).catch(function (wwm_err) {
+            wwm_setStatus('wwmKbStatus', '删除失败：' + wwm_err.message, false);
+        });
+    });
+
+    // 功能：基于知识库提问
+    document.getElementById('wwmKbAsk').addEventListener('click', function () {
+        var wwm_q = document.getElementById('wwmKbQuestion').value.trim();
+        if (!wwm_q) { wwm_setStatus('wwmKbStatus', '请先输入问题', false); return; }
+        wwm_setStatus('wwmKbStatus', '正在检索知识库并生成回答…', true);
+        wwm_trace('知识库提问', wwm_q);
+
+        wwm_request('/api/kb/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: wwm_q, topK: 4 })
+        }).then(function (wwm_d) {
+            var wwm_out = document.getElementById('wwmKbAnswer');
+            wwm_out.style.display = 'block';
+            wwm_out.textContent = wwm_d.wwm_answer;
+            document.getElementById('wwmKbSrc').innerHTML = (wwm_d.wwm_sources || []).map(function (wwm_s, wwm_i) {
+                return '<li><b>来源 ' + (wwm_i + 1) + '</b>：' + wwm_s.wwm_doc +
+                    '　相似度 ' + wwm_s.wwm_score + '<br>' + wwm_s.wwm_preview + '…</li>';
+            }).join('');
+            wwm_setStatus('wwmKbStatus', '回答完成 · ' + wwm_d.wwm_model, false);
+            wwm_trace('知识库回答', '命中 ' + (wwm_d.wwm_sources || []).length + ' 个片段，回答 ' + wwm_d.wwm_answer.length + ' 字');
+        }).catch(function (wwm_err) {
+            wwm_setStatus('wwmKbStatus', '问答失败：' + wwm_err.message, false);
+            wwm_trace('知识库问答失败', wwm_err.message);
+        });
+    });
+
+    /* ---------- 3. 图像识别 ---------- */
+
+    var wwm_visionFile = document.getElementById('wwmVisionFile');
+
+    wwm_visionFile.addEventListener('change', function () {
+        var wwm_file = wwm_visionFile.files[0];
+        if (!wwm_file) { return; }
+        document.getElementById('wwmVisionImg').src = URL.createObjectURL(wwm_file);
+        document.getElementById('wwmVisionPreview').style.display = 'block';
+        document.getElementById('wwmVisionOut').style.display = 'none';
+        wwm_setStatus('wwmVisionStatus', '已选择「' + wwm_file.name + '」', false);
+    });
+
+    // 功能：上传图片并获取描述
+    document.getElementById('wwmVisionBtn').addEventListener('click', function () {
+        var wwm_file = wwm_visionFile.files[0];
+        if (!wwm_file) { wwm_setStatus('wwmVisionStatus', '请先选择图片', false); return; }
+        var wwm_form = new FormData();
+        wwm_form.append('image', wwm_file);
+        var wwm_btn = this;
+        wwm_btn.disabled = true;
+        wwm_setStatus('wwmVisionStatus', '正在识别…', true);
+        wwm_trace('图像识别上传', wwm_file.name + '（' + Math.round(wwm_file.size / 1024) + ' KB）');
+
+        wwm_request('/api/vision', { method: 'POST', body: wwm_form }).then(function (wwm_d) {
+            var wwm_out = document.getElementById('wwmVisionOut');
+            wwm_out.style.display = 'block';
+            wwm_out.textContent = wwm_d.wwm_description;
+            wwm_setStatus('wwmVisionStatus', '识别完成 · ' + wwm_d.wwm_model, false);
+            wwm_trace('图像识别结果', '模型=' + wwm_d.wwm_model + '，描述 ' + wwm_d.wwm_description.length + ' 字');
+        }).catch(function (wwm_err) {
+            wwm_setStatus('wwmVisionStatus', '识别失败：' + wwm_err.message, false);
+            wwm_trace('图像识别失败', wwm_err.message);
+        }).then(function () {
+            wwm_btn.disabled = false;
+        });
+    });
+
+    /* ---------- 4. 语音识别 ---------- */
+
+    var wwm_asrFile = document.getElementById('wwmAsrFile');
+    var wwm_asrAudio = document.getElementById('wwmAsrAudio');
+    var wwm_recorder = null;
+    var wwm_recChunks = [];
+
+    wwm_asrFile.addEventListener('change', function () {
+        var wwm_file = wwm_asrFile.files[0];
+        if (!wwm_file) { return; }
+        wwm_asrAudio.src = URL.createObjectURL(wwm_file);
+        wwm_asrAudio.style.display = 'block';
+        wwm_setStatus('wwmAsrStatus', '已选择「' + wwm_file.name + '」', false);
+    });
+
+    // 功能：把音频发给后端识别并展示文字
+    function wwm_sendAudio(wwm_blob, wwm_name) {
+        var wwm_form = new FormData();
+        wwm_form.append('audio', wwm_blob, wwm_name);
+        var wwm_btn = document.getElementById('wwmAsrBtn');
+        wwm_btn.disabled = true;
+        wwm_setStatus('wwmAsrStatus', '正在识别语音…', true);
+        wwm_trace('语音识别上传', wwm_name + '（' + Math.round(wwm_blob.size / 1024) + ' KB）');
+
+        wwm_request('/api/asr', { method: 'POST', body: wwm_form }).then(function (wwm_d) {
+            var wwm_out = document.getElementById('wwmAsrOut');
+            wwm_out.style.display = 'block';
+            wwm_out.textContent = wwm_d.wwm_text || '（没有识别出文字）';
+            wwm_setStatus('wwmAsrStatus', '识别完成 · ' + wwm_d.wwm_model, false);
+            wwm_trace('语音识别结果', '模型=' + wwm_d.wwm_model + '，文字 ' + (wwm_d.wwm_text || '').length + ' 字');
+        }).catch(function (wwm_err) {
+            wwm_setStatus('wwmAsrStatus', '识别失败：' + wwm_err.message, false);
+            wwm_trace('语音识别失败', wwm_err.message);
+        }).then(function () {
+            wwm_btn.disabled = false;
+        });
+    }
+
+    document.getElementById('wwmAsrBtn').addEventListener('click', function () {
+        var wwm_file = wwm_asrFile.files[0];
+        if (!wwm_file) { wwm_setStatus('wwmAsrStatus', '请先选择音频，或使用「开始录音」', false); return; }
+        wwm_sendAudio(wwm_file, wwm_file.name);
+    });
+
+    // 功能：录音，停止后自动识别
+    document.getElementById('wwmAsrRec').addEventListener('click', function () {
+        var wwm_btn = this;
+        if (wwm_recorder && wwm_recorder.state === 'recording') {
+            wwm_recorder.stop();
+            return;
+        }
+        if (!navigator.mediaDevices || !window.MediaRecorder) {
+            wwm_setStatus('wwmAsrStatus', '当前浏览器不支持录音，请改用上传音频', false);
+            return;
+        }
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(function (wwm_stream) {
+            wwm_recChunks = [];
+            wwm_recorder = new MediaRecorder(wwm_stream);
+            wwm_recorder.ondataavailable = function (wwm_e) {
+                if (wwm_e.data && wwm_e.data.size > 0) { wwm_recChunks.push(wwm_e.data); }
+            };
+            wwm_recorder.onstop = function () {
+                wwm_stream.getTracks().forEach(function (wwm_t) { wwm_t.stop(); });
+                var wwm_blob = new Blob(wwm_recChunks, { type: 'audio/webm' });
+                wwm_asrAudio.src = URL.createObjectURL(wwm_blob);
+                wwm_asrAudio.style.display = 'block';
+                wwm_btn.textContent = '开始录音';
+                wwm_trace('录音结束', '时长约 ' + Math.round(wwm_blob.size / 16000) + ' 秒');
+                wwm_sendAudio(wwm_blob, 'wwm_record.webm');
+            };
+            wwm_recorder.start();
+            wwm_btn.textContent = '停止录音';
+            wwm_setStatus('wwmAsrStatus', '正在录音，再点一次结束', true);
+            wwm_trace('开始录音', '请求麦克风权限成功');
+        }).catch(function (wwm_err) {
+            wwm_setStatus('wwmAsrStatus', '无法使用麦克风：' + wwm_err.message, false);
+            wwm_trace('录音失败', wwm_err.message);
+        });
+    });
+
+    /* ---------- 初始化 ---------- */
+    wwm_trace('页面加载', '后端地址 ' + wwm_base());
+    wwm_checkApi();
+})();
+</script>
+</body>
+</html>
