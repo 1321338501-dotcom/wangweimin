@@ -89,6 +89,11 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
 .wwm_items{margin:10px 0 0;padding:0;list-style:none;border-top:1px dashed #c9c0ab}
 .wwm_items li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed #e3dccd;font:12.5px "Trebuchet MS",sans-serif}
 
+/* 登录状态条 */
+.wwm_auth{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;padding:11px 16px;background:#fff;border:2px solid var(--ink)}
+.wwm_auth__state{font:13px "Trebuchet MS",sans-serif;color:#3b475c}
+.wwm_auth__state b{color:var(--blue)}
+
 /* 下单弹窗 */
 .wwm_buy{margin-top:10px;padding:6px 0;width:100%;background:var(--coral);border:2px solid var(--ink);color:#fff;font:bold 12.5px "Trebuchet MS",sans-serif;cursor:pointer}
 .wwm_buy:hover{background:var(--ink)}
@@ -131,6 +136,14 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         <p>前端纯静态、后端全在 Supabase：数据走 REST 接口，读取受 RLS 保护，写入只允许 service_role。</p>
     </section>
 
+    <div class="wwm_auth">
+        <span class="wwm_auth__state" id="wwmAuthState">未登录 · 登录后才可提交订单</span>
+        <span>
+            <button class="wwm_btn" id="wwmAuthOpen" type="button">登录 / 注册</button>
+            <button class="wwm_btn wwm_btn--ghost" id="wwmAuthOut" type="button" style="display:none;">退出登录</button>
+        </span>
+    </div>
+
     <section class="wwm_sec">
         <h2>1 · 商品浏览</h2>
         <p class="wwm_sec__sub">支持关键词搜索、分类筛选、价格排序；数据来自 <code>wwm_products</code>。</p>
@@ -171,6 +184,21 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         <div class="wwm_status" id="wwmOrderStatusTip"></div>
         <div id="wwmOrderList"><div class="wwm_empty">正在加载订单…</div></div>
     </section>
+
+    <div class="wwm_mask" id="wwmAuthMask">
+        <div class="wwm_modal">
+            <h3 id="wwmAuthTitle">登录</h3>
+            <p>使用邮箱 + 密码，登录后即可提交订单。</p>
+            <label class="wwm_field"><span>邮箱</span><input id="wwmAuthEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+            <label class="wwm_field"><span>密码</span><input id="wwmAuthPwd" type="password" autocomplete="current-password" placeholder="至少 6 位"></label>
+            <p class="wwm_tip" id="wwmAuthTip"></p>
+            <div class="wwm_modal__foot">
+                <button class="wwm_btn wwm_btn--ghost" id="wwmAuthSwitch" type="button">没有账号？去注册</button>
+                <button class="wwm_btn wwm_btn--ghost" id="wwmAuthCancel" type="button">取消</button>
+                <button class="wwm_btn" id="wwmAuthSubmit" type="button">登录</button>
+            </div>
+        </div>
+    </div>
 
     <div class="wwm_mask" id="wwmMask">
         <div class="wwm_modal">
@@ -390,6 +418,157 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         });
     });
 
+    /* ---------- 登录（Supabase Auth REST） ---------- */
+    var wwm_authUrl = 'https://ezcjgdoesihifzovywgp.supabase.co/auth/v1';
+    var wwm_session = null;
+    var wwm_authMode = 'login';
+
+    // 功能：刷新登录状态条
+    function wwm_refreshAuthUi() {
+        var wwm_st = document.getElementById('wwmAuthState');
+        var wwm_open = document.getElementById('wwmAuthOpen');
+        var wwm_out = document.getElementById('wwmAuthOut');
+        if (wwm_session && wwm_session.access_token) {
+            wwm_st.innerHTML = '已登录：<b>' + wwm_session.email + '</b>　可提交订单';
+            wwm_open.style.display = 'none';
+            wwm_out.style.display = 'inline-block';
+        } else {
+            wwm_st.textContent = '未登录 · 登录后才可提交订单';
+            wwm_open.style.display = 'inline-block';
+            wwm_out.style.display = 'none';
+        }
+    }
+
+    // 功能：从 localStorage 恢复会话
+    function wwm_loadSession() {
+        try {
+            wwm_session = JSON.parse(localStorage.getItem('wwm_session') || 'null');
+        } catch (wwm_e) {
+            wwm_session = null;
+        }
+        wwm_refreshAuthUi();
+    }
+
+    // 功能：保存会话
+    function wwm_saveSession(wwm_data) {
+        wwm_session = {
+            access_token: wwm_data.access_token,
+            refresh_token: wwm_data.refresh_token,
+            email: wwm_data.user ? wwm_data.user.email : '',
+            expires_at: wwm_data.expires_at
+        };
+        localStorage.setItem('wwm_session', JSON.stringify(wwm_session));
+        wwm_refreshAuthUi();
+    }
+
+    // 功能：清除会话
+    function wwm_clearSession() {
+        wwm_session = null;
+        localStorage.removeItem('wwm_session');
+        wwm_refreshAuthUi();
+    }
+
+    // 功能：调用 Auth 接口（登录 / 注册 / 刷新）
+    function wwm_authPost(wwm_path, wwm_body) {
+        return fetch(wwm_authUrl + wwm_path, {
+            method: 'POST',
+            headers: { apikey: wwm_key, 'Content-Type': 'application/json' },
+            body: JSON.stringify(wwm_body)
+        }).then(function (wwm_resp) {
+            return wwm_resp.json().then(function (wwm_j) {
+                console.log('[auth]', wwm_path, wwm_resp.status, wwm_j);
+                return { ok: wwm_resp.ok, status: wwm_resp.status, body: wwm_j };
+            });
+        });
+    }
+
+    // 功能：打开登录弹窗
+    document.getElementById('wwmAuthOpen').addEventListener('click', function () {
+        wwm_authMode = 'login';
+        document.getElementById('wwmAuthTitle').textContent = '登录';
+        document.getElementById('wwmAuthSubmit').textContent = '登录';
+        document.getElementById('wwmAuthSwitch').textContent = '没有账号？去注册';
+        document.getElementById('wwmAuthTip').textContent = '';
+        document.getElementById('wwmAuthMask').classList.add('is-open');
+    });
+
+    // 功能：关闭登录弹窗
+    document.getElementById('wwmAuthCancel').addEventListener('click', function () {
+        document.getElementById('wwmAuthMask').classList.remove('is-open');
+    });
+
+    // 功能：登录 / 注册模式切换
+    document.getElementById('wwmAuthSwitch').addEventListener('click', function () {
+        wwm_authMode = wwm_authMode === 'login' ? 'signup' : 'login';
+        var wwm_isLogin = wwm_authMode === 'login';
+        document.getElementById('wwmAuthTitle').textContent = wwm_isLogin ? '登录' : '注册';
+        document.getElementById('wwmAuthSubmit').textContent = wwm_isLogin ? '登录' : '注册';
+        this.textContent = wwm_isLogin ? '没有账号？去注册' : '已有账号？去登录';
+        document.getElementById('wwmAuthTip').textContent = '';
+    });
+
+    // 功能：提交登录或注册
+    document.getElementById('wwmAuthSubmit').addEventListener('click', function () {
+        var wwm_email = document.getElementById('wwmAuthEmail').value.trim();
+        var wwm_pwd = document.getElementById('wwmAuthPwd').value;
+        var wwm_tip = document.getElementById('wwmAuthTip');
+        var wwm_btn = this;
+
+        wwm_tip.style.color = '#b3261e';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(wwm_email)) { wwm_tip.textContent = '邮箱格式不正确'; return; }
+        if (wwm_pwd.length < 6) { wwm_tip.textContent = '密码至少 6 位'; return; }
+
+        wwm_btn.disabled = true;
+        wwm_tip.style.color = '#3b475c';
+        wwm_tip.textContent = '正在提交…';
+
+        if (wwm_authMode === 'signup') {
+            wwm_authPost('/signup', { email: wwm_email, password: wwm_pwd }).then(function (wwm_r) {
+                if (!wwm_r.ok) { throw new Error(wwm_r.body.msg || wwm_r.body.error_description || '注册失败'); }
+                if (wwm_r.body.access_token) {
+                    wwm_saveSession(wwm_r.body);
+                    wwm_tip.style.color = '#1a7f37';
+                    wwm_tip.textContent = '注册并登录成功';
+                    setTimeout(function () { document.getElementById('wwmAuthMask').classList.remove('is-open'); }, 900);
+                } else {
+                    wwm_tip.style.color = '#b07d00';
+                    wwm_tip.textContent = '注册成功，请到邮箱点击确认链接后再登录';
+                }
+            }).catch(function (wwm_err) {
+                wwm_tip.style.color = '#b3261e';
+                wwm_tip.textContent = '注册失败：' + wwm_err.message;
+            }).then(function () { wwm_btn.disabled = false; });
+            return;
+        }
+
+        wwm_authPost('/token?grant_type=password', { email: wwm_email, password: wwm_pwd }).then(function (wwm_r) {
+            if (!wwm_r.ok) {
+                var wwm_msg = wwm_r.body.error_description || wwm_r.body.msg || '';
+                if (/invalid/i.test(wwm_msg)) { wwm_msg = '邮箱或密码错误'; }
+                if (/not confirmed/i.test(wwm_msg)) { wwm_msg = '邮箱尚未确认，请先点邮件里的确认链接'; }
+                throw new Error(wwm_msg || '登录失败');
+            }
+            wwm_saveSession(wwm_r.body);
+            wwm_tip.style.color = '#1a7f37';
+            wwm_tip.textContent = '登录成功';
+            setTimeout(function () { document.getElementById('wwmAuthMask').classList.remove('is-open'); }, 800);
+        }).catch(function (wwm_err) {
+            wwm_tip.style.color = '#b3261e';
+            wwm_tip.textContent = '登录失败：' + wwm_err.message;
+        }).then(function () { wwm_btn.disabled = false; });
+    });
+
+    // 功能：退出登录
+    document.getElementById('wwmAuthOut').addEventListener('click', function () {
+        if (wwm_session && wwm_session.access_token) {
+            fetch(wwm_authUrl + '/logout', {
+                method: 'POST',
+                headers: { apikey: wwm_key, Authorization: 'Bearer ' + wwm_session.access_token }
+            }).catch(function () {});
+        }
+        wwm_clearSession();
+    });
+
     /* ---------- 下单（Edge Function） ---------- */
     // 写入权限收在 Edge Function 内部（service_role），前端只带公开的 publishable key
     var wwm_fnUrl = 'https://ezcjgdoesihifzovywgp.supabase.co/functions/v1/place-order';
@@ -428,6 +607,11 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
     // 功能：提交订单，由 Edge Function 用 service_role 校验库存并写库
     document.getElementById('wwmBuySubmit').addEventListener('click', function () {
         if (!wwm_buyProduct) { return; }
+        if (!wwm_session || !wwm_session.access_token) {
+            document.getElementById('wwmBuyTip').style.color = '#b3261e';
+            document.getElementById('wwmBuyTip').textContent = '请先点击右上角「登录 / 注册」再下单';
+            return;
+        }
         var wwm_name = document.getElementById('wwmBuyName').value.trim();
         var wwm_phone = document.getElementById('wwmBuyPhone').value.trim();
         var wwm_addr = document.getElementById('wwmBuyAddr').value.trim();
@@ -448,7 +632,11 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
 
         fetch(wwm_fnUrl, {
             method: 'POST',
-            headers: { apikey: wwm_key, 'Content-Type': 'application/json' },
+            headers: {
+                apikey: wwm_key,
+                Authorization: 'Bearer ' + wwm_session.access_token,
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
                 customer_name: wwm_name,
                 phone: wwm_phone,
@@ -469,6 +657,7 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
             setTimeout(wwm_closeBuy, 1600);
         }).catch(function (wwm_err) {
             console.error('[edge-function] 下单失败', wwm_err);
+            if (/登录/.test(wwm_err.message)) { wwm_clearSession(); }
             wwm_tip.style.color = '#b3261e';
             wwm_tip.textContent = '下单失败：' + wwm_err.message;
         }).then(function () {
@@ -517,6 +706,7 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
     document.getElementById('wwmOrderStatus').addEventListener('change', wwm_loadOrders);
 
     /* ---------- 初始化 ---------- */
+    wwm_loadSession();
     wwm_loadCategories();
     wwm_loadProducts();
     wwm_loadOrders();
