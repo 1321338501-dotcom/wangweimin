@@ -617,6 +617,17 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         if (wwm_e.target === this) { wwm_closeBuy(); }
     });
 
+    // 功能：下单表单内按回车直接提交
+    var wwm_buyFields = ['wwmBuyName', 'wwmBuyPhone', 'wwmBuyAddr', 'wwmBuyQty'];
+    for (var wwm_fi = 0; wwm_fi < wwm_buyFields.length; wwm_fi++) {
+        document.getElementById(wwm_buyFields[wwm_fi]).addEventListener('keydown', function (wwm_ev) {
+            if (wwm_ev.key === 'Enter') {
+                wwm_ev.preventDefault();
+                document.getElementById('wwmBuySubmit').click();
+            }
+        });
+    }
+
     // 功能：提交订单，由 Edge Function 用 service_role 校验库存并写库
     document.getElementById('wwmBuySubmit').addEventListener('click', function () {
         if (!wwm_buyProduct) { return; }
@@ -658,11 +669,20 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
                 items: [{ product_id: Number(wwm_buyProduct.id), quantity: wwm_qty }]
             })
         }).then(function (wwm_resp) {
-            return wwm_resp.json().then(function (wwm_j) {
-                console.log('[edge-function] place-order', wwm_resp.status, wwm_j);
+            return wwm_resp.text().then(function (wwm_txt) {
+                var wwm_j = null;
+                try {
+                    wwm_j = JSON.parse(wwm_txt);
+                } catch (wwm_parseErr) {
+                    wwm_j = null;
+                }
+                console.log('[edge-function] place-order', wwm_resp.status, wwm_j || wwm_txt.slice(0, 200));
                 if (wwm_resp.status === 401) {
                     wwm_clearSession();
                     throw new Error('登录已过期，请重新登录');
+                }
+                if (!wwm_j) {
+                    throw new Error('服务返回异常（HTTP ' + wwm_resp.status + '），请稍后重试');
                 }
                 if (wwm_j.code !== 0) {
                     throw new Error(wwm_j.msg || wwm_j.message || ('HTTP ' + wwm_resp.status));
@@ -673,6 +693,9 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
             wwm_buyOk = true;
             wwm_tip.style.color = '#1a7f37';
             wwm_tip.textContent = '下单成功！订单号 ' + wwm_d.order_no + '，合计 ¥' + Number(wwm_d.total_amount).toFixed(2);
+            document.getElementById('wwmBuyName').value = '';
+            document.getElementById('wwmBuyPhone').value = '';
+            document.getElementById('wwmBuyAddr').value = '';
             wwm_loadProducts();
             wwm_loadOrders();
             setTimeout(wwm_closeBuy, 1600);
