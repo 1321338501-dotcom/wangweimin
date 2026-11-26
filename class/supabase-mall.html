@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!--
+  作者：王伟民
+  学号：24001010617
+  建立时间：2026-11-26 15:40
+  使用模型：DeepSeek-V4.1-Flash
+  功能名称及简介：商城购物前台 —— 纯静态前端直连 Supabase REST 接口，
+                  实现商品浏览、分类筛选、关键词搜索、价格排序，以及订单与订单明细查询
+-->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="王伟民 · 商城购物 · Supabase 纯前端实践">
+<title>商城购物 · Supabase 实践 · 王伟民</title>
+<style>
+:root{--blue:#1455d9;--blue-dark:#10254a;--lime:#d8f06b;--coral:#f06b4f;--ink:#10203a;--paper:#f4f1e9;--muted:#647084}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,"Times New Roman","Noto Serif SC",serif;line-height:1.7}
+a{color:inherit}
+code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Courier New",monospace;font-size:12.5px}
+
+.wwm_wrap{width:min(1080px,calc(100% - 32px));margin:auto;padding:18px 0 56px}
+
+/* 顶部 */
+.wwm_top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:2px solid var(--ink);flex-wrap:wrap}
+.wwm_brand{display:inline-flex;align-items:center;font-weight:bold;text-decoration:none;letter-spacing:.06em}
+.wwm_brand span{display:inline-grid;width:34px;height:34px;margin-right:9px;place-items:center;background:var(--lime);border:2px solid var(--ink);font:11px "Trebuchet MS",sans-serif;letter-spacing:0}
+.wwm_home_link{padding:7px 14px;background:var(--blue);color:#fff;font:13px "Trebuchet MS",sans-serif;text-decoration:none}
+.wwm_home_link:hover{background:var(--lime);color:var(--ink)}
+
+/* 头图 */
+.wwm_hero{position:relative;overflow:hidden;margin-top:22px;padding:30px 26px 26px;background:var(--blue-dark);border:2px solid var(--ink);box-shadow:12px 12px 0 var(--coral);color:#fff}
+.wwm_hero::before{position:absolute;top:18px;right:9%;width:80px;height:80px;border:2px solid var(--lime);border-radius:50%;content:""}
+.wwm_hero>*{position:relative;z-index:1}
+.wwm_hero__kicker{margin:0 0 8px;color:var(--lime);font:bold 12px "Trebuchet MS",sans-serif;letter-spacing:.14em;text-transform:uppercase}
+.wwm_hero h1{margin:0 0 8px;font-size:clamp(1.7rem,4.4vw,2.5rem);font-weight:normal;line-height:1.16}
+.wwm_hero p{margin:0;color:#e1e8f4;font-size:.95rem}
+
+/* 区块 */
+.wwm_sec{margin-top:24px;padding:22px 20px;background:#fffdf8;border:2px solid var(--ink)}
+.wwm_sec h2{margin:0 0 4px;padding:0 0 10px;border-bottom:2px solid var(--ink);font-size:clamp(1.25rem,3vw,1.6rem);font-weight:normal}
+.wwm_sec__sub{margin:10px 0 14px;color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
+
+/* 工具栏 */
+.wwm_bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.wwm_input,.wwm_select{flex:1;min-width:170px;padding:9px 12px;background:#fff;border:2px solid var(--ink);color:var(--ink);font:13.5px "Trebuchet MS",sans-serif}
+.wwm_select{flex:0 0 auto;min-width:150px}
+.wwm_input:focus,.wwm_select:focus{outline:none;border-color:var(--blue)}
+.wwm_btn{padding:9px 16px;background:var(--blue);border:2px solid var(--ink);color:#fff;font:bold 13px "Trebuchet MS",sans-serif;cursor:pointer;transition:background .2s,color .2s}
+.wwm_btn:hover{background:var(--lime);color:var(--ink)}
+.wwm_btn--ghost{background:#fff;color:var(--ink)}
+.wwm_btn--ghost:hover{background:var(--ink);color:#fff}
+
+/* 分类标签 */
+.wwm_tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.wwm_tag{padding:6px 13px;background:#fff;border:2px solid var(--ink);color:var(--ink);font:12.5px "Trebuchet MS",sans-serif;cursor:pointer}
+.wwm_tag.is-active{background:var(--lime)}
+.wwm_tag:hover{background:var(--lime)}
+
+/* 状态 */
+.wwm_status{min-height:20px;margin:8px 0;color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
+.wwm_status.is-loading{color:var(--blue);font-weight:bold}
+.wwm_status.is-error{color:#b3261e;font-weight:bold}
+.wwm_empty{padding:22px 0;color:var(--muted);font:13.5px "Trebuchet MS",sans-serif;text-align:center}
+
+/* 商品卡 */
+.wwm_grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(224px,1fr));gap:16px}
+.wwm_card{display:flex;flex-direction:column;padding:0;background:#fff;border:2px solid var(--ink)}
+.wwm_card__cover{display:grid;height:118px;place-items:center;background:var(--blue-dark);color:var(--lime);font:bold 30px Georgia,serif;letter-spacing:.08em}
+.wwm_card__body{display:flex;flex:1;flex-direction:column;padding:12px 14px 14px}
+.wwm_card__name{margin:0 0 4px;font-size:1.02rem;font-weight:normal}
+.wwm_card__desc{margin:0 0 10px;color:var(--muted);font:12.5px "Trebuchet MS",sans-serif;line-height:1.55;flex:1}
+.wwm_card__foot{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.wwm_price{color:var(--coral);font:bold 1.15rem "Trebuchet MS",sans-serif}
+.wwm_meta{color:var(--muted);font:12px "Trebuchet MS",sans-serif}
+
+/* 订单 */
+.wwm_order{padding:12px 14px;background:#fff;border:2px solid var(--ink);margin-bottom:10px}
+.wwm_order__head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.wwm_order__no{font:bold 13.5px "Trebuchet MS",sans-serif}
+.wwm_order__body{margin-top:6px;color:#3b475c;font:12.5px "Trebuchet MS",sans-serif}
+.wwm_badge{padding:2px 9px;border:1px solid var(--ink);font:12px "Trebuchet MS",sans-serif}
+.wwm_badge--wait{background:#fff3cd}
+.wwm_badge--paid{background:#d8f06b}
+.wwm_badge--ship{background:#cfe3ff}
+.wwm_badge--done{background:#d7f5dd}
+.wwm_badge--cancel{background:#f6d7d3}
+.wwm_items{margin:10px 0 0;padding:0;list-style:none;border-top:1px dashed #c9c0ab}
+.wwm_items li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed #e3dccd;font:12.5px "Trebuchet MS",sans-serif}
+
+/* 底部 */
+.wwm_foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:28px;padding-top:14px;border-top:2px solid var(--ink);color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
+
+/* 移动端 */
+@media (max-width:600px){
+  .wwm_hero{padding:22px 18px;box-shadow:8px 8px 0 var(--coral)}
+  .wwm_sec{padding:18px 14px}
+  .wwm_grid{grid-template-columns:1fr 1fr;gap:10px}
+  .wwm_card__cover{height:88px;font-size:24px}
+  .wwm_card__desc{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wwm_wrap">
+
+    <header class="wwm_top">
+        <a class="wwm_brand" href="index.html"><span>WWM</span>王伟民 · 高级网页设计</a>
+        <a class="wwm_home_link" href="index.html">← 返回课堂目录</a>
+    </header>
+
+    <section class="wwm_hero">
+        <p class="wwm_hero__kicker">Supabase · Pure Frontend</p>
+        <h1>商城购物</h1>
+        <p>前端纯静态、后端全在 Supabase：数据走 REST 接口，读取受 RLS 保护，写入只允许 service_role。</p>
+    </section>
+
+    <section class="wwm_sec">
+        <h2>1 · 商品浏览</h2>
+        <p class="wwm_sec__sub">支持关键词搜索、分类筛选、价格排序；数据来自 <code>wwm_products</code>。</p>
+
+        <div class="wwm_bar">
+            <input class="wwm_input" id="wwmSearch" type="text" placeholder="搜索商品名称，例如：耳机">
+            <select class="wwm_select" id="wwmSort">
+                <option value="id.asc">默认排序</option>
+                <option value="price.asc">价格从低到高</option>
+                <option value="price.desc">价格从高到低</option>
+                <option value="stock.desc">库存从多到少</option>
+            </select>
+            <button class="wwm_btn" id="wwmSearchBtn" type="button">查询</button>
+            <button class="wwm_btn wwm_btn--ghost" id="wwmResetBtn" type="button">重置</button>
+        </div>
+
+        <div class="wwm_tags" id="wwmTags"></div>
+        <div class="wwm_status" id="wwmStatus"></div>
+        <div class="wwm_grid" id="wwmList"></div>
+    </section>
+
+    <section class="wwm_sec">
+        <h2>2 · 订单查询</h2>
+        <p class="wwm_sec__sub">数据来自 <code>wwm_orders</code>，点击「查看明细」会联查 <code>wwm_order_items</code> 与 <code>wwm_products</code>。</p>
+
+        <div class="wwm_bar">
+            <select class="wwm_select" id="wwmOrderStatus">
+                <option value="">全部状态</option>
+                <option value="待付款">待付款</option>
+                <option value="已付款">已付款</option>
+                <option value="已发货">已发货</option>
+                <option value="已完成">已完成</option>
+                <option value="已取消">已取消</option>
+            </select>
+            <button class="wwm_btn" id="wwmOrderBtn" type="button">刷新订单</button>
+        </div>
+
+        <div class="wwm_status" id="wwmOrderStatusTip"></div>
+        <div id="wwmOrderList"><div class="wwm_empty">正在加载订单…</div></div>
+    </section>
+
+    <footer class="wwm_foot">
+        <span>姓名：王伟民　学号：24001010617</span>
+        <span>静态前端 + Supabase REST + RLS · 原生 HTML/CSS/JavaScript</span>
+    </footer>
+</div>
+
+<script>
+/* 作者：王伟民 | 建立时间：2026-11-26 15:40 | 使用模型：DeepSeek-V4.1-Flash
+   功能：商城购物前台全部逻辑 —— 直连 Supabase REST 完成只读查询 */
+(function () {
+    'use strict';
+
+    /* ---------- 配置 ---------- */
+    var wwm_base = 'https://ezcjgdoesihifzovywgp.supabase.co/rest/v1';
+    var wwm_key = 'sb_publishable_vMeXYJRXSsUmJJ4_8y9KBg_88QjoINJ';
+    var wwm_currentCategory = '';
+    var wwm_currentKeyword = '';
+
+    // 功能：统一的请求头（publishable key，只读权限）
+    function wwm_headers(wwm_extra) {
+        var wwm_h = { apikey: wwm_key, Authorization: 'Bearer ' + wwm_key };
+        if (wwm_extra) {
+            Object.keys(wwm_extra).forEach(function (wwm_k) { wwm_h[wwm_k] = wwm_extra[wwm_k]; });
+        }
+        return wwm_h;
+    }
+
+    // 功能：发请求并统一处理 HTTP 错误
+    function wwm_get(wwm_path, wwm_countMode) {
+        var wwm_extra = wwm_countMode ? { Prefer: 'count=exact' } : null;
+        return fetch(wwm_base + wwm_path, { headers: wwm_headers(wwm_extra) })
+            .then(function (wwm_resp) {
+                return wwm_resp.json().then(function (wwm_json) {
+                    if (!wwm_resp.ok) {
+                        throw new Error((wwm_json && wwm_json.message) || ('HTTP ' + wwm_resp.status));
+                    }
+                    return { data: wwm_json, range: wwm_resp.headers.get('Content-Range') };
+                });
+            })
+            .catch(function (wwm_err) {
+                if (wwm_err instanceof TypeError) {
+                    throw new Error('网络不可达，请检查网络或 Supabase 项目状态');
+                }
+                throw wwm_err;
+            });
+    }
+
+    // 功能：状态提示
+    function wwm_status(wwm_id, wwm_text, wwm_type) {
+        var wwm_el = document.getElementById(wwm_id);
+        wwm_el.textContent = wwm_text || '';
+        wwm_el.className = 'wwm_status' + (wwm_type ? ' is-' + wwm_type : '');
+    }
+
+    /* ---------- 商品 ---------- */
+
+    // 功能：根据当前分类/关键词/排序拼查询串并渲染商品
+    function wwm_loadProducts() {
+        var wwm_sort = document.getElementById('wwmSort').value;
+        var wwm_qs = '?select=*&order=' + encodeURIComponent(wwm_sort);
+        if (wwm_currentCategory) {
+            wwm_qs += '&category=eq.' + encodeURIComponent(wwm_currentCategory);
+        }
+        if (wwm_currentKeyword) {
+            wwm_qs += '&name=ilike.*' + encodeURIComponent(wwm_currentKeyword) + '*';
+        }
+
+        wwm_status('wwmStatus', '正在加载商品…', 'loading');
+        document.getElementById('wwmList').innerHTML = '';
+
+        wwm_get('/wwm_products' + wwm_qs, true).then(function (wwm_r) {
+            console.log('[supabase] 商品查询', wwm_qs, wwm_r.data);
+            var wwm_total = (wwm_r.range || '').split('/')[1] || wwm_r.data.length;
+            wwm_status('wwmStatus', '共 ' + wwm_total + ' 件商品' +
+                (wwm_currentCategory ? ' · 分类：' + wwm_currentCategory : '') +
+                (wwm_currentKeyword ? ' · 关键词：' + wwm_currentKeyword : ''), '');
+            wwm_renderProducts(wwm_r.data);
+        }).catch(function (wwm_err) {
+            console.error('[supabase] 商品查询失败', wwm_err);
+            wwm_status('wwmStatus', '加载失败：' + wwm_err.message, 'error');
+            document.getElementById('wwmList').innerHTML = '<div class="wwm_empty">没有获取到商品数据</div>';
+        });
+    }
+
+    // 功能：渲染商品卡片
+    function wwm_renderProducts(wwm_list) {
+        var wwm_box = document.getElementById('wwmList');
+        if (!wwm_list.length) {
+            wwm_box.innerHTML = '<div class="wwm_empty">没有符合条件的商品</div>';
+            return;
+        }
+        wwm_box.innerHTML = wwm_list.map(function (wwm_p) {
+            return '<article class="wwm_card">' +
+                '<div class="wwm_card__cover">' + wwm_p.category.slice(0, 1) + '</div>' +
+                '<div class="wwm_card__body">' +
+                    '<h3 class="wwm_card__name">' + wwm_p.name + '</h3>' +
+                    '<p class="wwm_card__desc">' + (wwm_p.description || '暂无描述') + '</p>' +
+                    '<div class="wwm_card__foot">' +
+                        '<span class="wwm_price">¥' + Number(wwm_p.price).toFixed(2) + '</span>' +
+                        '<span class="wwm_meta">' + wwm_p.category + ' · 库存 ' + wwm_p.stock + '</span>' +
+                    '</div>' +
+                '</div>' +
+            '</article>';
+        }).join('');
+    }
+
+    // 功能：读取分类并生成筛选标签
+    function wwm_loadCategories() {
+        wwm_get('/wwm_products?select=category').then(function (wwm_r) {
+            var wwm_seen = [];
+            wwm_r.data.forEach(function (wwm_row) {
+                if (wwm_seen.indexOf(wwm_row.category) === -1) { wwm_seen.push(wwm_row.category); }
+            });
+            var wwm_html = '<button class="wwm_tag is-active" data-cat="" type="button">全部</button>' +
+                wwm_seen.map(function (wwm_c) {
+                    return '<button class="wwm_tag" data-cat="' + wwm_c + '" type="button">' + wwm_c + '</button>';
+                }).join('');
+            document.getElementById('wwmTags').innerHTML = wwm_html;
+            console.log('[supabase] 分类列表', wwm_seen);
+        }).catch(function (wwm_err) {
+            console.error('[supabase] 分类读取失败', wwm_err);
+        });
+    }
+
+    /* ---------- 订单 ---------- */
+
+    // 功能：加载订单列表（可按状态筛选）
+    function wwm_loadOrders() {
+        var wwm_st = document.getElementById('wwmOrderStatus').value;
+        var wwm_qs = '?select=*&order=created_at.desc';
+        if (wwm_st) { wwm_qs += '&status=eq.' + encodeURIComponent(wwm_st); }
+
+        wwm_status('wwmOrderStatusTip', '正在加载订单…', 'loading');
+        wwm_get('/wwm_orders' + wwm_qs, true).then(function (wwm_r) {
+            console.log('[supabase] 订单查询', wwm_qs, wwm_r.data);
+            var wwm_total = (wwm_r.range || '').split('/')[1] || wwm_r.data.length;
+            wwm_status('wwmOrderStatusTip', '共 ' + wwm_total + ' 笔订单', '');
+            wwm_renderOrders(wwm_r.data);
+        }).catch(function (wwm_err) {
+            console.error('[supabase] 订单查询失败', wwm_err);
+            wwm_status('wwmOrderStatusTip', '加载失败：' + wwm_err.message, 'error');
+            document.getElementById('wwmOrderList').innerHTML = '<div class="wwm_empty">没有获取到订单数据</div>';
+        });
+    }
+
+    // 功能：渲染订单卡片
+    function wwm_renderOrders(wwm_list) {
+        var wwm_box = document.getElementById('wwmOrderList');
+        if (!wwm_list.length) {
+            wwm_box.innerHTML = '<div class="wwm_empty">该状态下没有订单</div>';
+            return;
+        }
+        var wwm_badgeMap = { '待付款': 'wait', '已付款': 'paid', '已发货': 'ship', '已完成': 'done', '已取消': 'cancel' };
+        wwm_box.innerHTML = wwm_list.map(function (wwm_o) {
+            return '<div class="wwm_order">' +
+                '<div class="wwm_order__head">' +
+                    '<span class="wwm_order__no">' + wwm_o.order_no + '</span>' +
+                    '<span class="wwm_badge wwm_badge--' + (wwm_badgeMap[wwm_o.status] || 'wait') + '">' + wwm_o.status + '</span>' +
+                '</div>' +
+                '<div class="wwm_order__body">' +
+                    wwm_o.customer_name + '　' + (wwm_o.phone || '') + '<br>' +
+                    (wwm_o.address || '') + '<br>' +
+                    '合计 <b>¥' + Number(wwm_o.total_amount).toFixed(2) + '</b>　' +
+                    '<button class="wwm_btn wwm_btn--ghost" data-order="' + wwm_o.id + '" type="button">查看明细</button>' +
+                '</div>' +
+                '<ul class="wwm_items" id="wwmItems' + wwm_o.id + '"></ul>' +
+            '</div>';
+        }).join('');
+    }
+
+    // 功能：点击订单时联查明细并展开
+    document.getElementById('wwmOrderList').addEventListener('click', function (wwm_e) {
+        var wwm_t = wwm_e.target;
+        if (!wwm_t.getAttribute || !wwm_t.getAttribute('data-order')) { return; }
+        var wwm_orderId = wwm_t.getAttribute('data-order');
+        var wwm_ul = document.getElementById('wwmItems' + wwm_orderId);
+        if (wwm_ul.innerHTML) {
+            wwm_ul.innerHTML = '';
+            wwm_t.textContent = '查看明细';
+            return;
+        }
+        wwm_t.textContent = '收起明细';
+        var wwm_qs = '?select=*,wwm_products(name,category)&order_id=eq.' + wwm_orderId;
+        wwm_get('/wwm_order_items' + wwm_qs).then(function (wwm_r) {
+            console.log('[supabase] 订单明细', wwm_orderId, wwm_r.data);
+            if (!wwm_r.data.length) {
+                wwm_ul.innerHTML = '<li>该订单暂无明细</li>';
+                return;
+            }
+            wwm_ul.innerHTML = wwm_r.data.map(function (wwm_i) {
+                return '<li><span>' + (wwm_i.wwm_products ? wwm_i.wwm_products.name : '商品已下架') +
+                    '　× ' + wwm_i.quantity + '</span>' +
+                    '<span>¥' + Number(wwm_i.unit_price).toFixed(2) + ' → <b>¥' + Number(wwm_i.subtotal).toFixed(2) + '</b></span></li>';
+            }).join('');
+        }).catch(function (wwm_err) {
+            console.error('[supabase] 明细加载失败', wwm_err);
+            wwm_ul.innerHTML = '<li>明细加载失败：' + wwm_err.message + '</li>';
+        });
+    });
+
+    /* ---------- 事件绑定 ---------- */
+
+    document.getElementById('wwmSearchBtn').addEventListener('click', function () {
+        wwm_currentKeyword = document.getElementById('wwmSearch').value.trim();
+        wwm_loadProducts();
+    });
+
+    document.getElementById('wwmSearch').addEventListener('keydown', function (wwm_e) {
+        if (wwm_e.key === 'Enter') {
+            wwm_currentKeyword = this.value.trim();
+            wwm_loadProducts();
+        }
+    });
+
+    document.getElementById('wwmSort').addEventListener('change', wwm_loadProducts);
+
+    document.getElementById('wwmResetBtn').addEventListener('click', function () {
+        wwm_currentCategory = '';
+        wwm_currentKeyword = '';
+        document.getElementById('wwmSearch').value = '';
+        document.getElementById('wwmSort').value = 'id.asc';
+        wwm_loadCategories();
+        wwm_loadProducts();
+    });
+
+    document.getElementById('wwmTags').addEventListener('click', function (wwm_e) {
+        var wwm_t = wwm_e.target;
+        if (!wwm_t.classList.contains('wwm_tag')) { return; }
+        var wwm_tags = document.querySelectorAll('.wwm_tag');
+        for (var wwm_i = 0; wwm_i < wwm_tags.length; wwm_i++) {
+            wwm_tags[wwm_i].classList.remove('is-active');
+        }
+        wwm_t.classList.add('is-active');
+        wwm_currentCategory = wwm_t.getAttribute('data-cat');
+        wwm_loadProducts();
+    });
+
+    document.getElementById('wwmOrderBtn').addEventListener('click', wwm_loadOrders);
+    document.getElementById('wwmOrderStatus').addEventListener('change', wwm_loadOrders);
+
+    /* ---------- 初始化 ---------- */
+    wwm_loadCategories();
+    wwm_loadProducts();
+    wwm_loadOrders();
+})();
+</script>
+</body>
+</html>
