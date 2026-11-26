@@ -274,6 +274,16 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         wwm_el.className = 'wwm_status' + (wwm_type ? ' is-' + wwm_type : '');
     }
 
+    // 功能：转义 HTML 特殊字符，避免拼接到 innerHTML 时被当成标签执行
+    function wwm_esc(wwm_v) {
+        return String(wwm_v === null || wwm_v === undefined ? '' : wwm_v)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     /* ---------- 商品 ---------- */
 
     // 功能：根据当前分类/关键词/排序拼查询串并渲染商品
@@ -315,14 +325,14 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
             return '<article class="wwm_card">' +
                 '<div class="wwm_card__cover">' + wwm_p.category.slice(0, 1) + '</div>' +
                 '<div class="wwm_card__body">' +
-                    '<h3 class="wwm_card__name">' + wwm_p.name + '</h3>' +
-                    '<p class="wwm_card__desc">' + (wwm_p.description || '暂无描述') + '</p>' +
+                    '<h3 class="wwm_card__name">' + wwm_esc(wwm_p.name) + '</h3>' +
+                    '<p class="wwm_card__desc">' + wwm_esc(wwm_p.description || '暂无描述') + '</p>' +
                     '<div class="wwm_card__foot">' +
                         '<span class="wwm_price">¥' + Number(wwm_p.price).toFixed(2) + '</span>' +
-                        '<span class="wwm_meta">' + wwm_p.category + ' · 库存 ' + wwm_p.stock + '</span>' +
+                        '<span class="wwm_meta">' + wwm_esc(wwm_p.category) + ' · 库存 ' + Number(wwm_p.stock) + '</span>' +
                     '</div>' +
-                    '<button class="wwm_buy" data-id="' + wwm_p.id + '" data-name="' + wwm_p.name +
-                        '" data-price="' + wwm_p.price + '" data-stock="' + wwm_p.stock + '" type="button">立即下单</button>' +
+                    '<button class="wwm_buy" data-id="' + Number(wwm_p.id) + '" data-name="' + wwm_esc(wwm_p.name) +
+                        '" data-price="' + Number(wwm_p.price) + '" data-stock="' + Number(wwm_p.stock) + '" type="button">立即下单</button>' +
                 '</div>' +
             '</article>';
         }).join('');
@@ -384,16 +394,16 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         wwm_box.innerHTML = wwm_list.map(function (wwm_o) {
             return '<div class="wwm_order">' +
                 '<div class="wwm_order__head">' +
-                    '<span class="wwm_order__no">' + wwm_o.order_no + '</span>' +
-                    '<span class="wwm_badge wwm_badge--' + (wwm_badgeMap[wwm_o.status] || 'wait') + '">' + wwm_o.status + '</span>' +
+                    '<span class="wwm_order__no">' + wwm_esc(wwm_o.order_no) + '</span>' +
+                    '<span class="wwm_badge wwm_badge--' + (wwm_badgeMap[wwm_o.status] || 'wait') + '">' + wwm_esc(wwm_o.status) + '</span>' +
                 '</div>' +
                 '<div class="wwm_order__body">' +
-                    wwm_o.customer_name + '　' + (wwm_o.phone || '') + '<br>' +
-                    (wwm_o.address || '') + '<br>' +
+                    wwm_esc(wwm_o.customer_name) + '　' + wwm_esc(wwm_o.phone) + '<br>' +
+                    wwm_esc(wwm_o.address) + '<br>' +
                     '合计 <b>¥' + Number(wwm_o.total_amount).toFixed(2) + '</b>　' +
-                    '<button class="wwm_btn wwm_btn--ghost" data-order="' + wwm_o.id + '" type="button">查看明细</button>' +
+                    '<button class="wwm_btn wwm_btn--ghost" data-order="' + Number(wwm_o.id) + '" type="button">查看明细</button>' +
                 '</div>' +
-                '<ul class="wwm_items" id="wwmItems' + wwm_o.id + '"></ul>' +
+                '<ul class="wwm_items" id="wwmItems' + Number(wwm_o.id) + '"></ul>' +
             '</div>';
         }).join('');
     }
@@ -418,13 +428,13 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
                 return;
             }
             wwm_ul.innerHTML = wwm_r.data.map(function (wwm_i) {
-                return '<li><span>' + (wwm_i.wwm_products ? wwm_i.wwm_products.name : '商品已下架') +
-                    '　× ' + wwm_i.quantity + '</span>' +
+                return '<li><span>' + wwm_esc(wwm_i.wwm_products ? wwm_i.wwm_products.name : '商品已下架') +
+                    '　× ' + Number(wwm_i.quantity) + '</span>' +
                     '<span>¥' + Number(wwm_i.unit_price).toFixed(2) + ' → <b>¥' + Number(wwm_i.subtotal).toFixed(2) + '</b></span></li>';
             }).join('');
         }).catch(function (wwm_err) {
             console.error('[supabase] 明细加载失败', wwm_err);
-            wwm_ul.innerHTML = '<li>明细加载失败：' + wwm_err.message + '</li>';
+            wwm_ul.innerHTML = '<li>明细加载失败：' + wwm_esc(wwm_err.message) + '</li>';
         });
     });
 
