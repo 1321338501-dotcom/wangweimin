@@ -607,9 +607,10 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         document.getElementById('wwmMask').classList.add('is-open');
     });
 
-    // 功能：关闭下单弹窗
+    // 功能：关闭下单弹窗（同时解锁提交按钮，防止上一单成功后按钮一直禁用）
     function wwm_closeBuy() {
         document.getElementById('wwmMask').classList.remove('is-open');
+        document.getElementById('wwmBuySubmit').disabled = false;
     }
     document.getElementById('wwmBuyCancel').addEventListener('click', wwm_closeBuy);
     document.getElementById('wwmMask').addEventListener('click', function (wwm_e) {
@@ -630,6 +631,7 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         var wwm_qty = Number(document.getElementById('wwmBuyQty').value);
         var wwm_tip = document.getElementById('wwmBuyTip');
         var wwm_btn = this;
+        var wwm_buyOk = false;
 
         wwm_tip.style.color = '#b3261e';
         if (!wwm_name) { wwm_tip.textContent = '请填写收货人'; return; }
@@ -658,10 +660,17 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         }).then(function (wwm_resp) {
             return wwm_resp.json().then(function (wwm_j) {
                 console.log('[edge-function] place-order', wwm_resp.status, wwm_j);
-                if (wwm_j.code !== 0) { throw new Error(wwm_j.msg || ('HTTP ' + wwm_resp.status)); }
+                if (wwm_resp.status === 401) {
+                    wwm_clearSession();
+                    throw new Error('登录已过期，请重新登录');
+                }
+                if (wwm_j.code !== 0) {
+                    throw new Error(wwm_j.msg || wwm_j.message || ('HTTP ' + wwm_resp.status));
+                }
                 return wwm_j.data;
             });
         }).then(function (wwm_d) {
+            wwm_buyOk = true;
             wwm_tip.style.color = '#1a7f37';
             wwm_tip.textContent = '下单成功！订单号 ' + wwm_d.order_no + '，合计 ¥' + Number(wwm_d.total_amount).toFixed(2);
             wwm_loadProducts();
@@ -673,7 +682,8 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
             wwm_tip.style.color = '#b3261e';
             wwm_tip.textContent = '下单失败：' + wwm_err.message;
         }).then(function () {
-            wwm_btn.disabled = false;
+            // 成功后保持禁用，直到弹窗关闭，避免提示期内连点重复下单
+            if (!wwm_buyOk) { wwm_btn.disabled = false; }
         });
     });
 
