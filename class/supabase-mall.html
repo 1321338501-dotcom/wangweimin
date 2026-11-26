@@ -166,8 +166,8 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
     </section>
 
     <section class="wwm_sec">
-        <h2>2 · 订单查询</h2>
-        <p class="wwm_sec__sub">数据来自 <code>wwm_orders</code>，点击「查看明细」会联查 <code>wwm_order_items</code> 与 <code>wwm_products</code>。</p>
+        <h2>2 · 我的订单</h2>
+        <p class="wwm_sec__sub">需登录后查看，RLS 只返回当前账号的订单；点「查看明细」会联查 <code>wwm_order_items</code> 与 <code>wwm_products</code>。</p>
 
         <div class="wwm_bar">
             <select class="wwm_select" id="wwmOrderStatus">
@@ -243,9 +243,13 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         return wwm_h;
     }
 
-    // 功能：发请求并统一处理 HTTP 错误
-    function wwm_get(wwm_path, wwm_countMode) {
-        var wwm_extra = wwm_countMode ? { Prefer: 'count=exact' } : null;
+    // 功能：发请求并统一处理 HTTP 错误（wwm_auth=true 时携带登录令牌）
+    function wwm_get(wwm_path, wwm_countMode, wwm_auth) {
+        var wwm_extra = {};
+        if (wwm_countMode) { wwm_extra.Prefer = 'count=exact'; }
+        if (wwm_auth && wwm_session && wwm_session.access_token) {
+            wwm_extra.Authorization = 'Bearer ' + wwm_session.access_token;
+        }
         return fetch(wwm_base + wwm_path, { headers: wwm_headers(wwm_extra) })
             .then(function (wwm_resp) {
                 return wwm_resp.json().then(function (wwm_json) {
@@ -344,14 +348,20 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
 
     /* ---------- 订单 ---------- */
 
-    // 功能：加载订单列表（可按状态筛选）
+    // 功能：加载「我的订单」（RLS 只返回当前登录用户的订单）
     function wwm_loadOrders() {
+        if (!wwm_session || !wwm_session.access_token) {
+            wwm_status('wwmOrderStatusTip', '登录后可查看我的订单', '');
+            document.getElementById('wwmOrderList').innerHTML =
+                '<div class="wwm_empty">请先点右上角「登录 / 注册」，登录后这里会显示你自己的订单</div>';
+            return;
+        }
         var wwm_st = document.getElementById('wwmOrderStatus').value;
         var wwm_qs = '?select=*&order=created_at.desc';
         if (wwm_st) { wwm_qs += '&status=eq.' + encodeURIComponent(wwm_st); }
 
         wwm_status('wwmOrderStatusTip', '正在加载订单…', 'loading');
-        wwm_get('/wwm_orders' + wwm_qs, true).then(function (wwm_r) {
+        wwm_get('/wwm_orders' + wwm_qs, true, true).then(function (wwm_r) {
             console.log('[supabase] 订单查询', wwm_qs, wwm_r.data);
             var wwm_total = (wwm_r.range || '').split('/')[1] || wwm_r.data.length;
             wwm_status('wwmOrderStatusTip', '共 ' + wwm_total + ' 笔订单', '');
@@ -367,7 +377,7 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
     function wwm_renderOrders(wwm_list) {
         var wwm_box = document.getElementById('wwmOrderList');
         if (!wwm_list.length) {
-            wwm_box.innerHTML = '<div class="wwm_empty">该状态下没有订单</div>';
+            wwm_box.innerHTML = '<div class="wwm_empty">还没有订单，点商品卡上的「立即下单」试试</div>';
             return;
         }
         var wwm_badgeMap = { '待付款': 'wait', '已付款': 'paid', '已发货': 'ship', '已完成': 'done', '已取消': 'cancel' };
@@ -401,7 +411,7 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         }
         wwm_t.textContent = '收起明细';
         var wwm_qs = '?select=*,wwm_products(name,category)&order_id=eq.' + wwm_orderId;
-        wwm_get('/wwm_order_items' + wwm_qs).then(function (wwm_r) {
+        wwm_get('/wwm_order_items' + wwm_qs, false, true).then(function (wwm_r) {
             console.log('[supabase] 订单明细', wwm_orderId, wwm_r.data);
             if (!wwm_r.data.length) {
                 wwm_ul.innerHTML = '<li>该订单暂无明细</li>';
@@ -459,6 +469,7 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         };
         localStorage.setItem('wwm_session', JSON.stringify(wwm_session));
         wwm_refreshAuthUi();
+        wwm_loadOrders();
     }
 
     // 功能：清除会话
@@ -466,6 +477,7 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         wwm_session = null;
         localStorage.removeItem('wwm_session');
         wwm_refreshAuthUi();
+        wwm_loadOrders();
     }
 
     // 功能：调用 Auth 接口（登录 / 注册 / 刷新）
