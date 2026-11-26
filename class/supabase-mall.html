@@ -89,6 +89,21 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
 .wwm_items{margin:10px 0 0;padding:0;list-style:none;border-top:1px dashed #c9c0ab}
 .wwm_items li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed #e3dccd;font:12.5px "Trebuchet MS",sans-serif}
 
+/* 下单弹窗 */
+.wwm_buy{margin-top:10px;padding:6px 0;width:100%;background:var(--coral);border:2px solid var(--ink);color:#fff;font:bold 12.5px "Trebuchet MS",sans-serif;cursor:pointer}
+.wwm_buy:hover{background:var(--ink)}
+.wwm_mask{display:none;position:fixed;inset:0;z-index:20;background:#10203acc;place-items:center;padding:16px}
+.wwm_mask.is-open{display:grid}
+.wwm_modal{width:min(420px,100%);padding:22px;background:#fffdf8;border:2px solid var(--ink);box-shadow:10px 10px 0 var(--coral)}
+.wwm_modal h3{margin:0 0 4px;font-weight:normal;font-size:1.2rem}
+.wwm_modal p{margin:0 0 14px;color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
+.wwm_field{display:block;margin-bottom:10px}
+.wwm_field span{display:block;margin-bottom:4px;color:#3b475c;font:12px "Trebuchet MS",sans-serif}
+.wwm_field input{width:100%;padding:9px 11px;background:#fff;border:2px solid var(--ink);font:13.5px "Trebuchet MS",sans-serif}
+.wwm_field input:focus{outline:none;border-color:var(--blue)}
+.wwm_modal__foot{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.wwm_tip{min-height:18px;margin:6px 0 0;color:#b3261e;font:12.5px "Trebuchet MS",sans-serif}
+
 /* 底部 */
 .wwm_foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:28px;padding-top:14px;border-top:2px solid var(--ink);color:var(--muted);font:12.5px "Trebuchet MS",sans-serif}
 
@@ -156,6 +171,22 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         <div class="wwm_status" id="wwmOrderStatusTip"></div>
         <div id="wwmOrderList"><div class="wwm_empty">正在加载订单…</div></div>
     </section>
+
+    <div class="wwm_mask" id="wwmMask">
+        <div class="wwm_modal">
+            <h3>立即下单</h3>
+            <p id="wwmModalDesc">商品：—</p>
+            <label class="wwm_field"><span>收货人</span><input id="wwmBuyName" type="text" maxlength="20" placeholder="请输入姓名"></label>
+            <label class="wwm_field"><span>手机号</span><input id="wwmBuyPhone" type="text" maxlength="11" placeholder="11 位手机号"></label>
+            <label class="wwm_field"><span>收货地址</span><input id="wwmBuyAddr" type="text" maxlength="120" placeholder="省市区 + 详细地址"></label>
+            <label class="wwm_field"><span>购买数量</span><input id="wwmBuyQty" type="number" min="1" value="1"></label>
+            <p class="wwm_tip" id="wwmBuyTip"></p>
+            <div class="wwm_modal__foot">
+                <button class="wwm_btn wwm_btn--ghost" id="wwmBuyCancel" type="button">取消</button>
+                <button class="wwm_btn" id="wwmBuySubmit" type="button">提交订单</button>
+            </div>
+        </div>
+    </div>
 
     <footer class="wwm_foot">
         <span>姓名：王伟民　学号：24001010617</span>
@@ -258,6 +289,8 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
                         '<span class="wwm_price">¥' + Number(wwm_p.price).toFixed(2) + '</span>' +
                         '<span class="wwm_meta">' + wwm_p.category + ' · 库存 ' + wwm_p.stock + '</span>' +
                     '</div>' +
+                    '<button class="wwm_buy" data-id="' + wwm_p.id + '" data-name="' + wwm_p.name +
+                        '" data-price="' + wwm_p.price + '" data-stock="' + wwm_p.stock + '" type="button">立即下单</button>' +
                 '</div>' +
             '</article>';
         }).join('');
@@ -354,6 +387,92 @@ code{background:#efe9db;color:#8a2b12;padding:2px 6px;font-family:Consolas,"Cour
         }).catch(function (wwm_err) {
             console.error('[supabase] 明细加载失败', wwm_err);
             wwm_ul.innerHTML = '<li>明细加载失败：' + wwm_err.message + '</li>';
+        });
+    });
+
+    /* ---------- 下单（Edge Function） ---------- */
+    // 写入权限收在 Edge Function 内部（service_role），前端只带公开的 publishable key
+    var wwm_fnUrl = 'https://ezcjgdoesihifzovywgp.supabase.co/functions/v1/place-order';
+    var wwm_buyProduct = null;
+
+    // 功能：打开下单弹窗
+    document.getElementById('wwmList').addEventListener('click', function (wwm_e) {
+        var wwm_t = wwm_e.target;
+        if (!wwm_t.classList.contains('wwm_buy')) { return; }
+        wwm_buyProduct = {
+            id: wwm_t.getAttribute('data-id'),
+            name: wwm_t.getAttribute('data-name'),
+            price: Number(wwm_t.getAttribute('data-price')),
+            stock: Number(wwm_t.getAttribute('data-stock'))
+        };
+        document.getElementById('wwmModalDesc').textContent =
+            '商品：' + wwm_buyProduct.name + '　单价 ¥' + wwm_buyProduct.price.toFixed(2) +
+            '　库存 ' + wwm_buyProduct.stock + ' 件';
+        var wwmQty = document.getElementById('wwmBuyQty');
+        wwmQty.value = '1';
+        wwmQty.max = String(wwm_buyProduct.stock);
+        document.getElementById('wwmBuyTip').textContent = '';
+        document.getElementById('wwmBuyTip').style.color = '#b3261e';
+        document.getElementById('wwmMask').classList.add('is-open');
+    });
+
+    // 功能：关闭下单弹窗
+    function wwm_closeBuy() {
+        document.getElementById('wwmMask').classList.remove('is-open');
+    }
+    document.getElementById('wwmBuyCancel').addEventListener('click', wwm_closeBuy);
+    document.getElementById('wwmMask').addEventListener('click', function (wwm_e) {
+        if (wwm_e.target === this) { wwm_closeBuy(); }
+    });
+
+    // 功能：提交订单，由 Edge Function 用 service_role 校验库存并写库
+    document.getElementById('wwmBuySubmit').addEventListener('click', function () {
+        if (!wwm_buyProduct) { return; }
+        var wwm_name = document.getElementById('wwmBuyName').value.trim();
+        var wwm_phone = document.getElementById('wwmBuyPhone').value.trim();
+        var wwm_addr = document.getElementById('wwmBuyAddr').value.trim();
+        var wwm_qty = Number(document.getElementById('wwmBuyQty').value);
+        var wwm_tip = document.getElementById('wwmBuyTip');
+        var wwm_btn = this;
+
+        wwm_tip.style.color = '#b3261e';
+        if (!wwm_name) { wwm_tip.textContent = '请填写收货人'; return; }
+        if (!/^1\d{10}$/.test(wwm_phone)) { wwm_tip.textContent = '手机号格式不正确'; return; }
+        if (!wwm_addr) { wwm_tip.textContent = '请填写收货地址'; return; }
+        if (!Number.isInteger(wwm_qty) || wwm_qty <= 0) { wwm_tip.textContent = '购买数量不合法'; return; }
+        if (wwm_qty > wwm_buyProduct.stock) { wwm_tip.textContent = '库存只剩 ' + wwm_buyProduct.stock + ' 件'; return; }
+
+        wwm_btn.disabled = true;
+        wwm_tip.style.color = '#3b475c';
+        wwm_tip.textContent = '正在提交…';
+
+        fetch(wwm_fnUrl, {
+            method: 'POST',
+            headers: { apikey: wwm_key, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                customer_name: wwm_name,
+                phone: wwm_phone,
+                address: wwm_addr,
+                items: [{ product_id: Number(wwm_buyProduct.id), quantity: wwm_qty }]
+            })
+        }).then(function (wwm_resp) {
+            return wwm_resp.json().then(function (wwm_j) {
+                console.log('[edge-function] place-order', wwm_resp.status, wwm_j);
+                if (wwm_j.code !== 0) { throw new Error(wwm_j.msg || ('HTTP ' + wwm_resp.status)); }
+                return wwm_j.data;
+            });
+        }).then(function (wwm_d) {
+            wwm_tip.style.color = '#1a7f37';
+            wwm_tip.textContent = '下单成功！订单号 ' + wwm_d.order_no + '，合计 ¥' + Number(wwm_d.total_amount).toFixed(2);
+            wwm_loadProducts();
+            wwm_loadOrders();
+            setTimeout(wwm_closeBuy, 1600);
+        }).catch(function (wwm_err) {
+            console.error('[edge-function] 下单失败', wwm_err);
+            wwm_tip.style.color = '#b3261e';
+            wwm_tip.textContent = '下单失败：' + wwm_err.message;
+        }).then(function () {
+            wwm_btn.disabled = false;
         });
     });
 
